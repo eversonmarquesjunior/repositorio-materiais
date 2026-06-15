@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REPO</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="sidebar-brand-title">REPO</p>
+          <p class="sidebar-brand-sub">Painel administrativo</p>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-link">Pesquisar</a>
+        <a href="pages/dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="pages/adicionar-disciplina.html" class="sidebar-link">Adicionar Disciplina</a>
+        <a href="pages/sobre.html" class="sidebar-link">Sobre</a>
+      </nav>
+    </aside>
+    <div class="sidebar-backdrop"></div>
+
+    <div class="app-main">
+      <!-- ── HEADER ── -->
+      <header class="app-header">
+        <div class="header-inner">
+          <a href="index.html" class="logo-wrap">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-name">REPO</span>
+          <span class="logo-sub">Repositório de Materiais</span>
+        </div>
+      </a>
+      <button id="sidebarToggle" class="sidebar-toggle" aria-label="Abrir menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="4" y1="7" x2="20" y2="7"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+      </button>
+
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link active">Pesquisar</a>
+        <a href="pages/sobre.html" class="nav-link">Sobre</a>
+      </nav>
+
+      <button id="themeToggle" class="theme-btn" title="Alternar tema">
+        <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section class="hero-section">
+    <div class="hero-inner">
+      <h1 class="hero-title">Pesquise por qualquer disciplina</h1>
+      <br>
+      <!--<p class="hero-sub">Pesquise por nome, código, área do conhecimento ou professor responsável.</p>-->
+
+      <form id="searchForm" class="search-box" onsubmit="return false;">
+        <div class="search-field-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            id="searchInput"
+            type="text"
+            class="search-field"
+            placeholder="..."
+            autocomplete="off"
+          />
+          <button type="button" id="clearBtn" class="clear-btn" style="display:none" title="Limpar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <!-- botão Pesquisar removido: busca é instantânea ao digitar -->
+      </form>
+    </div>
+  </section>
+
+  <!-- ── RESULTADOS ── -->
+  <main class="results-section">
+    <div class="results-inner">
+
+      <!-- Barra de controles -->
+      <div class="results-toolbar" id="resultsToolbar" style="display:none">
+        <div class="results-count" id="resultsCount">0 disciplinas encontradas</div>
+        <div class="toolbar-right">
+          <label class="sort-label" for="sortSelect">Ordenar por</label>
+          <select id="sortSelect" class="sort-select">
+            <option value="nome">Nome A–Z</option>
+            <option value="nome_desc">Nome Z–A</option>
+            <option value="codigo">Código</option>
+            <option value="area">Área</option>
+          </select>
+          <div class="view-toggle">
+            <button id="viewList" class="view-btn active" title="Lista">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+            </button>
+            <button id="viewGrid" class="view-btn" title="Grade">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de resultados -->
+      <div id="resultsList" class="results-list"></div>
+
+      <!-- Estado vazio / inicial -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <p class="empty-title">Digite acima para pesquisar</p>
+        <p class="empty-sub">Você pode buscar por nome, código, área ou professor.</p>
+      </div>
+
+      <!-- Sem resultados -->
+      <div id="noResults" class="empty-state" style="display:none">
+        <div class="empty-icon empty-icon--warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <p class="empty-title">Nenhuma disciplina encontrada</p>
+        <p class="empty-sub">Tente palavras-chave diferentes ou remova os filtros.</p>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingState" class="loading-state" style="display:none">
+        <div class="spinner"></div>
+        <p>Buscando disciplinas…</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <span>© <span id="footerYear"></span> Repositório de Disciplinas</span>
+      <span class="footer-sep">·</span>
+      <span>Versão 1.0</span>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/ui.js"></script>
+    </div>
+  </div>
+</body>
+</html>

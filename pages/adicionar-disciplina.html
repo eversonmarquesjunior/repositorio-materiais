@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adicionar Disciplina — RepoDisciplinas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="sidebar-brand-title">RepoDisciplinas</p>
+          <p class="sidebar-brand-sub">Nova disciplina</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="../index.html" class="sidebar-link">Pesquisar</a>
+        <a href="dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="adicionar-disciplina.html" class="sidebar-link active">Adicionar Disciplina</a>
+        <a href="sobre.html" class="sidebar-link">Sobre</a>
+      </nav>
+    </aside>
+    <div class="sidebar-backdrop"></div>
+
+    <div class="app-main">
+      <header class="app-header">
+        <div class="header-inner">
+          <a href="../index.html" class="logo-wrap">
+            <div class="logo-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </div>
+            <div class="logo-text">
+              <span class="logo-name">RepoDisciplinas</span>
+              <span class="logo-sub">Repositório Acadêmico</span>
+            </div>
+          </a>
+          <button id="sidebarToggle" class="sidebar-toggle" aria-label="Abrir menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="7" x2="20" y2="7"/>
+              <line x1="4" y1="12" x2="20" y2="12"/>
+              <line x1="4" y1="17" x2="20" y2="17"/>
+            </svg>
+          </button>
+
+          <nav class="header-nav">
+            <a href="../index.html" class="nav-link">Pesquisar</a>
+            <a href="sobre.html" class="nav-link">Sobre</a>
+          </nav>
+
+          <button id="themeToggle" class="theme-btn" title="Alternar tema">
+            <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="page-shell">
+          <h1 class="page-title">Adicionar Disciplina</h1>
+          <form id="addDisciplineForm" class="add-form">
+            <div class="form-group">
+              <label for="nome">Nome *</label>
+              <input type="text" id="nome" name="nome" required placeholder="Ex: Cálculo Diferencial e Integral I" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="modelo">Modelo *</label>
+                <select id="modelo" name="modelo" required>
+                  <option value="">Selecione um modelo</option>
+                  <option value="Graduação">Graduação</option>
+                  <option value="Pós-graduação">Pós-graduação</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                  <option value="finalizada">Finalizada</option>
+                  <option value="pendente">Pendente</option>
+                  <option value="producao">Em Produção</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="modulo">Módulo</label>
+                <select id="modulo" name="modulo">
+                  <option value="">Selecione um módulo</option>
+                  <option value="2026/01">2026/01</option>
+                  <option value="2026/02">2026/02</option>
+                  <option value="2026/03">2026/03</option>
+                  <option value="2026/04">2026/04</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="toggle-label">
+                <input type="checkbox" class="field-toggle" data-target="linkMoodleWAE">
+                <span>Link Moodle WAE</span>
+              </label>
+              <input type="url" id="linkMoodleWAE" name="linkMoodleWAE" disabled placeholder="https://moodle.exemplo.com/..." />
+            </div>
+            <div class="form-group">
+              <label class="toggle-label">
+                <input type="checkbox" class="field-toggle" data-target="linkDPWAE">
+                <span>Link DP WAE</span>
+              </label>
+              <input type="url" id="linkDPWAE" name="linkDPWAE" disabled placeholder="https://..." />
+            </div>
+            <div class="form-group">
+              <label class="toggle-label">
+                <input type="checkbox" class="field-toggle" data-target="linkMoodleERP">
+                <span>Link Moodle ERP</span>
+              </label>
+              <input type="url" id="linkMoodleERP" name="linkMoodleERP" disabled placeholder="https://moodle.exemplo.com/..." />
+            </div>
+            <div class="form-group">
+              <label class="toggle-label">
+                <input type="checkbox" class="field-toggle" data-target="linkDPERP">
+                <span>Link DP ERP</span>
+              </label>
+              <input type="url" id="linkDPERP" name="linkDPERP" disabled placeholder="https://..." />
+            </div>
+            <div class="form-group">
+              <label for="dropbox">Dropbox</label>
+              <input type="url" id="dropbox" name="dropbox" placeholder="https://www.dropbox.com/..." />
+            </div>
+            <div class="form-group">
+              <label for="youtube">YouTube</label>
+              <input type="url" id="youtube" name="youtube" placeholder="https://www.youtube.com/..." />
+            </div>
+            <div class="form-group">
+              <label for="soundcloud">Soundcloud</label>
+              <input type="url" id="soundcloud" name="soundcloud" placeholder="https://soundcloud.com/..." />
+            </div>
+            <div class="form-group">
+              <label for="observacoes">Observações</label>
+              <textarea id="observacoes" name="observacoes" rows="4" placeholder="Informações adicionais sobre a disciplina..."></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Adicionar Disciplina</button>
+              <button type="reset" class="btn btn-secondary">Limpar</button>
+            </div>
+            <div id="formMessage" class="form-message" style="display:none"></div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const sun = document.getElementById('iconSun');
+    const moon = document.getElementById('iconMoon');
+    const saved = localStorage.getItem('repo-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    if (saved === 'dark') { sun.style.display='none'; moon.style.display='block'; }
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('repo-theme', next);
+      if (next === 'dark') { sun.style.display='none'; moon.style.display='block'; }
+      else { sun.style.display='block'; moon.style.display='none'; }
+    });
+  </script>
+  <script src="../js/data.js"></script>
+  <script src="../js/adicionar.js"></script>
+  <script src="../js/ui.js"></script>

@@ -1,0 +1,355 @@
+/**
+ * app.js — Lógica da página inicial (pesquisa de disciplinas)
+ */
+
+/* ── ESTADO ─────────────────────────────────────────────── */
+const state = {
+  query:    '',
+  sort:     'nome',
+  viewMode: 'list',   // 'list' | 'grid'
+  results:  []
+};
+
+let searchTimeout = null;
+
+/* ── REFS DOM ────────────────────────────────────────────── */
+const searchInput    = document.getElementById('searchInput');
+const searchForm     = document.getElementById('searchForm');
+const clearBtn       = document.getElementById('clearBtn');
+const resultsList    = document.getElementById('resultsList');
+const resultsToolbar = document.getElementById('resultsToolbar');
+const resultsCount   = document.getElementById('resultsCount');
+const emptyState     = document.getElementById('emptyState');
+const noResults      = document.getElementById('noResults');
+const loadingState   = document.getElementById('loadingState');
+const sortSelect     = document.getElementById('sortSelect');
+const viewListBtn    = document.getElementById('viewList');
+const viewGridBtn    = document.getElementById('viewGrid');
+// quickFilters removed — repository search is name-only
+
+/* ── INICIALIZAÇÃO ───────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  loadCustomDisciplines();
+  restoreFromURL();
+  document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+  // Event listeners
+  searchInput.addEventListener('input', onSearchInput);
+  searchForm.addEventListener('submit', e => e.preventDefault());
+  clearBtn.addEventListener('click', clearSearch);
+  sortSelect.addEventListener('change', onSortChange);
+  viewListBtn.addEventListener('click', () => setView('list'));
+  viewGridBtn.addEventListener('click', () => setView('grid'));
+});
+
+/* ── TEMA ────────────────────────────────────────────────── */
+function initTheme() {
+  const saved = localStorage.getItem('repo-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  const sun  = document.getElementById('iconSun');
+  const moon = document.getElementById('iconMoon');
+  if (saved === 'dark') { sun.style.display = 'none'; moon.style.display = 'block'; }
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur  = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('repo-theme', next);
+    if (next === 'dark') { sun.style.display = 'none'; moon.style.display = 'block'; }
+    else                 { sun.style.display = 'block'; moon.style.display = 'none'; }
+  });
+}
+
+/* ── FILTROS RÁPIDOS (ÁREA) ──────────────────────────────── */
+// area filters removed — no quick filter buttons
+
+/* ── BUSCA ───────────────────────────────────────────────── */
+function onSearchInput() {
+  state.query = searchInput.value.trim();
+  clearBtn.style.display = state.query ? 'flex' : 'none';
+  if (searchTimeout) clearTimeout(searchTimeout);
+
+  // Only trigger instant search when user typed at least 2 chars.
+  if (state.query && state.query.length >= 2) {
+    searchTimeout = setTimeout(runSearch, 180);
+  } else if (!state.query) {
+    showEmpty();
+  } else {
+    // fewer than 2 chars — don't run search yet, keep results hidden
+    hideAll();
+  }
+}
+
+function clearSearch() {
+  searchInput.value = '';
+  state.query = '';
+  clearBtn.style.display = 'none';
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+    searchTimeout = null;
+  }
+  searchInput.focus();
+  showEmpty();
+}
+
+function runSearch() {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+    searchTimeout = null;
+  }
+  state.query = searchInput.value.trim();
+  if (!state.query && !state.area) {
+    showEmpty();
+    return;
+  }
+
+  showLoading();
+
+  // Simula latência de rede (remova ao integrar API real)
+  setTimeout(() => {
+    state.results = filterAndSort();
+    renderResults();
+    updateURL();
+  }, 180);
+}
+
+/* ── FILTRO + ORDENAÇÃO ──────────────────────────────────── */
+function filterAndSort() {
+  const q = normalizeStr(state.query);
+
+  let list = window.disciplinas.filter(d => {
+    const matchArea = !state.area || d.area === state.area;
+    const matchQuery = !q || normalizeStr(d.nome).includes(q);
+    return matchArea && matchQuery;
+  });
+
+  return sortList(list, state.sort);
+}
+
+function sortList(list, by) {
+  return [...list].sort((a, b) => {
+    switch (by) {
+      case 'nome':      return a.nome.localeCompare(b.nome, 'pt-BR');
+      case 'nome_desc': return b.nome.localeCompare(a.nome, 'pt-BR');
+      case 'codigo':    return a.codigo.localeCompare(b.codigo, 'pt-BR');
+      case 'area':      return a.area.localeCompare(b.area, 'pt-BR');
+      default:          return 0;
+    }
+  });
+}
+
+function onSortChange() {
+  state.sort = sortSelect.value;
+  if (state.results.length) {
+    state.results = sortList(state.results, state.sort);
+    renderResults();
+  }
+}
+
+/* ── RENDERIZAÇÃO ────────────────────────────────────────── */
+function renderResults() {
+  hideAll();
+  resultsToolbar.style.display = 'flex';
+  resultsList.style.display = state.viewMode === 'grid' ? 'grid' : 'flex';
+
+  resultsCount.textContent =
+    state.results.length === 1
+      ? '1 disciplina encontrada'
+      : `${state.results.length} disciplinas encontradas`;
+
+  if (state.results.length === 0) {
+    resultsToolbar.style.display = 'none';
+    noResults.style.display = 'flex';
+    return;
+  }
+
+  resultsList.innerHTML = state.results.map(d => cardHTML(d)).join('');
+
+  // animação de entrada
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.disc-card').forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(8px)';
+      setTimeout(() => {
+        el.style.transition = 'opacity .2s ease, transform .2s ease';
+        el.style.opacity = '1';
+        el.style.transform = '';
+      }, i * 40);
+    });
+  });
+}
+
+function isUrl(s) {
+  return Boolean(s && (s.startsWith('http://') || s.startsWith('https://')));
+}
+
+function normalizeStr(s) {
+  return String(s || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/-/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+
+function cardIconSVG(type) {
+  const icons = {
+    moodle: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`,
+    youtube: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
+    soundcloud: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M1.175 12.225c-.051 0-.175.016-.175.175v1.2c0 .159.124.175.175.175.051 0 .175-.016.175-.175v-1.2c0-.159-.124-.175-.175-.175zm2.158 2.066c1.453-.607 2.515-2.068 2.515-3.766 0-2.262-1.884-4.105-4.205-4.105-.276 0-.554.025-.816.074-.165-2.565-2.4-4.609-5.135-4.609C-6.308 1.885-8.647 4.172-8.647 7.026c0 .347.037.684.104 1.016C-9.841 8.93-11.147 10.834-11.147 13.008c0 2.509 2.079 4.547 4.647 4.547h13.205c1.913 0 3.461-1.565 3.461-3.5 0-1.763-1.252-3.236-2.833-3.764z"/></svg>`,
+    dropbox: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M6 2l6 4.5L6 11V2zm6 4.5l6-4.5v8.5l-6 4.5-6-4.5 6-4.5zm6-4.5v8.5l-6 4.5 6 4.5 6-4.5V2l-6 4.5zm-12 9l6 4.5v8.5l-6-4.5v-4.5zm6 4.5l6 4.5 6-4.5-6-4.5-6 4.5z"/></svg>`
+  };
+  return icons[type] || icons.moodle;
+}
+
+function cardHTML(d) {
+  const statusLabel = {
+    ativo:      '<span class="badge badge-status-ativo">Ativo</span>',
+    inativo:    '<span class="badge badge-status-inativo">Inativo</span>',
+    revisao:    '<span class="badge badge-status-revisao">Em Revisão</span>',
+    finalizada: '<span class="badge badge-status-ativo">Finalizada</span>',
+    pendente:   '<span class="badge badge-status-revisao">Pendente</span>',
+    producao:   '<span class="badge badge-status-inativo">Em Produção</span>'
+  }[d.status] || '';
+
+  // Badges direita do nome: área/modelo, módulo, status
+  const moduloBadge = d.modulo
+    ? `<span class="badge badge-periodo">${esc(d.modulo)}</span>`
+    : (!isUrl(d.periodo) && d.periodo ? `<span class="badge badge-periodo">${esc(d.periodo)}</span>` : '');
+
+  // Botões de link: WAE e ERP
+  const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  const waeUrl = isUrl(d.codigo) ? d.codigo : (d.modulo && isUrl(d.periodo) ? d.periodo : '');
+  const linkDefs = [
+    { label: 'Link Moodle WAE', url: waeUrl },
+    { label: 'Link DP WAE',     url: isUrl(d.linkDPWAE)     ? d.linkDPWAE     : '' },
+    { label: 'Link Moodle ERP', url: isUrl(d.linkMoodleERP) ? d.linkMoodleERP : '' },
+    { label: 'Link DP ERP',     url: isUrl(d.linkDPERP)     ? d.linkDPERP     : '' }
+  ].filter(l => l.url);
+  const linkBtns = linkDefs.length
+    ? `<div class="card-link-btns">${linkDefs.map(l =>
+        `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn" onclick="event.stopPropagation()">${linkSVG}${esc(l.label)}</a>`
+      ).join('')}</div>`
+    : '';
+
+  // Ícones circulares: Dropbox, YouTube, Soundcloud
+  const iconLinks = [
+    { value: d.cargaHoraria, cls: 'dropbox',    title: 'Dropbox' },
+    { value: d.periodo,      cls: 'youtube',    title: 'YouTube' },
+    { value: d.professor,    cls: 'soundcloud', title: 'Soundcloud' }
+  ]
+    .filter(l => isUrl(l.value))
+    .map(l => `<a href="${esc(l.value)}" target="_blank" rel="noopener noreferrer" class="detail-meta-icon ${l.cls}" title="${l.title}" onclick="event.stopPropagation()">${cardIconSVG(l.cls)}</a>`)
+    .join('');
+
+  const cardUrl = `pages/disciplina.html?id=${esc(d.id)}`;
+
+  return `
+    <div class="disc-card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="card-nome">${esc(d.nome)}</span>
+        </div>
+        ${linkBtns}
+        <div class="card-footer">
+          ${iconLinks}
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-area">${esc(d.area)}</span>
+        ${moduloBadge}
+        ${statusLabel}
+      </div>
+      <div class="card-info-row">
+        <a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Informações da Disciplina
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+/* ── VIEW MODE ───────────────────────────────────────────── */
+function setView(mode) {
+  state.viewMode = mode;
+  if (mode === 'list') {
+    viewListBtn.classList.add('active');
+    viewGridBtn.classList.remove('active');
+    resultsList.className = 'results-list';
+  } else {
+    viewGridBtn.classList.add('active');
+    viewListBtn.classList.remove('active');
+    resultsList.className = 'results-list grid-view';
+  }
+}
+
+/* ── ESTADOS DA UI ───────────────────────────────────────── */
+function hideAll() {
+  emptyState.style.display   = 'none';
+  noResults.style.display    = 'none';
+  loadingState.style.display = 'none';
+  resultsList.innerHTML      = '';
+  resultsList.style.display  = 'none';
+  resultsToolbar.style.display = 'none';
+}
+function showEmpty()   { hideAll(); emptyState.style.display = 'flex'; }
+function showLoading() { hideAll(); loadingState.style.display = 'flex'; }
+
+/* ── URL STATE ───────────────────────────────────────────── */
+function updateURL() {
+  const params = new URLSearchParams();
+  if (state.query) params.set('q', state.query);
+  history.replaceState({}, '', '?' + params.toString());
+}
+
+function restoreFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const q    = params.get('q')    || '';
+  if (q) {
+    searchInput.value = q;
+    state.query = q;
+    clearBtn.style.display = 'flex';
+  }
+  if (q) runSearch();
+}
+
+/* ── CARREGAR DISCIPLINAS CUSTOMIZADAS ──────────────────── */
+function loadCustomDisciplines() {
+  const stored = localStorage.getItem('customDisciplines');
+  if (stored) {
+    try {
+      const custom = JSON.parse(stored);
+      custom.forEach(cd => {
+        if (!window.disciplinas.some(d => d.id === cd.id)) {
+          window.disciplinas.push(cd);
+        }
+      });
+    } catch (e) {
+      console.error('Erro ao carregar disciplinas customizadas:', e);
+    }
+  }
+}
+
+/* ── UTIL ────────────────────────────────────────────────── */
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
