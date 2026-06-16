@@ -54,7 +54,10 @@ function addNewDiscipline() {
     linkDPWAE:     toggleVal('linkDPWAE'),
     linkMoodleERP: toggleVal('linkMoodleERP'),
     linkDPERP:     toggleVal('linkDPERP'),
+    linkMoodlePos: toggleVal('linkMoodlePos'),
+    linkInova:     toggleVal('linkInova'),
     cargaHoraria:  document.getElementById('dropbox').value.trim(),
+    googleDrive:   document.getElementById('googledrive').value.trim(),
     periodo: document.getElementById('youtube').value.trim(),
     professor: document.getElementById('soundcloud').value.trim(),
     ementa: document.getElementById('observacoes').value.trim(),
@@ -84,7 +87,7 @@ function addNewDiscipline() {
   saveCustomDisciplines();
 
   // Exibe mensagem de sucesso
-  showMessage(messageEl, '✓ Disciplina adicionada com sucesso! Você pode procurá-la na página inicial.', 'success');
+  showMessage(messageEl, '✓ Disciplina adicionada com sucesso!', 'success');
 
   // Limpa formulário
   form.reset();
@@ -99,16 +102,28 @@ function generateId() {
   return 'disc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 }
 
-function showMessage(element, text, type) {
-  element.textContent = text;
-  element.className = 'form-message ' + (type === 'success' ? 'form-message-success' : 'form-message-error');
-  element.style.display = 'block';
+function showMessage(_el, text, type) {
+  const isSuccess = type === 'success';
+  const iconSVG = isSuccess
+    ? `<svg class="toast-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>`
+    : `<svg class="toast-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
-  if (type === 'error') {
-    setTimeout(() => {
-      element.style.display = 'none';
-    }, 5000);
-  }
+  const toast = document.createElement('div');
+  toast.className = `toast ${isSuccess ? 'toast-success' : 'toast-error'}`;
+  toast.innerHTML = `${iconSVG}<span>${text}</span><button class="toast-close" aria-label="Fechar">✕</button>`;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('toast-show'));
+  });
+
+  const remove = () => {
+    toast.classList.remove('toast-show');
+    setTimeout(() => toast.remove(), 280);
+  };
+
+  toast.querySelector('.toast-close').addEventListener('click', remove);
+  setTimeout(remove, isSuccess ? 4000 : 6000);
 }
 
 function saveCustomDisciplines() {

@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderDetail(disc);
   initCopyLink();
+  initEditModal(disc);
+  initDeleteBtn(disc);
 });
 
 /* ── RENDERIZAÇÃO PRINCIPAL ──────────────────────────────── */
@@ -56,7 +58,9 @@ function renderDetail(d) {
     { label: 'Link Moodle WAE', url: waeUrl },
     { label: 'Link DP WAE',     url: isUrl(d.linkDPWAE)     ? d.linkDPWAE     : '' },
     { label: 'Link Moodle ERP', url: isUrl(d.linkMoodleERP) ? d.linkMoodleERP : '' },
-    { label: 'Link DP ERP',     url: isUrl(d.linkDPERP)     ? d.linkDPERP     : '' }
+    { label: 'Link DP ERP',     url: isUrl(d.linkDPERP)     ? d.linkDPERP     : '' },
+    { label: 'Link Moodle Pós', url: isUrl(d.linkMoodlePos) ? d.linkMoodlePos : '' },
+    { label: 'Link Inova',      url: isUrl(d.linkInova)     ? d.linkInova     : '' }
   ].filter(l => l.url);
   document.getElementById('detailCodigo').innerHTML = detailLinkDefs.length
     ? `<div class="card-link-btns">${detailLinkDefs.map(l =>
@@ -66,9 +70,10 @@ function renderDetail(d) {
 
   // Meta row
   const metas = [
-    { label: 'DROPBOX',   value: d.cargaHoraria, icon: 'dropbox' },
-    { label: 'YOUTUBE',   value: d.periodo, icon: 'youtube' },
-    { label: 'SOUNDCLOUD', value: d.professor, icon: 'soundcloud' }
+    { label: 'DROPBOX',      value: d.cargaHoraria, icon: 'dropbox' },
+    { label: 'GOOGLE DRIVE', value: d.googleDrive,  icon: 'googledrive' },
+    { label: 'YOUTUBE',      value: d.periodo,      icon: 'youtube' },
+    { label: 'SOUNDCLOUD',   value: d.professor,    icon: 'soundcloud' }
   ].filter(m => m.value);
 
   document.getElementById('detailMetaRow').innerHTML = metas.map(m => `
@@ -85,11 +90,14 @@ function renderDetail(d) {
 
   // Sidebar — Informações
   const infoItems = [
-    { label: 'LINK MOODLE',   value: d.codigo, icon: 'moodle', isLink: true },
-    { label: 'ÁREA',          value: d.area, isLink: false },
-    { label: 'DROPBOX',       value: d.cargaHoraria, icon: 'dropbox', isLink: true },
-    { label: 'YOUTUBE',       value: d.periodo, icon: 'youtube', isLink: true },
-    { label: 'SOUNDCLOUD',    value: d.professor, icon: 'soundcloud', isLink: true },
+    { label: 'LINK MOODLE',     value: d.codigo,        icon: 'moodle', isLink: true },
+    { label: 'LINK MOODLE PÓS', value: d.linkMoodlePos, icon: 'moodle', isLink: true },
+    { label: 'LINK INOVA',      value: d.linkInova,     icon: 'moodle', isLink: true },
+    { label: 'ÁREA',            value: d.area, isLink: false },
+    { label: 'DROPBOX',         value: d.cargaHoraria, icon: 'dropbox', isLink: true },
+    { label: 'GOOGLE DRIVE',  value: d.googleDrive,  icon: 'googledrive', isLink: true },
+    { label: 'YOUTUBE',       value: d.periodo,      icon: 'youtube',     isLink: true },
+    { label: 'SOUNDCLOUD',    value: d.professor,    icon: 'soundcloud',  isLink: true },
     { label: 'STATUS',        value: statusLabel(d.status), isLink: false },
     { label: 'ATUALIZADO EM', value: formatDate(d.updatedAt), isLink: false }
   ].filter(i => i.value);
@@ -210,7 +218,11 @@ function getIconSVG(type) {
     </svg>`,
     
     dropbox: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon">
-      <path d="M6 2l6 4.5L6 11V2zm6 4.5l6-4.5v8.5l-6 4.5-6-4.5 6-4.5zm6-4.5v8.5l-6 4.5 6 4.5 6-4.5V2l-6 4.5zm-12 9l6 4.5v8.5l-6-4.5v-4.5zm6 4.5l6 4.5 6-4.5-6-4.5-6 4.5z"/>
+      <path d="M6 2L11 6L6 10L1 6zM18 2L23 6L18 10L13 6zM12 8L17 12L12 16L7 12zM6 14L11 18L6 22L1 18zM18 14L23 18L18 22L13 18z"/>
+    </svg>`,
+
+    googledrive: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon">
+      <path d="M7.5 3L1 14.5l3.25 5.5 6.5-11zm9 0H7.5l6.5 11h9zm-9.25 13L4 21.5h16l-3.25-5.5z"/>
     </svg>`,
     
     moodle: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon">
@@ -220,6 +232,159 @@ function getIconSVG(type) {
   return icons[type] || icons.moodle;
 }
 
+
+/* ── EXCLUIR DISCIPLINA ──────────────────────────────── */
+function initDeleteBtn(d) {
+  const btn = document.getElementById('deleteBtn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const confirmed = confirm(`Tem certeza que deseja excluir a disciplina "${d.nome}"?\n\nEsta ação não pode ser desfeita.`);
+    if (!confirmed) return;
+    const idx = (window.disciplinas || []).findIndex(disc => disc.id === d.id);
+    if (idx !== -1) window.disciplinas.splice(idx, 1);
+    saveCustomDisciplines();
+    window.location.href = '../index.html';
+  });
+}
+
+/* ── MODAL EDITAR DISCIPLINA ─────────────────────────── */
+function initEditModal(d) {
+  const modal    = document.getElementById('editModal');
+  const closeBtn = document.getElementById('editModalClose');
+  const cancelBtn = document.getElementById('editModalCancelBtn');
+  const editBtn  = document.getElementById('editBtn');
+  const form     = document.getElementById('editDisciplineForm');
+  if (!modal || !editBtn || !form) return;
+
+  const openModal = () => {
+    fillEditForm(d);
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add('modal-open')));
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('modal-open');
+    setTimeout(() => { modal.style.display = ''; }, 210);
+    document.body.style.overflow = '';
+  };
+
+  editBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('modal-open')) closeModal(); });
+
+  form.querySelectorAll('.field-toggle').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const target = document.getElementById(cb.dataset.target);
+      if (target) {
+        target.disabled = !cb.checked;
+        if (!cb.checked) target.value = '';
+      }
+    });
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveEditedDiscipline(d, closeModal);
+  });
+}
+
+function fillEditForm(d) {
+  document.getElementById('editNome').value    = d.nome    || '';
+  document.getElementById('editModelo').value  = d.area    || '';
+  document.getElementById('editStatus').value  = d.status  || 'finalizada';
+  document.getElementById('editModulo').value  = d.modulo  || '';
+
+  const setToggle = (inputId, value) => {
+    const input = document.getElementById(inputId);
+    const cb    = document.querySelector(`[data-target="${inputId}"]`);
+    if (!input || !cb) return;
+    if (value && isUrl(value)) {
+      cb.checked     = true;
+      input.disabled = false;
+      input.value    = value;
+    } else {
+      cb.checked     = false;
+      input.disabled = true;
+      input.value    = '';
+    }
+  };
+
+  setToggle('editLinkMoodleWAE', d.codigo);
+  setToggle('editLinkDPWAE',     d.linkDPWAE);
+  setToggle('editLinkMoodleERP', d.linkMoodleERP);
+  setToggle('editLinkDPERP',     d.linkDPERP);
+  setToggle('editLinkMoodlePos', d.linkMoodlePos);
+  setToggle('editLinkInova',     d.linkInova);
+
+  document.getElementById('editDropbox').value      = d.cargaHoraria || '';
+  document.getElementById('editGoogledrive').value  = d.googleDrive  || '';
+  document.getElementById('editYoutube').value      = d.periodo      || '';
+  document.getElementById('editSoundcloud').value   = d.professor    || '';
+  document.getElementById('editObservacoes').value  = d.ementa       || '';
+}
+
+function saveEditedDiscipline(d, closeModal) {
+  const val = (id) => document.getElementById(id)?.value.trim() || '';
+  const toggleVal = (id) => {
+    const el = document.getElementById(id);
+    return el && !el.disabled ? el.value.trim() : '';
+  };
+
+  const nome = val('editNome');
+  const area = val('editModelo');
+  if (!nome || !area) {
+    showToast('Por favor, preencha os campos obrigatórios (Nome e Modelo).', 'error');
+    return;
+  }
+
+  d.nome         = nome;
+  d.area         = area;
+  d.status       = val('editStatus');
+  d.modulo       = val('editModulo');
+  d.codigo       = toggleVal('editLinkMoodleWAE');
+  d.linkDPWAE    = toggleVal('editLinkDPWAE');
+  d.linkMoodleERP = toggleVal('editLinkMoodleERP');
+  d.linkDPERP    = toggleVal('editLinkDPERP');
+  d.linkMoodlePos = toggleVal('editLinkMoodlePos');
+  d.linkInova    = toggleVal('editLinkInova');
+  d.cargaHoraria = val('editDropbox');
+  d.googleDrive  = val('editGoogledrive');
+  d.periodo      = val('editYoutube');
+  d.professor    = val('editSoundcloud');
+  d.ementa       = val('editObservacoes');
+  d.updatedAt    = new Date().toISOString();
+
+  saveCustomDisciplines();
+  renderDetail(d);
+  closeModal();
+  showToast('Disciplina atualizada com sucesso!', 'success');
+}
+
+function saveCustomDisciplines() {
+  const custom = (window.disciplinas || []).filter(d => d.id && d.id.startsWith('disc-'));
+  localStorage.setItem('customDisciplines', JSON.stringify(custom));
+}
+
+function showToast(text, type) {
+  const isSuccess = type === 'success';
+  const iconSVG = isSuccess
+    ? `<svg class="toast-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>`
+    : `<svg class="toast-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+  const toast = document.createElement('div');
+  toast.className = `toast ${isSuccess ? 'toast-success' : 'toast-error'}`;
+  toast.innerHTML = `${iconSVG}<span>${text}</span><button class="toast-close" aria-label="Fechar">✕</button>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast-show')));
+  const remove = () => {
+    toast.classList.remove('toast-show');
+    setTimeout(() => toast.remove(), 280);
+  };
+  toast.querySelector('.toast-close').addEventListener('click', remove);
+  setTimeout(remove, isSuccess ? 4000 : 6000);
+}
 
 /* ── CARREGAR DISCIPLINAS CUSTOMIZADAS ──────────────────── */
 function loadCustomDisciplines() {

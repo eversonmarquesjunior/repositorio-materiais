@@ -99,6 +99,22 @@
           <h1 class="detail-title" id="detailNome">Carregando…</h1>
           <p class="detail-code" id="detailCodigo"></p>
           <div class="detail-meta-row" id="detailMetaRow"></div>
+          <div class="detail-action-btns">
+            <button id="editBtn" class="card-moodle-btn detail-edit-btn" title="Editar disciplina">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button id="deleteBtn" class="card-moodle-btn detail-delete-btn" title="Excluir disciplina">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Ementa -->
@@ -166,6 +182,123 @@
       <span>Versão 1.0</span>
     </div>
   </footer>
+
+  <!-- ── MODAL EDITAR DISCIPLINA ── -->
+  <div id="editModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title" id="editModalTitle">Editar Disciplina</h2>
+        <button id="editModalClose" class="modal-close-btn" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editDisciplineForm" class="add-form">
+          <div class="form-group">
+            <label for="editNome">Nome *</label>
+            <input type="text" id="editNome" name="nome" required placeholder="Ex: Cálculo Diferencial e Integral I" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editModelo">Modelo *</label>
+              <select id="editModelo" name="modelo" required>
+                <option value="">Selecione um modelo</option>
+                <option value="Graduação">Graduação</option>
+                <option value="Pós-graduação">Pós-graduação</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editStatus">Status</label>
+              <select id="editStatus" name="status">
+                <option value="finalizada">Finalizada</option>
+                <option value="pendente">Pendente</option>
+                <option value="producao">Em Produção</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editModulo">Módulo</label>
+              <select id="editModulo" name="modulo">
+                <option value="">Selecione um módulo</option>
+                <option value="2026/01">2026/01</option>
+                <option value="2026/02">2026/02</option>
+                <option value="2026/03">2026/03</option>
+                <option value="2026/04">2026/04</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" class="field-toggle" data-target="editLinkMoodleWAE">
+              <span>Link Moodle WAE</span>
+            </label>
+            <input type="url" id="editLinkMoodleWAE" name="linkMoodleWAE" disabled placeholder="https://moodle.exemplo.com/..." />
+          </div>
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" class="field-toggle" data-target="editLinkDPWAE">
+              <span>Link DP WAE</span>
+            </label>
+            <input type="url" id="editLinkDPWAE" name="linkDPWAE" disabled placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" class="field-toggle" data-target="editLinkMoodleERP">
+              <span>Link Moodle ERP</span>
+            </label>
+            <input type="url" id="editLinkMoodleERP" name="linkMoodleERP" disabled placeholder="https://moodle.exemplo.com/..." />
+          </div>
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" class="field-toggle" data-target="editLinkDPERP">
+              <span>Link DP ERP</span>
+            </label>
+            <input type="url" id="editLinkDPERP" name="linkDPERP" disabled placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" class="field-toggle" data-target="editLinkMoodlePos">
+              <span>Link Moodle Pós</span>
+            </label>
+            <input type="url" id="editLinkMoodlePos" name="linkMoodlePos" disabled placeholder="https://moodle.exemplo.com/..." />
+          </div>
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" class="field-toggle" data-target="editLinkInova">
+              <span>Link Inova</span>
+            </label>
+            <input type="url" id="editLinkInova" name="linkInova" disabled placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label for="editDropbox">Dropbox</label>
+            <input type="url" id="editDropbox" name="dropbox" placeholder="https://www.dropbox.com/..." />
+          </div>
+          <div class="form-group">
+            <label for="editGoogledrive">Google Drive</label>
+            <input type="url" id="editGoogledrive" name="googledrive" placeholder="https://drive.google.com/..." />
+          </div>
+          <div class="form-group">
+            <label for="editYoutube">YouTube</label>
+            <input type="url" id="editYoutube" name="youtube" placeholder="https://www.youtube.com/..." />
+          </div>
+          <div class="form-group">
+            <label for="editSoundcloud">Soundcloud</label>
+            <input type="url" id="editSoundcloud" name="soundcloud" placeholder="https://soundcloud.com/..." />
+          </div>
+          <div class="form-group">
+            <label for="editObservacoes">Observações</label>
+            <textarea id="editObservacoes" name="observacoes" rows="4" placeholder="Informações adicionais sobre a disciplina..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            <button type="button" id="editModalCancelBtn" class="btn btn-secondary">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script src="../js/data.js"></script>
   <script src="../js/detalhe.js"></script>

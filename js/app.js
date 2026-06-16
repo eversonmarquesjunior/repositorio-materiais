@@ -199,8 +199,9 @@ function cardIconSVG(type) {
   const icons = {
     moodle: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`,
     youtube: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
-    soundcloud: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M1.175 12.225c-.051 0-.175.016-.175.175v1.2c0 .159.124.175.175.175.051 0 .175-.016.175-.175v-1.2c0-.159-.124-.175-.175-.175zm2.158 2.066c1.453-.607 2.515-2.068 2.515-3.766 0-2.262-1.884-4.105-4.205-4.105-.276 0-.554.025-.816.074-.165-2.565-2.4-4.609-5.135-4.609C-6.308 1.885-8.647 4.172-8.647 7.026c0 .347.037.684.104 1.016C-9.841 8.93-11.147 10.834-11.147 13.008c0 2.509 2.079 4.547 4.647 4.547h13.205c1.913 0 3.461-1.565 3.461-3.5 0-1.763-1.252-3.236-2.833-3.764z"/></svg>`,
-    dropbox: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M6 2l6 4.5L6 11V2zm6 4.5l6-4.5v8.5l-6 4.5-6-4.5 6-4.5zm6-4.5v8.5l-6 4.5 6 4.5 6-4.5V2l-6 4.5zm-12 9l6 4.5v8.5l-6-4.5v-4.5zm6 4.5l6 4.5 6-4.5-6-4.5-6 4.5z"/></svg>`
+    soundcloud: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M1.175 12.225c-.051 0-.175.016-.175.175v1.2c0 .159.124.175.175.175.051 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm1.633 1.751h.35c.059 0 .175-.016.175-.175v-1.533c0-.159-.116-.175-.175-.175h-.35c-.058 0-.174.016-.174.175v1.533c0 .159.116.175.174.175zm1.35-1.751h-.35c-.058 0-.174.016-.174.175v1.2c0 .159.116.175.174.175h.35c.059 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm1.99 1.751h.35c.059 0 .175-.016.175-.175v-.875c0-.159-.116-.175-.175-.175h-.35c-.059 0-.175.016-.175.175v.875c0 .159.116.175.175.175zm1.35-1.751h-.35c-.059 0-.175.016-.175.175v1.2c0 .159.116.175.175.175h.35c.058 0 .174-.016.174-.175v-1.2c0-.159-.116-.175-.174-.175zm1.99 1.751h.35c.058 0 .174-.016.174-.175v-.525c0-.159-.116-.175-.175-.175h-.35c-.058 0-.174.016-.174.175v.525c0 .159.116.175.175.175zm1.35-1.751h-.35c-.059 0-.175.016-.175.175v1.2c0 .159.116.175.175.175h.35c.059 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm2.158 2.066c1.453-.607 2.515-2.068 2.515-3.766 0-2.262-1.884-4.105-4.205-4.105-.276 0-.554.025-.816.074-.165-2.565-2.4-4.609-5.135-4.609-2.858 0-5.197 2.287-5.197 5.141 0 .347.037.684.104 1.016C1.306 8.93 0 10.834 0 13.008c0 2.509 2.079 4.547 4.647 4.547h13.205c1.913 0 3.461-1.565 3.461-3.5 0-1.763-1.252-3.236-2.897-3.528z"/></svg>`,
+    dropbox: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M6 2L11 6L6 10L1 6zM18 2L23 6L18 10L13 6zM12 8L17 12L12 16L7 12zM6 14L11 18L6 22L1 18zM18 14L23 18L18 22L13 18z"/></svg>`,
+    googledrive: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M7.5 3L1 14.5l3.25 5.5 6.5-11zm9 0H7.5l6.5 11h9zm-9.25 13L4 21.5h16l-3.25-5.5z"/></svg>`
   };
   return icons[type] || icons.moodle;
 }
@@ -227,7 +228,9 @@ function cardHTML(d) {
     { label: 'Link Moodle WAE', url: waeUrl },
     { label: 'Link DP WAE',     url: isUrl(d.linkDPWAE)     ? d.linkDPWAE     : '' },
     { label: 'Link Moodle ERP', url: isUrl(d.linkMoodleERP) ? d.linkMoodleERP : '' },
-    { label: 'Link DP ERP',     url: isUrl(d.linkDPERP)     ? d.linkDPERP     : '' }
+    { label: 'Link DP ERP',     url: isUrl(d.linkDPERP)     ? d.linkDPERP     : '' },
+    { label: 'Link Moodle Pós', url: isUrl(d.linkMoodlePos) ? d.linkMoodlePos : '' },
+    { label: 'Link Inova',      url: isUrl(d.linkInova)     ? d.linkInova     : '' }
   ].filter(l => l.url);
   const linkBtns = linkDefs.length
     ? `<div class="card-link-btns">${linkDefs.map(l =>
@@ -235,11 +238,12 @@ function cardHTML(d) {
       ).join('')}</div>`
     : '';
 
-  // Ícones circulares: Dropbox, YouTube, Soundcloud
+  // Ícones circulares: Dropbox, Google Drive, YouTube, Soundcloud
   const iconLinks = [
-    { value: d.cargaHoraria, cls: 'dropbox',    title: 'Dropbox' },
-    { value: d.periodo,      cls: 'youtube',    title: 'YouTube' },
-    { value: d.professor,    cls: 'soundcloud', title: 'Soundcloud' }
+    { value: d.cargaHoraria, cls: 'dropbox',     title: 'Dropbox' },
+    { value: d.googleDrive,  cls: 'googledrive', title: 'Google Drive' },
+    { value: d.periodo,      cls: 'youtube',     title: 'YouTube' },
+    { value: d.professor,    cls: 'soundcloud',  title: 'Soundcloud' }
   ]
     .filter(l => isUrl(l.value))
     .map(l => `<a href="${esc(l.value)}" target="_blank" rel="noopener noreferrer" class="detail-meta-icon ${l.cls}" title="${l.title}" onclick="event.stopPropagation()">${cardIconSVG(l.cls)}</a>`)
@@ -269,16 +273,14 @@ function cardHTML(d) {
         ${moduloBadge}
         ${statusLabel}
       </div>
-      <div class="card-info-row">
-        <a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          Informações da Disciplina
-        </a>
-      </div>
+      <a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn card-info-btn" onclick="event.stopPropagation()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Informações da Disciplina
+      </a>
     </div>
   `;
 }
