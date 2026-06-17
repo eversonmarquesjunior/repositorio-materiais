@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDeleteBtn(disc);
   initObservacoes(disc);
   initHistorico(disc);
+  initRetornos(disc);
 });
 
 /* ── RENDERIZAÇÃO PRINCIPAL ──────────────────────────────── */
@@ -96,28 +97,8 @@ function renderDetail(d) {
   // Histórico
   renderHistorico(d);
 
-  // Sidebar — Informações
-  const infoItems = [
-    { label: 'LINK MOODLE',     value: d.codigo,        icon: 'moodle', isLink: true },
-    { label: 'LINK MOODLE PÓS', value: d.linkMoodlePos, icon: 'moodle', isLink: true },
-    { label: 'LINK INOVA',      value: d.linkInova,     icon: 'moodle', isLink: true },
-    { label: 'ÁREA',            value: d.area, isLink: false },
-    { label: 'DROPBOX',         value: d.cargaHoraria, icon: 'dropbox', isLink: true },
-    { label: 'GOOGLE DRIVE',  value: d.googleDrive,  icon: 'googledrive', isLink: true },
-    { label: 'YOUTUBE',       value: d.periodo,      icon: 'youtube',     isLink: true },
-    { label: 'SOUNDCLOUD',    value: d.professor,    icon: 'soundcloud',  isLink: true },
-    { label: 'STATUS',        value: statusLabel(d.status), isLink: false },
-    { label: 'ATUALIZADO EM', value: formatDate(d.updatedAt), isLink: false }
-  ].filter(i => i.value);
-
-  document.getElementById('sidebarInfo').innerHTML = infoItems.map(i => `
-    <div>
-      <div class="sc-item-label">${esc(i.label)}</div>
-      <div class="sc-item-value">
-        ${i.isLink ? `<a href="${esc(i.value)}" target="_blank" rel="noopener noreferrer" class="sidebar-icon-link ${i.icon}" title="${esc(i.label)}">${getIconSVG(i.icon)}</a>` : esc(i.value)}
-      </div>
-    </div>
-  `).join('');
+  // Retornos
+  renderRetornos(d);
 
   // Sidebar — Cursos Relacionados
   if (d.cursos && d.cursos.length) {
@@ -271,6 +252,147 @@ function initHistorico(d) {
     cancelNew();
     renderHistorico(d);
     showToast('Registro adicionado ao histórico!', 'success');
+  });
+}
+
+/* ── RETORNOS ────────────────────────────────────────────── */
+function renderRetornos(d) {
+  const timeline = document.getElementById('retornosTimeline');
+  const emptyEl  = document.getElementById('retornosEmpty');
+  if (!timeline) return;
+
+  const items = (d.retornos || []).slice().sort((a, b) => a.data.localeCompare(b.data));
+
+  if (!items.length) {
+    timeline.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  timeline.innerHTML = items.map(item => `
+    <div class="hist-entry" data-id="${esc(item.id)}">
+      <div class="hist-dot"></div>
+      <div class="hist-content">
+        <div class="hist-view">
+          <div class="hist-header">
+            <span class="hist-date">${formatHistDate(item.data)}</span>
+            <div class="hist-actions">
+              <button class="ret-edit-btn obs-edit-btn" title="Editar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="ret-del-btn obs-edit-btn" title="Excluir">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <p class="hist-text">${esc(item.texto)}</p>
+        </div>
+        <div class="hist-edit" style="display:none">
+          <input type="date" class="hist-date-input" value="${esc(item.data)}" />
+          <textarea class="obs-textarea" rows="3">${esc(item.texto)}</textarea>
+          <div class="obs-edit-actions">
+            <button class="ret-save-btn btn btn-primary btn-sm">Salvar</button>
+            <button class="ret-cancel-btn btn btn-secondary btn-sm">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  timeline.querySelectorAll('.hist-entry').forEach(entry => {
+    const id     = entry.dataset.id;
+    const viewEl = entry.querySelector('.hist-view');
+    const editEl = entry.querySelector('.hist-edit');
+    const dateIn = entry.querySelector('.hist-date-input');
+    const textIn = entry.querySelector('textarea');
+
+    entry.querySelector('.ret-edit-btn').addEventListener('click', () => {
+      viewEl.style.display = 'none';
+      editEl.style.display = '';
+      textIn.focus();
+    });
+
+    entry.querySelector('.ret-cancel-btn').addEventListener('click', () => {
+      viewEl.style.display = '';
+      editEl.style.display = 'none';
+    });
+
+    entry.querySelector('.ret-del-btn').addEventListener('click', () => {
+      if (!confirm('Remover este retorno?')) return;
+      d.retornos = (d.retornos || []).filter(i => i.id !== id);
+      d.updatedAt = new Date().toISOString();
+      saveCustomDisciplines();
+      renderRetornos(d);
+      showToast('Retorno removido.', 'success');
+    });
+
+    entry.querySelector('.ret-save-btn').addEventListener('click', () => {
+      const item = (d.retornos || []).find(i => i.id === id);
+      if (!item) return;
+      const novoTexto = textIn.value.trim();
+      const novaData  = dateIn.value;
+      if (!novoTexto || !novaData) {
+        showToast('Preencha a data e o texto do retorno.', 'error');
+        return;
+      }
+      item.texto  = novoTexto;
+      item.data   = novaData;
+      d.updatedAt = new Date().toISOString();
+      saveCustomDisciplines();
+      renderRetornos(d);
+      showToast('Retorno atualizado.', 'success');
+    });
+  });
+}
+
+function initRetornos(d) {
+  const addBtn    = document.getElementById('retornosAddBtn');
+  const newForm   = document.getElementById('retornosNewForm');
+  const dateIn    = document.getElementById('retornosNewData');
+  const textIn    = document.getElementById('retornosNewTexto');
+  const saveBtn   = document.getElementById('retornosNewSave');
+  const cancelBtn = document.getElementById('retornosNewCancel');
+  if (!addBtn || !newForm) return;
+
+  addBtn.addEventListener('click', () => {
+    dateIn.value = new Date().toISOString().slice(0, 10);
+    textIn.value = '';
+    newForm.style.display = '';
+    addBtn.style.display  = 'none';
+    textIn.focus();
+  });
+
+  const cancelNew = () => {
+    newForm.style.display = 'none';
+    addBtn.style.display  = '';
+  };
+
+  cancelBtn.addEventListener('click', cancelNew);
+
+  saveBtn.addEventListener('click', () => {
+    const texto = textIn.value.trim();
+    const data  = dateIn.value;
+    if (!texto || !data) {
+      showToast('Preencha a data e o texto do retorno.', 'error');
+      return;
+    }
+    if (!d.retornos) d.retornos = [];
+    d.retornos.push({ id: `ret-${Date.now()}`, texto, data });
+    d.updatedAt = new Date().toISOString();
+    saveCustomDisciplines();
+    cancelNew();
+    renderRetornos(d);
+    showToast('Retorno adicionado!', 'success');
   });
 }
 
