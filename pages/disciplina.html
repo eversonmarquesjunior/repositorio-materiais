@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Detalhe da Disciplina — RepoDisciplinas</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet" />
@@ -14,9 +15,16 @@
     <aside class="app-sidebar">
       <div class="sidebar-brand">
         <div class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <polygon fill="#CFD8DC" points="39.4,23 38.6,19 26,21.6 26,8 22,8 22,20.3 8.1,11.3 5.9,14.7 21.1,24.5 9.4,39.8 12.6,42.2 23.9,27.4 32.3,40.1 35.7,37.9 27.3,25.4"/>
+            <circle fill="#3F51B5" cx="24" cy="24" r="7"/>
+            <g fill="#00BCD4">
+              <circle cx="24" cy="8" r="5"/>
+              <circle cx="39" cy="21" r="5"/>
+              <circle cx="7" cy="13" r="5"/>
+              <circle cx="11" cy="41" r="5"/>
+              <circle cx="34" cy="39" r="5"/>
+            </g>
           </svg>
         </div>
         <div>
@@ -39,8 +47,16 @@
     <div class="header-inner">
       <a href="../index.html" class="logo-wrap">
         <div class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <polygon fill="#CFD8DC" points="39.4,23 38.6,19 26,21.6 26,8 22,8 22,20.3 8.1,11.3 5.9,14.7 21.1,24.5 9.4,39.8 12.6,42.2 23.9,27.4 32.3,40.1 35.7,37.9 27.3,25.4"/>
+            <circle fill="#3F51B5" cx="24" cy="24" r="7"/>
+            <g fill="#00BCD4">
+              <circle cx="24" cy="8" r="5"/>
+              <circle cx="39" cy="21" r="5"/>
+              <circle cx="7" cy="13" r="5"/>
+              <circle cx="11" cy="41" r="5"/>
+              <circle cx="34" cy="39" r="5"/>
+            </g>
           </svg>
         </div>
         <div class="logo-text">
@@ -117,21 +133,61 @@
           </div>
         </div>
 
-        <!-- Ementa -->
-        <div class="detail-card" id="cardEmenta" style="display:none">
+        <!-- Observações -->
+        <div class="detail-card" id="cardEmenta">
           <div class="dc-header">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
             </svg>
             <h2 class="dc-title">OBSERVAÇÕES</h2>
+            <button id="ementaEditBtn" class="obs-edit-btn" title="Editar observações">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
           </div>
           <div class="dc-body">
             <p class="detail-text" id="detailEmenta"></p>
+            <div id="ementaEditMode" style="display:none">
+              <textarea id="ementaTextarea" class="obs-textarea" rows="5" placeholder="Adicione observações sobre esta disciplina..."></textarea>
+              <div class="obs-edit-actions">
+                <button id="ementaSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
+                <button id="ementaCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Removed sections: Objetivos, Conteúdo Programático, Bibliografia, Observações -->
+        <!-- Histórico de Atualizações -->
+        <div class="detail-card" id="cardHistorico">
+          <div class="dc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <h2 class="dc-title">HISTÓRICO DE REGISTROS</h2>
+            <button id="historicoAddBtn" class="obs-edit-btn" title="Adicionar registro">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+          </div>
+          <div class="dc-body">
+            <div id="historicoNewForm" class="hist-new-form" style="display:none">
+              <input type="date" id="historicoNewData" class="hist-date-input" />
+              <textarea id="historicoNewTexto" class="obs-textarea" rows="3" placeholder="Descreva a atualização ou liberação..."></textarea>
+              <div class="obs-edit-actions">
+                <button id="historicoNewSave" class="btn btn-primary btn-sm">Salvar</button>
+                <button id="historicoNewCancel" class="btn btn-secondary btn-sm">Cancelar</button>
+              </div>
+            </div>
+            <div id="historicoTimeline" class="hist-timeline"></div>
+            <p id="historicoEmpty" class="detail-text obs-empty">Nenhuma atualização registrada.</p>
+          </div>
+        </div>
 
       </div>
 
@@ -207,21 +263,31 @@
                 <option value="">Selecione um modelo</option>
                 <option value="Graduação">Graduação</option>
                 <option value="Pós-graduação">Pós-graduação</option>
+                <option value="Projeto Integrador">Projeto Integrador</option>
+                <option value="Projeto em Ambiente Profissional">Projeto em Ambiente Profissional</option>
+                <option value="Introdução ao Curso">Introdução ao Curso</option>
                 <option value="Outro">Outro</option>
               </select>
             </div>
             <div class="form-group">
               <label for="editStatus">Status</label>
-              <select id="editStatus" name="status">
-                <option value="finalizada">Finalizada</option>
-                <option value="pendente">Pendente</option>
-                <option value="producao">Em Produção</option>
-              </select>
+              <div style="display:flex; gap:8px; align-items:stretch">
+                <select id="editStatus" name="status" style="flex:1; min-width:0">
+                  <option value="">Selecione um status</option>
+                  <option value="padronizada">Disciplina Padronizada</option>
+                  <option value="antiga">Disciplina Antiga</option>
+                  <option value="atualizacao">Atualização do Zero</option>
+                  <option value="paliativa">Disciplina Paliativa</option>
+                </select>
+                <input type="number" id="editAnoAntiga" name="editAnoAntiga" min="1950" max="2099"
+                       placeholder="Ano" style="display:none; width:80px; flex-shrink:0" />
+              </div>
             </div>
             <div class="form-group">
               <label for="editModulo">Módulo</label>
               <select id="editModulo" name="modulo">
                 <option value="">Selecione um módulo</option>
+                <option value="Sem Módulo">Sem Módulo</option>
                 <option value="2026/01">2026/01</option>
                 <option value="2026/02">2026/02</option>
                 <option value="2026/03">2026/03</option>

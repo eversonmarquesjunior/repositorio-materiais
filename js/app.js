@@ -207,14 +207,20 @@ function cardIconSVG(type) {
 }
 
 function cardHTML(d) {
-  const statusLabel = {
-    ativo:      '<span class="badge badge-status-ativo">Ativo</span>',
-    inativo:    '<span class="badge badge-status-inativo">Inativo</span>',
-    revisao:    '<span class="badge badge-status-revisao">Em Revisão</span>',
-    finalizada: '<span class="badge badge-status-ativo">Finalizada</span>',
-    pendente:   '<span class="badge badge-status-revisao">Pendente</span>',
-    producao:   '<span class="badge badge-status-inativo">Em Produção</span>'
-  }[d.status] || '';
+  const statusBadges = {
+    ativo:        '<span class="badge badge-status-ativo">Ativo</span>',
+    inativo:      '<span class="badge badge-status-inativo">Inativo</span>',
+    revisao:      '<span class="badge badge-status-revisao">Em Revisão</span>',
+    finalizada:   '<span class="badge badge-status-ativo">Finalizada</span>',
+    pendente:     '<span class="badge badge-status-revisao">Pendente</span>',
+    producao:     '<span class="badge badge-status-inativo">Em Produção</span>',
+    padronizada:  '<span class="badge badge-status-ativo">Disciplina Padronizada</span>',
+    atualizacao:  '<span class="badge badge-status-revisao">Atualização do Zero</span>',
+    paliativa:    '<span class="badge badge-status-revisao">Disciplina Paliativa</span>',
+    antiga:       '<span class="badge badge-status-inativo">Disciplina Antiga</span>',
+  };
+  const statusLabel = statusBadges[d.status]
+    || (d.status ? `<span class="badge badge-status-inativo">${d.status}</span>` : '');
 
   // Badges direita do nome: área/modelo, módulo, status
   const moduloBadge = d.modulo

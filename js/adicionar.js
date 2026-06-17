@@ -13,6 +13,17 @@ document.addEventListener('DOMContentLoaded', () => {
     addNewDiscipline();
   });
 
+  // Mostra/esconde campo de ano quando "Disciplina Antiga" é selecionado
+  const statusSel = document.getElementById('status');
+  const anoInput  = document.getElementById('anoAntiga');
+  if (statusSel && anoInput) {
+    statusSel.addEventListener('change', () => {
+      const show = statusSel.value === 'antiga';
+      anoInput.style.display = show ? '' : 'none';
+      if (!show) anoInput.value = '';
+    });
+  }
+
   // Habilita/desabilita campos de link ao clicar no checkbox
   document.querySelectorAll('.field-toggle').forEach(cb => {
     cb.addEventListener('change', () => {
@@ -24,13 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Ao resetar o formulário, recoloca os inputs de link como desabilitados
+  // Ao resetar o formulário, recoloca os inputs de link como desabilitados e esconde o campo de ano
   form.addEventListener('reset', () => {
     setTimeout(() => {
       document.querySelectorAll('.field-toggle').forEach(cb => {
         const target = document.getElementById(cb.dataset.target);
         if (target) target.disabled = true;
       });
+      if (anoInput) anoInput.style.display = 'none';
     }, 0);
   });
 });
@@ -48,7 +60,11 @@ function addNewDiscipline() {
   const formData = {
     nome: document.getElementById('nome').value.trim(),
     area: document.getElementById('modelo').value.trim(),
-    status: document.getElementById('status').value,
+    status: (() => {
+      const s   = document.getElementById('status').value;
+      const ano = document.getElementById('anoAntiga').value.trim();
+      return s === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : s;
+    })(),
     modulo:        document.getElementById('modulo').value,
     codigo:        toggleVal('linkMoodleWAE'),
     linkDPWAE:     toggleVal('linkDPWAE'),

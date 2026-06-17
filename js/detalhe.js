@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initCopyLink();
   initEditModal(disc);
   initDeleteBtn(disc);
+  initObservacoes(disc);
+  initHistorico(disc);
 });
 
 /* ── RENDERIZAÇÃO PRINCIPAL ──────────────────────────────── */
@@ -32,12 +34,16 @@ function renderDetail(d) {
 
   // Badges
   const statusMap = {
-    ativo:      { cls: 'badge-status-ativo',   label: 'Ativo' },
-    inativo:    { cls: 'badge-status-inativo', label: 'Inativo' },
-    revisao:    { cls: 'badge-status-revisao', label: 'Em Revisão' },
-    finalizada: { cls: 'badge-status-ativo',   label: 'Finalizada' },
-    pendente:   { cls: 'badge-status-revisao', label: 'Pendente' },
-    producao:   { cls: 'badge-status-inativo', label: 'Em Produção' }
+    ativo:        { cls: 'badge-status-ativo',   label: 'Ativo' },
+    inativo:      { cls: 'badge-status-inativo', label: 'Inativo' },
+    revisao:      { cls: 'badge-status-revisao', label: 'Em Revisão' },
+    finalizada:   { cls: 'badge-status-ativo',   label: 'Finalizada' },
+    pendente:     { cls: 'badge-status-revisao', label: 'Pendente' },
+    producao:     { cls: 'badge-status-inativo', label: 'Em Produção' },
+    padronizada:  { cls: 'badge-status-ativo',   label: 'Disciplina Padronizada' },
+    antiga:       { cls: 'badge-status-inativo', label: 'Disciplina Antiga' },
+    atualizacao:  { cls: 'badge-status-revisao', label: 'Atualização do Zero' },
+    paliativa:    { cls: 'badge-status-revisao', label: 'Disciplina Paliativa' },
   };
   const st = statusMap[d.status] || { cls: 'badge-status-inativo', label: d.status || '—' };
   document.getElementById('detailBadges').innerHTML = `
@@ -84,9 +90,11 @@ function renderDetail(d) {
     </div>
   `).join('');
 
-  // Ementa
-  showCard('cardEmenta', 'detailEmenta', d.ementa);
-  // (Removed sections: Objetivos, Conteúdo Programático, Bibliografia, Observações)
+  // Observações
+  renderObservacoes(d);
+
+  // Histórico
+  renderHistorico(d);
 
   // Sidebar — Informações
   const infoItems = [
@@ -117,6 +125,206 @@ function renderDetail(d) {
     document.getElementById('sidebarCursos').innerHTML =
       d.cursos.map(c => `<li><a href="#">${esc(c)}</a></li>`).join('');
   }
+}
+
+/* ── HISTÓRICO DE ATUALIZAÇÕES ───────────────────────────── */
+function formatHistDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return (d && m && y) ? `${d}/${m}/${y}` : dateStr;
+}
+
+function renderHistorico(d) {
+  const timeline = document.getElementById('historicoTimeline');
+  const emptyEl  = document.getElementById('historicoEmpty');
+  if (!timeline) return;
+
+  const items = (d.historico || []).slice().sort((a, b) => a.data.localeCompare(b.data));
+
+  if (!items.length) {
+    timeline.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  timeline.innerHTML = items.map(item => `
+    <div class="hist-entry" data-id="${esc(item.id)}">
+      <div class="hist-dot"></div>
+      <div class="hist-content">
+        <div class="hist-view">
+          <div class="hist-header">
+            <span class="hist-date">${formatHistDate(item.data)}</span>
+            <div class="hist-actions">
+              <button class="hist-edit-btn obs-edit-btn" title="Editar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="hist-del-btn obs-edit-btn" title="Excluir">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <p class="hist-text">${esc(item.texto)}</p>
+        </div>
+        <div class="hist-edit" style="display:none">
+          <input type="date" class="hist-date-input" value="${esc(item.data)}" />
+          <textarea class="obs-textarea" rows="3">${esc(item.texto)}</textarea>
+          <div class="obs-edit-actions">
+            <button class="hist-save-btn btn btn-primary btn-sm">Salvar</button>
+            <button class="hist-cancel-btn btn btn-secondary btn-sm">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  timeline.querySelectorAll('.hist-entry').forEach(entry => {
+    const id     = entry.dataset.id;
+    const viewEl = entry.querySelector('.hist-view');
+    const editEl = entry.querySelector('.hist-edit');
+    const dateIn = entry.querySelector('.hist-date-input');
+    const textIn = entry.querySelector('textarea');
+
+    entry.querySelector('.hist-edit-btn').addEventListener('click', () => {
+      viewEl.style.display = 'none';
+      editEl.style.display = '';
+      textIn.focus();
+    });
+
+    entry.querySelector('.hist-cancel-btn').addEventListener('click', () => {
+      viewEl.style.display = '';
+      editEl.style.display = 'none';
+    });
+
+    entry.querySelector('.hist-del-btn').addEventListener('click', () => {
+      if (!confirm('Remover este registro do histórico?')) return;
+      d.historico = (d.historico || []).filter(i => i.id !== id);
+      d.updatedAt = new Date().toISOString();
+      saveCustomDisciplines();
+      renderHistorico(d);
+      showToast('Registro removido.', 'success');
+    });
+
+    entry.querySelector('.hist-save-btn').addEventListener('click', () => {
+      const item = (d.historico || []).find(i => i.id === id);
+      if (!item) return;
+      const novoTexto = textIn.value.trim();
+      const novaData  = dateIn.value;
+      if (!novoTexto || !novaData) {
+        showToast('Preencha a data e o texto do registro.', 'error');
+        return;
+      }
+      item.texto  = novoTexto;
+      item.data   = novaData;
+      d.updatedAt = new Date().toISOString();
+      saveCustomDisciplines();
+      renderHistorico(d);
+      showToast('Registro atualizado.', 'success');
+    });
+  });
+}
+
+function initHistorico(d) {
+  const addBtn    = document.getElementById('historicoAddBtn');
+  const newForm   = document.getElementById('historicoNewForm');
+  const dateIn    = document.getElementById('historicoNewData');
+  const textIn    = document.getElementById('historicoNewTexto');
+  const saveBtn   = document.getElementById('historicoNewSave');
+  const cancelBtn = document.getElementById('historicoNewCancel');
+  if (!addBtn || !newForm) return;
+
+  addBtn.addEventListener('click', () => {
+    dateIn.value = new Date().toISOString().slice(0, 10);
+    textIn.value = '';
+    newForm.style.display = '';
+    addBtn.style.display  = 'none';
+    textIn.focus();
+  });
+
+  const cancelNew = () => {
+    newForm.style.display = 'none';
+    addBtn.style.display  = '';
+  };
+
+  cancelBtn.addEventListener('click', cancelNew);
+
+  saveBtn.addEventListener('click', () => {
+    const texto = textIn.value.trim();
+    const data  = dateIn.value;
+    if (!texto || !data) {
+      showToast('Preencha a data e o texto do registro.', 'error');
+      return;
+    }
+    if (!d.historico) d.historico = [];
+    d.historico.push({ id: `hist-${Date.now()}`, texto, data });
+    d.updatedAt = new Date().toISOString();
+    saveCustomDisciplines();
+    cancelNew();
+    renderHistorico(d);
+    showToast('Registro adicionado ao histórico!', 'success');
+  });
+}
+
+/* ── OBSERVAÇÕES INLINE ──────────────────────────────────── */
+function renderObservacoes(d) {
+  const textEl  = document.getElementById('detailEmenta');
+  const editMode = document.getElementById('ementaEditMode');
+  const editBtn  = document.getElementById('ementaEditBtn');
+  if (!textEl) return;
+  if (editMode) editMode.style.display = 'none';
+  if (editBtn)  editBtn.style.display  = '';
+  if (d.ementa && d.ementa.trim()) {
+    textEl.textContent = d.ementa;
+    textEl.classList.remove('obs-empty');
+  } else {
+    textEl.textContent = 'Sem observações.';
+    textEl.classList.add('obs-empty');
+  }
+  textEl.style.display = '';
+}
+
+function initObservacoes(d) {
+  const editBtn  = document.getElementById('ementaEditBtn');
+  const editMode = document.getElementById('ementaEditMode');
+  const textarea = document.getElementById('ementaTextarea');
+  const saveBtn  = document.getElementById('ementaSaveBtn');
+  const cancelBtn = document.getElementById('ementaCancelBtn');
+  const textEl   = document.getElementById('detailEmenta');
+  if (!editBtn || !editMode || !textarea) return;
+
+  editBtn.addEventListener('click', () => {
+    textarea.value = d.ementa || '';
+    textEl.style.display  = 'none';
+    editMode.style.display = '';
+    editBtn.style.display  = 'none';
+    textarea.focus();
+  });
+
+  const cancelEdit = () => {
+    editMode.style.display = 'none';
+    textEl.style.display   = '';
+    editBtn.style.display  = '';
+  };
+
+  saveBtn.addEventListener('click', () => {
+    d.ementa    = textarea.value.trim();
+    d.updatedAt = new Date().toISOString();
+    saveCustomDisciplines();
+    cancelEdit();
+    renderObservacoes(d);
+    showToast('Observações salvas com sucesso!', 'success');
+  });
+
+  cancelBtn.addEventListener('click', cancelEdit);
 }
 
 /* ── COPIAR LINK ─────────────────────────────────────────── */
@@ -182,7 +390,9 @@ function showCard(cardId, fieldId, text) {
 function statusLabel(s) {
   return {
     ativo: 'Ativo', inativo: 'Inativo', revisao: 'Em Revisão',
-    finalizada: 'Finalizada', pendente: 'Pendente', producao: 'Em Produção'
+    finalizada: 'Finalizada', pendente: 'Pendente', producao: 'Em Produção',
+    padronizada: 'Disciplina Padronizada', atualizacao: 'Atualização do Zero',
+    paliativa: 'Disciplina Paliativa', antiga: 'Disciplina Antiga'
   }[s] || s;
 }
 
@@ -275,6 +485,16 @@ function initEditModal(d) {
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('modal-open')) closeModal(); });
 
+  const editStatusSel  = document.getElementById('editStatus');
+  const editAnoInput   = document.getElementById('editAnoAntiga');
+  if (editStatusSel && editAnoInput) {
+    editStatusSel.addEventListener('change', () => {
+      const show = editStatusSel.value === 'antiga';
+      editAnoInput.style.display = show ? '' : 'none';
+      if (!show) editAnoInput.value = '';
+    });
+  }
+
   form.querySelectorAll('.field-toggle').forEach(cb => {
     cb.addEventListener('change', () => {
       const target = document.getElementById(cb.dataset.target);
@@ -294,8 +514,18 @@ function initEditModal(d) {
 function fillEditForm(d) {
   document.getElementById('editNome').value    = d.nome    || '';
   document.getElementById('editModelo').value  = d.area    || '';
-  document.getElementById('editStatus').value  = d.status  || 'finalizada';
   document.getElementById('editModulo').value  = d.modulo  || '';
+
+  const anoAntigaInput = document.getElementById('editAnoAntiga');
+  const isAntiga = d.status && d.status.startsWith('Disciplina Antiga');
+  if (isAntiga) {
+    document.getElementById('editStatus').value = 'antiga';
+    const match = d.status.match(/(\d{4})$/);
+    if (anoAntigaInput) { anoAntigaInput.value = match ? match[1] : ''; anoAntigaInput.style.display = ''; }
+  } else {
+    document.getElementById('editStatus').value = d.status || '';
+    if (anoAntigaInput) { anoAntigaInput.value = ''; anoAntigaInput.style.display = 'none'; }
+  }
 
   const setToggle = (inputId, value) => {
     const input = document.getElementById(inputId);
@@ -342,7 +572,11 @@ function saveEditedDiscipline(d, closeModal) {
 
   d.nome         = nome;
   d.area         = area;
-  d.status       = val('editStatus');
+  d.status       = (() => {
+    const s   = val('editStatus');
+    const ano = (document.getElementById('editAnoAntiga') || {}).value?.trim();
+    return s === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : s;
+  })();
   d.modulo       = val('editModulo');
   d.codigo       = toggleVal('editLinkMoodleWAE');
   d.linkDPWAE    = toggleVal('editLinkDPWAE');
