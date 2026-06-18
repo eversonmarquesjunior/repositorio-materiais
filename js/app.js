@@ -28,9 +28,9 @@ const viewGridBtn    = document.getElementById('viewGrid');
 // quickFilters removed — repository search is name-only
 
 /* ── INICIALIZAÇÃO ───────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
-  loadCustomDisciplines();
+  await loadDisciplinas();
   restoreFromURL();
   document.getElementById('footerYear').textContent = new Date().getFullYear();
 
@@ -119,7 +119,7 @@ function filterAndSort() {
   const q = normalizeStr(state.query);
 
   let list = window.disciplinas.filter(d => {
-    const matchArea = !state.area || d.area === state.area;
+    const matchArea = !state.area || d.modelo === state.area;
     const matchQuery = !q || normalizeStr(d.nome).includes(q);
     return matchArea && matchQuery;
   });
@@ -132,8 +132,8 @@ function sortList(list, by) {
     switch (by) {
       case 'nome':      return a.nome.localeCompare(b.nome, 'pt-BR');
       case 'nome_desc': return b.nome.localeCompare(a.nome, 'pt-BR');
-      case 'codigo':    return a.codigo.localeCompare(b.codigo, 'pt-BR');
-      case 'area':      return a.area.localeCompare(b.area, 'pt-BR');
+      case 'link_moodle_wae': return (a.link_moodle_wae || '').localeCompare(b.link_moodle_wae || '', 'pt-BR');
+      case 'modelo':    return (a.modelo || '').localeCompare(b.modelo || '', 'pt-BR');
       default:          return 0;
     }
   });
@@ -201,7 +201,9 @@ function cardIconSVG(type) {
     youtube: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
     soundcloud: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M1.175 12.225c-.051 0-.175.016-.175.175v1.2c0 .159.124.175.175.175.051 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm1.633 1.751h.35c.059 0 .175-.016.175-.175v-1.533c0-.159-.116-.175-.175-.175h-.35c-.058 0-.174.016-.174.175v1.533c0 .159.116.175.174.175zm1.35-1.751h-.35c-.058 0-.174.016-.174.175v1.2c0 .159.116.175.174.175h.35c.059 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm1.99 1.751h.35c.059 0 .175-.016.175-.175v-.875c0-.159-.116-.175-.175-.175h-.35c-.059 0-.175.016-.175.175v.875c0 .159.116.175.175.175zm1.35-1.751h-.35c-.059 0-.175.016-.175.175v1.2c0 .159.116.175.175.175h.35c.058 0 .174-.016.174-.175v-1.2c0-.159-.116-.175-.174-.175zm1.99 1.751h.35c.058 0 .174-.016.174-.175v-.525c0-.159-.116-.175-.175-.175h-.35c-.058 0-.174.016-.174.175v.525c0 .159.116.175.175.175zm1.35-1.751h-.35c-.059 0-.175.016-.175.175v1.2c0 .159.116.175.175.175h.35c.059 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm2.158 2.066c1.453-.607 2.515-2.068 2.515-3.766 0-2.262-1.884-4.105-4.205-4.105-.276 0-.554.025-.816.074-.165-2.565-2.4-4.609-5.135-4.609-2.858 0-5.197 2.287-5.197 5.141 0 .347.037.684.104 1.016C1.306 8.93 0 10.834 0 13.008c0 2.509 2.079 4.547 4.647 4.547h13.205c1.913 0 3.461-1.565 3.461-3.5 0-1.763-1.252-3.236-2.897-3.528z"/></svg>`,
     dropbox: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M6 2L11 6L6 10L1 6zM18 2L23 6L18 10L13 6zM12 8L17 12L12 16L7 12zM6 14L11 18L6 22L1 18zM18 14L23 18L18 22L13 18z"/></svg>`,
-    googledrive: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M7.5 3L1 14.5l3.25 5.5 6.5-11zm9 0H7.5l6.5 11h9zm-9.25 13L4 21.5h16l-3.25-5.5z"/></svg>`
+    googledrive: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M7.5 3L1 14.5l3.25 5.5 6.5-11zm9 0H7.5l6.5 11h9zm-9.25 13L4 21.5h16l-3.25-5.5z"/></svg>`,
+    sharepoint: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm9.5 4c-1.8 0-2.8.8-2.8 2 0 1 .68 1.7 2.04 2.02l.96.24c.78.18 1.1.48 1.1.96 0 .6-.56 1-1.52 1-.98 0-1.58-.42-1.68-1.16H9.22c.1 1.38 1.14 2.2 3.06 2.2s3.04-.84 3.04-2.12c0-1.04-.66-1.7-2.08-2.04l-.86-.2c-.78-.2-1.1-.48-1.1-.94 0-.58.52-.96 1.36-.96s1.4.4 1.5 1.08h1.28C15.3 9.82 14.3 9 12.5 9z"/></svg>`,
+    apostilahtml: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>`
   };
   return icons[type] || icons.moodle;
 }
@@ -225,18 +227,18 @@ function cardHTML(d) {
   // Badges direita do nome: área/modelo, módulo, status
   const moduloBadge = d.modulo
     ? `<span class="badge badge-periodo">${esc(d.modulo)}</span>`
-    : (!isUrl(d.periodo) && d.periodo ? `<span class="badge badge-periodo">${esc(d.periodo)}</span>` : '');
+    : (!isUrl(d.youtube) && d.youtube ? `<span class="badge badge-periodo">${esc(d.youtube)}</span>` : '');
 
   // Botões de link: WAE e ERP
   const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
-  const waeUrl = isUrl(d.codigo) ? d.codigo : (d.modulo && isUrl(d.periodo) ? d.periodo : '');
+  const waeUrl = isUrl(d.link_moodle_wae) ? d.link_moodle_wae : (d.modulo && isUrl(d.youtube) ? d.youtube : '');
   const linkDefs = [
     { label: 'Link Moodle WAE', url: waeUrl },
-    { label: 'Link DP WAE',     url: isUrl(d.linkDPWAE)     ? d.linkDPWAE     : '' },
-    { label: 'Link Moodle ERP', url: isUrl(d.linkMoodleERP) ? d.linkMoodleERP : '' },
-    { label: 'Link DP ERP',     url: isUrl(d.linkDPERP)     ? d.linkDPERP     : '' },
-    { label: 'Link Moodle Pós', url: isUrl(d.linkMoodlePos) ? d.linkMoodlePos : '' },
-    { label: 'Link Inova',      url: isUrl(d.linkInova)     ? d.linkInova     : '' }
+    { label: 'Link DP WAE',     url: isUrl(d.link_dp_wae)     ? d.link_dp_wae     : '' },
+    { label: 'Link Moodle ERP', url: isUrl(d.link_moodle_erp) ? d.link_moodle_erp : '' },
+    { label: 'Link DP ERP',     url: isUrl(d.link_dp_erp)     ? d.link_dp_erp     : '' },
+    { label: 'Link Moodle Pós', url: isUrl(d.link_moodle_pos) ? d.link_moodle_pos : '' },
+    { label: 'Link Inova',      url: isUrl(d.link_inova)      ? d.link_inova      : '' }
   ].filter(l => l.url);
   const linkBtns = linkDefs.length
     ? `<div class="card-link-btns">${linkDefs.map(l =>
@@ -246,10 +248,12 @@ function cardHTML(d) {
 
   // Ícones circulares: Dropbox, Google Drive, YouTube, Soundcloud
   const iconLinks = [
-    { value: d.cargaHoraria, cls: 'dropbox',     title: 'Dropbox' },
-    { value: d.googleDrive,  cls: 'googledrive', title: 'Google Drive' },
-    { value: d.periodo,      cls: 'youtube',     title: 'YouTube' },
-    { value: d.professor,    cls: 'soundcloud',  title: 'Soundcloud' }
+    { value: d.dropbox,      cls: 'dropbox',      title: 'Dropbox' },
+    { value: d.google_drive,  cls: 'googledrive',  title: 'Google Drive' },
+    { value: d.sharepoint,    cls: 'sharepoint',   title: 'SharePoint' },
+    { value: d.apostila_html, cls: 'apostilahtml', title: 'Apostila HTML' },
+    { value: d.youtube,      cls: 'youtube',      title: 'YouTube' },
+    { value: d.soundcloud,   cls: 'soundcloud',   title: 'Soundcloud' }
   ]
     .filter(l => isUrl(l.value))
     .map(l => `<a href="${esc(l.value)}" target="_blank" rel="noopener noreferrer" class="detail-meta-icon ${l.cls}" title="${l.title}" onclick="event.stopPropagation()">${cardIconSVG(l.cls)}</a>`)
@@ -275,7 +279,7 @@ function cardHTML(d) {
         </div>
       </div>
       <div class="card-badges">
-        <span class="badge badge-area">${esc(d.area)}</span>
+        <span class="badge badge-area">${esc(d.modelo)}</span>
         ${moduloBadge}
         ${statusLabel}
       </div>
@@ -335,22 +339,6 @@ function restoreFromURL() {
   if (q) runSearch();
 }
 
-/* ── CARREGAR DISCIPLINAS CUSTOMIZADAS ──────────────────── */
-function loadCustomDisciplines() {
-  const stored = localStorage.getItem('customDisciplines');
-  if (stored) {
-    try {
-      const custom = JSON.parse(stored);
-      custom.forEach(cd => {
-        if (!window.disciplinas.some(d => d.id === cd.id)) {
-          window.disciplinas.push(cd);
-        }
-      });
-    } catch (e) {
-      console.error('Erro ao carregar disciplinas customizadas:', e);
-    }
-  }
-}
 
 /* ── UTIL ────────────────────────────────────────────────── */
 function esc(str) {

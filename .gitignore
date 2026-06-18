@@ -1,0 +1,12 @@
+# Credenciais — nunca commitar
+js/config.js
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/settings.json
+.idea/
+*.suo
+*.user

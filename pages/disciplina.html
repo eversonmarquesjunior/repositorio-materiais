@@ -294,7 +294,7 @@
               <div style="display:flex; gap:8px; align-items:stretch">
                 <select id="editStatus" name="status" style="flex:1; min-width:0">
                   <option value="">Selecione um status</option>
-                  <option value="padronizada">Disciplina Padronizada</option>
+                  <option value="padronizada">Disciplina Padrão</option>
                   <option value="antiga">Disciplina Antiga</option>
                   <option value="atualizacao">Atualização do Zero</option>
                   <option value="paliativa">Disciplina Paliativa</option>
@@ -305,14 +305,7 @@
             </div>
             <div class="form-group">
               <label for="editModulo">Módulo</label>
-              <select id="editModulo" name="modulo">
-                <option value="">Selecione um módulo</option>
-                <option value="Sem Módulo">Sem Módulo</option>
-                <option value="2026/01">2026/01</option>
-                <option value="2026/02">2026/02</option>
-                <option value="2026/03">2026/03</option>
-                <option value="2026/04">2026/04</option>
-              </select>
+              <textarea id="editModulo" name="modulo" rows="1" style="min-height:unset;resize:none;" placeholder="Use o formato Ano/Número — ex: 2026/1"></textarea>
             </div>
           </div>
           <div class="form-group">
@@ -366,6 +359,14 @@
             <input type="url" id="editGoogledrive" name="googledrive" placeholder="https://drive.google.com/..." />
           </div>
           <div class="form-group">
+            <label for="editSharepoint">SharePoint</label>
+            <input type="url" id="editSharepoint" name="sharepoint" placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label for="editApostilaHtml">Apostila HTML</label>
+            <input type="url" id="editApostilaHtml" name="apostilaHtml" placeholder="https://..." />
+          </div>
+          <div class="form-group">
             <label for="editYoutube">YouTube</label>
             <input type="url" id="editYoutube" name="youtube" placeholder="https://www.youtube.com/..." />
           </div>
@@ -386,6 +387,9 @@
     </div>
   </div>
 
+  <script src="../js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase-client.js"></script>
   <script src="../js/data.js"></script>
   <script src="../js/detalhe.js"></script>
   <script src="../js/ui.js"></script>

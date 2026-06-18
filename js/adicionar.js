@@ -52,71 +52,62 @@ function toggleVal(id) {
   return el && !el.disabled ? el.value.trim() : '';
 }
 
-function addNewDiscipline() {
+async function addNewDiscipline() {
   const form = document.getElementById('addDisciplineForm');
   const messageEl = document.getElementById('formMessage');
 
   // Coleta dados do formulário
   const formData = {
     nome: document.getElementById('nome').value.trim(),
-    area: document.getElementById('modelo').value.trim(),
+    modelo: document.getElementById('modelo').value.trim(),
     status: (() => {
       const s   = document.getElementById('status').value;
       const ano = document.getElementById('anoAntiga').value.trim();
       return s === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : s;
     })(),
-    modulo:        document.getElementById('modulo').value,
-    codigo:        toggleVal('linkMoodleWAE'),
-    linkDPWAE:     toggleVal('linkDPWAE'),
-    linkMoodleERP: toggleVal('linkMoodleERP'),
-    linkDPERP:     toggleVal('linkDPERP'),
-    linkMoodlePos: toggleVal('linkMoodlePos'),
-    linkInova:     toggleVal('linkInova'),
-    cargaHoraria:  document.getElementById('dropbox').value.trim(),
-    googleDrive:   document.getElementById('googledrive').value.trim(),
-    periodo: document.getElementById('youtube').value.trim(),
-    professor: document.getElementById('soundcloud').value.trim(),
-    ementa: document.getElementById('observacoes').value.trim(),
-    updatedAt: new Date().toISOString(),
-    id: generateId()
+    modulo:          document.getElementById('modulo').value.trim(),
+    link_moodle_wae: toggleVal('linkMoodleWAE'),
+    link_dp_wae:     toggleVal('linkDPWAE'),
+    link_moodle_erp: toggleVal('linkMoodleERP'),
+    link_dp_erp:     toggleVal('linkDPERP'),
+    link_moodle_pos: toggleVal('linkMoodlePos'),
+    link_inova:      toggleVal('linkInova'),
+    dropbox:         document.getElementById('dropbox').value.trim(),
+    google_drive:    document.getElementById('googledrive').value.trim(),
+    sharepoint:      document.getElementById('sharepoint').value.trim(),
+    apostila_html:   document.getElementById('apostilaHtml').value.trim(),
+    youtube:         document.getElementById('youtube').value.trim(),
+    soundcloud:      document.getElementById('soundcloud').value.trim(),
+    obs:             document.getElementById('observacoes').value.trim(),
+    updated_at: new Date().toISOString()
   };
 
   // Validação básica
-  if (!formData.nome || !formData.area) {
+  if (!formData.nome || !formData.modelo) {
     showMessage(messageEl, 'Por favor, preencha os campos obrigatórios (Nome e Modelo).', 'error');
     return;
   }
 
-  // Carrega disciplinas existentes (incluindo as salvas em localStorage)
-  loadCustomDisciplines();
-
-  // Verifica se disciplina com mesmo nome já existe
-  if (window.disciplinas.some(d => d.nome.toLowerCase() === formData.nome.toLowerCase())) {
-    showMessage(messageEl, 'Uma disciplina com este nome já existe.', 'error');
+  if (formData.modulo && !/^\d{4}\/\d+$/.test(formData.modulo)) {
+    showMessage(messageEl, 'O módulo deve seguir o formato Ano/Número (ex: 2026/1).', 'error');
     return;
   }
 
-  // Adiciona nova disciplina ao array global
-  window.disciplinas.push(formData);
+  const { data, error } = await db.from('disciplinas').insert([formData]).select().single();
 
-  // Salva disciplinas customizadas no localStorage
-  saveCustomDisciplines();
+  if (error) {
+    showMessage(messageEl, 'Erro ao salvar: ' + error.message, 'error');
+    return;
+  }
 
-  // Exibe mensagem de sucesso
   showMessage(messageEl, '✓ Disciplina adicionada com sucesso!', 'success');
-
-  // Limpa formulário
   form.reset();
 
-  // Redireciona para página inicial após 2 segundos
   setTimeout(() => {
-    window.location.href = '../index.html?q=' + encodeURIComponent(formData.nome);
+    window.location.href = '../index.html?q=' + encodeURIComponent(data.nome);
   }, 2000);
 }
 
-function generateId() {
-  return 'disc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-}
 
 function showMessage(_el, text, type) {
   const isSuccess = type === 'success';
@@ -142,29 +133,3 @@ function showMessage(_el, text, type) {
   setTimeout(remove, isSuccess ? 4000 : 6000);
 }
 
-function saveCustomDisciplines() {
-  // Salva apenas as disciplinas customizadas (as adicionadas depois do carregamento)
-  const customDisciplines = window.disciplinas.filter(d => d.id.startsWith('disc-') && d.id.includes('-'));
-  localStorage.setItem('customDisciplines', JSON.stringify(customDisciplines));
-}
-
-function loadCustomDisciplines() {
-  // Carrega disciplinas customizadas do localStorage
-  const stored = localStorage.getItem('customDisciplines');
-  if (stored) {
-    try {
-      const custom = JSON.parse(stored);
-      // Remove duplicatas (evita adicionar as mesmas disciplinas customizadas 2x)
-      custom.forEach(cd => {
-        if (!window.disciplinas.some(d => d.id === cd.id)) {
-          window.disciplinas.push(cd);
-        }
-      });
-    } catch (e) {
-      console.error('Erro ao carregar disciplinas customizadas:', e);
-    }
-  }
-}
-
-// Carrega disciplinas customizadas ao iniciar a página
-window.addEventListener('DOMContentLoaded', loadCustomDisciplines);

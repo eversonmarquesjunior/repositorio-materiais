@@ -708,6 +708,22 @@ a.bc-link:hover { color: var(--accent); }
   background-color: #34A853;
   color: #ffffff;
 }
+.detail-meta-icon.sharepoint {
+  background-color: rgba(0, 142, 125, 0.1);
+  color: #009aa2;
+}
+.detail-meta-icon.sharepoint:hover {
+  background-color: #007666;
+  color: #ffffff;
+}
+.detail-meta-icon.apostilahtml {
+  background-color: rgba(0, 141, 151, 0.1);
+  color: #26f7fb;
+}
+.detail-meta-icon.apostilahtml:hover {
+  background-color: #54e0ff;
+  color: #ffffff;
+}
 .detail-meta-icon.moodle {
   background-color: rgba(249, 128, 18, 0.1);
   color: #F98012;
@@ -990,7 +1006,9 @@ a.bc-link:hover { color: var(--accent); }
 .add-form .form-group:nth-child(10) { grid-column: span 2; }
 .add-form .form-group:nth-child(11) { grid-column: span 2; }
 .add-form .form-group:nth-child(12) { grid-column: span 2; }
-.add-form .form-group:nth-child(13) { grid-column: span 4; }
+.add-form .form-group:nth-child(13) { grid-column: span 2; }
+.add-form .form-group:nth-child(14) { grid-column: span 2; }
+.add-form .form-group:nth-child(15) { grid-column: span 4; }
 .add-form .form-actions { grid-column: span 4; }
 #nome { text-transform: uppercase; }
 
@@ -1045,6 +1063,12 @@ a.bc-link:hover { color: var(--accent); }
 .form-group textarea {
   resize: vertical;
   min-height: 70px;
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--text-muted, #888);
+  margin-top: 2px;
 }
 
 .form-group select {

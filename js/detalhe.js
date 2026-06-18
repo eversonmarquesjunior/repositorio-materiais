@@ -2,18 +2,22 @@
  * detalhe.js — Lógica da página de detalhes de disciplina
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   document.getElementById('footerYear').textContent = new Date().getFullYear();
-
-  // Carrega disciplinas customizadas do localStorage
-  loadCustomDisciplines();
 
   const id = new URLSearchParams(window.location.search).get('id');
   if (!id) { showNotFound(); return; }
 
-  const disc = (window.disciplinas || []).find(d => d.id === id);
-  if (!disc) { showNotFound(); return; }
+  const { data: disc, error } = await db.from('disciplinas').select('*').eq('id', id).single();
+  if (error || !disc) { showNotFound(); return; }
+
+  const [{ data: historico }, { data: retornos }] = await Promise.all([
+    db.from('historico').select('*').eq('disciplina_id', id).order('data'),
+    db.from('retornos').select('*').eq('disciplina_id', id).order('data'),
+  ]);
+  disc.historico = historico || [];
+  disc.retornos  = retornos  || [];
 
   renderDetail(disc);
   initCopyLink();
@@ -30,7 +34,7 @@ function renderDetail(d) {
   document.title = `${d.nome.toUpperCase()} — RepoDisciplinas`;
 
   // Breadcrumb
-  document.getElementById('bcArea').textContent = d.area || '—';
+  document.getElementById('bcArea').textContent = d.modelo || '—';
   document.getElementById('bcNome').textContent = d.nome.toUpperCase();
 
   // Badges
@@ -48,10 +52,10 @@ function renderDetail(d) {
   };
   const st = statusMap[d.status] || { cls: 'badge-status-inativo', label: d.status || '—' };
   document.getElementById('detailBadges').innerHTML = `
-    <span class="badge badge-area">${esc(d.area)}</span>
+    <span class="badge badge-area">${esc(d.modelo)}</span>
     ${d.modulo
       ? `<span class="badge badge-periodo">${esc(d.modulo)}</span>`
-      : (d.periodo ? `<span class="badge badge-periodo">${esc(d.periodo)}</span>` : '')}
+      : (d.youtube ? `<span class="badge badge-periodo">${esc(d.youtube)}</span>` : '')}
     <span class="badge ${st.cls}">${st.label}</span>
   `;
 
@@ -60,14 +64,14 @@ function renderDetail(d) {
 
   // Botões de link (mesmos do card da página inicial)
   const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
-  const waeUrl = isUrl(d.codigo) ? d.codigo : (d.modulo && isUrl(d.periodo) ? d.periodo : '');
+  const waeUrl = isUrl(d.link_moodle_wae) ? d.link_moodle_wae : (d.modulo && isUrl(d.youtube) ? d.youtube : '');
   const detailLinkDefs = [
     { label: 'Link Moodle WAE', url: waeUrl },
-    { label: 'Link DP WAE',     url: isUrl(d.linkDPWAE)     ? d.linkDPWAE     : '' },
-    { label: 'Link Moodle ERP', url: isUrl(d.linkMoodleERP) ? d.linkMoodleERP : '' },
-    { label: 'Link DP ERP',     url: isUrl(d.linkDPERP)     ? d.linkDPERP     : '' },
-    { label: 'Link Moodle Pós', url: isUrl(d.linkMoodlePos) ? d.linkMoodlePos : '' },
-    { label: 'Link Inova',      url: isUrl(d.linkInova)     ? d.linkInova     : '' }
+    { label: 'Link DP WAE',     url: isUrl(d.link_dp_wae)     ? d.link_dp_wae     : '' },
+    { label: 'Link Moodle ERP', url: isUrl(d.link_moodle_erp) ? d.link_moodle_erp : '' },
+    { label: 'Link DP ERP',     url: isUrl(d.link_dp_erp)     ? d.link_dp_erp     : '' },
+    { label: 'Link Moodle Pós', url: isUrl(d.link_moodle_pos) ? d.link_moodle_pos : '' },
+    { label: 'Link Inova',      url: isUrl(d.link_inova)      ? d.link_inova      : '' }
   ].filter(l => l.url);
   document.getElementById('detailCodigo').innerHTML = detailLinkDefs.length
     ? `<div class="card-link-btns">${detailLinkDefs.map(l =>
@@ -77,10 +81,12 @@ function renderDetail(d) {
 
   // Meta row
   const metas = [
-    { label: 'DROPBOX',      value: d.cargaHoraria, icon: 'dropbox' },
-    { label: 'GOOGLE DRIVE', value: d.googleDrive,  icon: 'googledrive' },
-    { label: 'YOUTUBE',      value: d.periodo,      icon: 'youtube' },
-    { label: 'SOUNDCLOUD',   value: d.professor,    icon: 'soundcloud' }
+    { label: 'DROPBOX',       value: d.dropbox, icon: 'dropbox' },
+    { label: 'GOOGLE DRIVE', value: d.google_drive,  icon: 'googledrive' },
+    { label: 'SHAREPOINT',   value: d.sharepoint,    icon: 'sharepoint' },
+    { label: 'APOSTILA HTML',value: d.apostila_html, icon: 'apostilahtml' },
+    { label: 'YOUTUBE',      value: d.youtube,      icon: 'youtube' },
+    { label: 'SOUNDCLOUD',   value: d.soundcloud,    icon: 'soundcloud' }
   ].filter(m => m.value);
 
   document.getElementById('detailMetaRow').innerHTML = metas.map(m => `
@@ -186,28 +192,26 @@ function renderHistorico(d) {
       editEl.style.display = 'none';
     });
 
-    entry.querySelector('.hist-del-btn').addEventListener('click', () => {
+    entry.querySelector('.hist-del-btn').addEventListener('click', async () => {
       if (!confirm('Remover este registro do histórico?')) return;
+      const { error } = await db.from('historico').delete().eq('id', id);
+      if (error) { showToast('Erro ao remover: ' + error.message, 'error'); return; }
       d.historico = (d.historico || []).filter(i => i.id !== id);
-      d.updatedAt = new Date().toISOString();
-      saveCustomDisciplines();
       renderHistorico(d);
       showToast('Registro removido.', 'success');
     });
 
-    entry.querySelector('.hist-save-btn').addEventListener('click', () => {
-      const item = (d.historico || []).find(i => i.id === id);
-      if (!item) return;
+    entry.querySelector('.hist-save-btn').addEventListener('click', async () => {
       const novoTexto = textIn.value.trim();
       const novaData  = dateIn.value;
       if (!novoTexto || !novaData) {
         showToast('Preencha a data e o texto do registro.', 'error');
         return;
       }
-      item.texto  = novoTexto;
-      item.data   = novaData;
-      d.updatedAt = new Date().toISOString();
-      saveCustomDisciplines();
+      const { error } = await db.from('historico').update({ texto: novoTexto, data: novaData }).eq('id', id);
+      if (error) { showToast('Erro ao atualizar: ' + error.message, 'error'); return; }
+      const item = (d.historico || []).find(i => i.id === id);
+      if (item) { item.texto = novoTexto; item.data = novaData; }
       renderHistorico(d);
       showToast('Registro atualizado.', 'success');
     });
@@ -238,17 +242,19 @@ function initHistorico(d) {
 
   cancelBtn.addEventListener('click', cancelNew);
 
-  saveBtn.addEventListener('click', () => {
+  saveBtn.addEventListener('click', async () => {
     const texto = textIn.value.trim();
     const data  = dateIn.value;
     if (!texto || !data) {
       showToast('Preencha a data e o texto do registro.', 'error');
       return;
     }
+    const { data: novo, error } = await db.from('historico')
+      .insert([{ disciplina_id: d.id, texto, data }])
+      .select().single();
+    if (error) { showToast('Erro ao adicionar: ' + error.message, 'error'); return; }
     if (!d.historico) d.historico = [];
-    d.historico.push({ id: `hist-${Date.now()}`, texto, data });
-    d.updatedAt = new Date().toISOString();
-    saveCustomDisciplines();
+    d.historico.push(novo);
     cancelNew();
     renderHistorico(d);
     showToast('Registro adicionado ao histórico!', 'success');
@@ -327,28 +333,26 @@ function renderRetornos(d) {
       editEl.style.display = 'none';
     });
 
-    entry.querySelector('.ret-del-btn').addEventListener('click', () => {
+    entry.querySelector('.ret-del-btn').addEventListener('click', async () => {
       if (!confirm('Remover este retorno?')) return;
+      const { error } = await db.from('retornos').delete().eq('id', id);
+      if (error) { showToast('Erro ao remover: ' + error.message, 'error'); return; }
       d.retornos = (d.retornos || []).filter(i => i.id !== id);
-      d.updatedAt = new Date().toISOString();
-      saveCustomDisciplines();
       renderRetornos(d);
       showToast('Retorno removido.', 'success');
     });
 
-    entry.querySelector('.ret-save-btn').addEventListener('click', () => {
-      const item = (d.retornos || []).find(i => i.id === id);
-      if (!item) return;
+    entry.querySelector('.ret-save-btn').addEventListener('click', async () => {
       const novoTexto = textIn.value.trim();
       const novaData  = dateIn.value;
       if (!novoTexto || !novaData) {
         showToast('Preencha a data e o texto do retorno.', 'error');
         return;
       }
-      item.texto  = novoTexto;
-      item.data   = novaData;
-      d.updatedAt = new Date().toISOString();
-      saveCustomDisciplines();
+      const { error } = await db.from('retornos').update({ texto: novoTexto, data: novaData }).eq('id', id);
+      if (error) { showToast('Erro ao atualizar: ' + error.message, 'error'); return; }
+      const item = (d.retornos || []).find(i => i.id === id);
+      if (item) { item.texto = novoTexto; item.data = novaData; }
       renderRetornos(d);
       showToast('Retorno atualizado.', 'success');
     });
@@ -379,17 +383,19 @@ function initRetornos(d) {
 
   cancelBtn.addEventListener('click', cancelNew);
 
-  saveBtn.addEventListener('click', () => {
+  saveBtn.addEventListener('click', async () => {
     const texto = textIn.value.trim();
     const data  = dateIn.value;
     if (!texto || !data) {
       showToast('Preencha a data e o texto do retorno.', 'error');
       return;
     }
+    const { data: novo, error } = await db.from('retornos')
+      .insert([{ disciplina_id: d.id, texto, data }])
+      .select().single();
+    if (error) { showToast('Erro ao adicionar: ' + error.message, 'error'); return; }
     if (!d.retornos) d.retornos = [];
-    d.retornos.push({ id: `ret-${Date.now()}`, texto, data });
-    d.updatedAt = new Date().toISOString();
-    saveCustomDisciplines();
+    d.retornos.push(novo);
     cancelNew();
     renderRetornos(d);
     showToast('Retorno adicionado!', 'success');
@@ -404,8 +410,8 @@ function renderObservacoes(d) {
   if (!textEl) return;
   if (editMode) editMode.style.display = 'none';
   if (editBtn)  editBtn.style.display  = '';
-  if (d.ementa && d.ementa.trim()) {
-    textEl.textContent = d.ementa;
+  if (d.obs && d.obs.trim()) {
+    textEl.textContent = d.obs;
     textEl.classList.remove('obs-empty');
   } else {
     textEl.textContent = 'Sem observações.';
@@ -424,7 +430,7 @@ function initObservacoes(d) {
   if (!editBtn || !editMode || !textarea) return;
 
   editBtn.addEventListener('click', () => {
-    textarea.value = d.ementa || '';
+    textarea.value = d.obs || '';
     textEl.style.display  = 'none';
     editMode.style.display = '';
     editBtn.style.display  = 'none';
@@ -437,10 +443,11 @@ function initObservacoes(d) {
     editBtn.style.display  = '';
   };
 
-  saveBtn.addEventListener('click', () => {
-    d.ementa    = textarea.value.trim();
-    d.updatedAt = new Date().toISOString();
-    saveCustomDisciplines();
+  saveBtn.addEventListener('click', async () => {
+    const obs = textarea.value.trim();
+    const { error } = await db.from('disciplinas').update({ obs }).eq('id', d.id);
+    if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+    d.obs = obs;
     cancelEdit();
     renderObservacoes(d);
     showToast('Observações salvas com sucesso!', 'success');
@@ -556,7 +563,11 @@ function getIconSVG(type) {
     googledrive: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon">
       <path d="M7.5 3L1 14.5l3.25 5.5 6.5-11zm9 0H7.5l6.5 11h9zm-9.25 13L4 21.5h16l-3.25-5.5z"/>
     </svg>`,
-    
+
+    sharepoint: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm9.5 4c-1.8 0-2.8.8-2.8 2 0 1 .68 1.7 2.04 2.02l.96.24c.78.18 1.1.48 1.1.96 0 .6-.56 1-1.52 1-.98 0-1.58-.42-1.68-1.16H9.22c.1 1.38 1.14 2.2 3.06 2.2s3.04-.84 3.04-2.12c0-1.04-.66-1.7-2.08-2.04l-.86-.2c-.78-.2-1.1-.48-1.1-.94 0-.58.52-.96 1.36-.96s1.4.4 1.5 1.08h1.28C15.3 9.82 14.3 9 12.5 9z"/></svg>`,
+
+    apostilahtml: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>`,
+
     moodle: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
     </svg>`
@@ -569,12 +580,11 @@ function getIconSVG(type) {
 function initDeleteBtn(d) {
   const btn = document.getElementById('deleteBtn');
   if (!btn) return;
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     const confirmed = confirm(`Tem certeza que deseja excluir a disciplina "${d.nome}"?\n\nEsta ação não pode ser desfeita.`);
     if (!confirmed) return;
-    const idx = (window.disciplinas || []).findIndex(disc => disc.id === d.id);
-    if (idx !== -1) window.disciplinas.splice(idx, 1);
-    saveCustomDisciplines();
+    const { error } = await db.from('disciplinas').delete().eq('id', d.id);
+    if (error) { showToast('Erro ao excluir: ' + error.message, 'error'); return; }
     window.location.href = '../index.html';
   });
 }
@@ -635,7 +645,7 @@ function initEditModal(d) {
 
 function fillEditForm(d) {
   document.getElementById('editNome').value    = d.nome    || '';
-  document.getElementById('editModelo').value  = d.area    || '';
+  document.getElementById('editModelo').value  = d.modelo    || '';
   document.getElementById('editModulo').value  = d.modulo  || '';
 
   const anoAntigaInput = document.getElementById('editAnoAntiga');
@@ -664,21 +674,23 @@ function fillEditForm(d) {
     }
   };
 
-  setToggle('editLinkMoodleWAE', d.codigo);
-  setToggle('editLinkDPWAE',     d.linkDPWAE);
-  setToggle('editLinkMoodleERP', d.linkMoodleERP);
-  setToggle('editLinkDPERP',     d.linkDPERP);
-  setToggle('editLinkMoodlePos', d.linkMoodlePos);
-  setToggle('editLinkInova',     d.linkInova);
+  setToggle('editLinkMoodleWAE', d.link_moodle_wae);
+  setToggle('editLinkDPWAE',     d.link_dp_wae);
+  setToggle('editLinkMoodleERP', d.link_moodle_erp);
+  setToggle('editLinkDPERP',     d.link_dp_erp);
+  setToggle('editLinkMoodlePos', d.link_moodle_pos);
+  setToggle('editLinkInova',     d.link_inova);
 
-  document.getElementById('editDropbox').value      = d.cargaHoraria || '';
-  document.getElementById('editGoogledrive').value  = d.googleDrive  || '';
-  document.getElementById('editYoutube').value      = d.periodo      || '';
-  document.getElementById('editSoundcloud').value   = d.professor    || '';
-  document.getElementById('editObservacoes').value  = d.ementa       || '';
+  document.getElementById('editDropbox').value      = d.dropbox      || '';
+  document.getElementById('editGoogledrive').value  = d.google_drive || '';
+  document.getElementById('editSharepoint').value   = d.sharepoint   || '';
+  document.getElementById('editApostilaHtml').value = d.apostila_html || '';
+  document.getElementById('editYoutube').value      = d.youtube      || '';
+  document.getElementById('editSoundcloud').value   = d.soundcloud   || '';
+  document.getElementById('editObservacoes').value  = d.obs          || '';
 }
 
-function saveEditedDiscipline(d, closeModal) {
+async function saveEditedDiscipline(d, closeModal) {
   const val = (id) => document.getElementById(id)?.value.trim() || '';
   const toggleVal = (id) => {
     const el = document.getElementById(id);
@@ -692,36 +704,46 @@ function saveEditedDiscipline(d, closeModal) {
     return;
   }
 
-  d.nome         = nome;
-  d.area         = area;
-  d.status       = (() => {
-    const s   = val('editStatus');
-    const ano = (document.getElementById('editAnoAntiga') || {}).value?.trim();
-    return s === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : s;
-  })();
-  d.modulo       = val('editModulo');
-  d.codigo       = toggleVal('editLinkMoodleWAE');
-  d.linkDPWAE    = toggleVal('editLinkDPWAE');
-  d.linkMoodleERP = toggleVal('editLinkMoodleERP');
-  d.linkDPERP    = toggleVal('editLinkDPERP');
-  d.linkMoodlePos = toggleVal('editLinkMoodlePos');
-  d.linkInova    = toggleVal('editLinkInova');
-  d.cargaHoraria = val('editDropbox');
-  d.googleDrive  = val('editGoogledrive');
-  d.periodo      = val('editYoutube');
-  d.professor    = val('editSoundcloud');
-  d.ementa       = val('editObservacoes');
-  d.updatedAt    = new Date().toISOString();
+  const modulo = val('editModulo');
+  if (modulo && !/^\d{4}\/\d+$/.test(modulo)) {
+    showToast('O módulo deve seguir o formato Ano/Número (ex: 2026/1).', 'error');
+    return;
+  }
 
-  saveCustomDisciplines();
+  const updates = {
+    nome:            nome,
+    modelo:          area,
+    status:          (() => {
+      const s   = val('editStatus');
+      const ano = (document.getElementById('editAnoAntiga') || {}).value?.trim();
+      return s === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : s;
+    })(),
+    modulo:          val('editModulo'),
+    link_moodle_wae: toggleVal('editLinkMoodleWAE'),
+    link_dp_wae:     toggleVal('editLinkDPWAE'),
+    link_moodle_erp: toggleVal('editLinkMoodleERP'),
+    link_dp_erp:     toggleVal('editLinkDPERP'),
+    link_moodle_pos: toggleVal('editLinkMoodlePos'),
+    link_inova:      toggleVal('editLinkInova'),
+    dropbox:         val('editDropbox'),
+    google_drive:    val('editGoogledrive'),
+    sharepoint:      val('editSharepoint'),
+    apostila_html:   val('editApostilaHtml'),
+    youtube:         val('editYoutube'),
+    soundcloud:      val('editSoundcloud'),
+    obs:             val('editObservacoes'),
+  };
+
+  const { error } = await db.from('disciplinas').update(updates).eq('id', d.id);
+  if (error) {
+    showToast('Erro ao salvar: ' + error.message, 'error');
+    return;
+  }
+
+  Object.assign(d, updates);
   renderDetail(d);
   closeModal();
   showToast('Disciplina atualizada com sucesso!', 'success');
-}
-
-function saveCustomDisciplines() {
-  const custom = (window.disciplinas || []).filter(d => d.id && d.id.startsWith('disc-'));
-  localStorage.setItem('customDisciplines', JSON.stringify(custom));
 }
 
 function showToast(text, type) {
@@ -740,23 +762,4 @@ function showToast(text, type) {
   };
   toast.querySelector('.toast-close').addEventListener('click', remove);
   setTimeout(remove, isSuccess ? 4000 : 6000);
-}
-
-/* ── CARREGAR DISCIPLINAS CUSTOMIZADAS ──────────────────── */
-function loadCustomDisciplines() {
-  // Carrega disciplinas customizadas do localStorage
-  const stored = localStorage.getItem('customDisciplines');
-  if (stored) {
-    try {
-      const custom = JSON.parse(stored);
-      // Remove duplicatas (evita adicionar as mesmas disciplinas customizadas 2x)
-      custom.forEach(cd => {
-        if (!window.disciplinas.some(d => d.id === cd.id)) {
-          window.disciplinas.push(cd);
-        }
-      });
-    } catch (e) {
-      console.error('Erro ao carregar disciplinas customizadas:', e);
-    }
-  }
 }
