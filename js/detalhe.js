@@ -12,12 +12,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   const { data: disc, error } = await db.from('disciplinas').select('*').eq('id', id).single();
   if (error || !disc) { showNotFound(); return; }
 
-  const [{ data: historico }, { data: retornos }] = await Promise.all([
+  const [{ data: historico }, { data: retornos }, { data: todasDisciplinas }, { data: filhas }] = await Promise.all([
     db.from('historico').select('*').eq('disciplina_id', id).order('data'),
     db.from('retornos').select('*').eq('disciplina_id', id).order('data'),
+    db.from('disciplinas').select('id, nome').order('nome'),
+    db.from('disciplinas').select('id, nome').eq('disciplina_pai_id', id),
   ]);
-  disc.historico = historico || [];
-  disc.retornos  = retornos  || [];
+  disc.historico        = historico        || [];
+  disc.retornos         = retornos         || [];
+  disc.todasDisciplinas       = todasDisciplinas || [];
+  disc.filhas                 = filhas           || [];
+  window._todasDisciplinas    = todasDisciplinas || [];
+
+  if (disc.disciplina_pai_id) {
+    const pai = (todasDisciplinas || []).find(d => d.id === disc.disciplina_pai_id);
+    disc.paiNome = pai ? pai.nome : null;
+    disc.paiId   = pai ? pai.id   : null;
+  }
 
   renderDetail(disc);
   initCopyLink();
@@ -51,19 +62,33 @@ function renderDetail(d) {
     paliativa:    { cls: 'badge-status-revisao', label: 'Disciplina Paliativa' },
   };
   const st = statusMap[d.status] || { cls: 'badge-status-inativo', label: d.status || '—' };
-  document.getElementById('detailBadges').innerHTML = `
-    <span class="badge badge-area">${esc(d.modelo)}</span>
-    ${d.modulo
-      ? `<span class="badge badge-periodo">${esc(d.modulo)}</span>`
-      : (d.youtube ? `<span class="badge badge-periodo">${esc(d.youtube)}</span>` : '')}
-    <span class="badge ${st.cls}">${st.label}</span>
-  `;
+  document.getElementById('detailBadges').innerHTML = [
+    d.modelo ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : '',
+    d.modulo  ? `<span class="badge badge-periodo">${esc(d.modulo)}</span>` : '',
+    d.status  ? `<span class="badge ${st.cls}">${st.label}</span>` : '',
+  ].join('');
+
+  // Badge "Mesmo material de"
+  const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  const mesmoMaterialEl = document.getElementById('detailMesmoMaterial');
+  if (mesmoMaterialEl) {
+    if (d.paiNome && d.paiId) {
+      mesmoMaterialEl.innerHTML = `${linkSVG}<span>Mesmo material de: <a href="disciplina.html?id=${esc(d.paiId)}" class="badge-linked-name">${esc(d.paiNome)}</a></span>`;
+      mesmoMaterialEl.style.display = '';
+    } else if (d.filhas && d.filhas.length) {
+      const nomes = d.filhas.map(f => `<a href="disciplina.html?id=${esc(f.id)}" class="badge-linked-name">${esc(f.nome)}</a>`).join(', ');
+      mesmoMaterialEl.innerHTML = `${linkSVG}<span>Mesmo material de: ${nomes}</span>`;
+      mesmoMaterialEl.style.display = '';
+    } else {
+      mesmoMaterialEl.style.display = 'none';
+    }
+  }
 
   // Título e código
   document.getElementById('detailNome').textContent = d.nome.toUpperCase();
 
   // Botões de link (mesmos do card da página inicial)
-  const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  const linkBtnSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
   const waeUrl = isUrl(d.link_moodle_wae) ? d.link_moodle_wae : (d.modulo && isUrl(d.youtube) ? d.youtube : '');
   const detailLinkDefs = [
     { label: 'Link Moodle WAE', url: waeUrl },
@@ -75,7 +100,7 @@ function renderDetail(d) {
   ].filter(l => l.url);
   document.getElementById('detailCodigo').innerHTML = detailLinkDefs.length
     ? `<div class="card-link-btns">${detailLinkDefs.map(l =>
-        `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn">${linkSVG}${esc(l.label)}</a>`
+        `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn">${linkBtnSVG}${esc(l.label)}</a>`
       ).join('')}</div>`
     : '';
 
@@ -576,6 +601,65 @@ function getIconSVG(type) {
 }
 
 
+/* ── AUTOCOMPLETE DISCIPLINA PAI ─────────────────────── */
+function initDisciplinaPaiAutocomplete(searchId, dropdownId, hiddenId, selectedId, selectedNameId, clearBtnId, excludeId) {
+  const searchEl   = document.getElementById(searchId);
+  const dropdownEl = document.getElementById(dropdownId);
+  const hiddenEl   = document.getElementById(hiddenId);
+  const selectedEl = document.getElementById(selectedId);
+  const nameEl     = document.getElementById(selectedNameId);
+  const clearBtn   = document.getElementById(clearBtnId);
+  if (!searchEl || !dropdownEl) return;
+
+  const normalize = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  searchEl.addEventListener('input', () => {
+    const q = normalize(searchEl.value);
+    if (!q) { dropdownEl.innerHTML = ''; dropdownEl.classList.remove('ac-open'); return; }
+
+    const allDiscs = (window._todasDisciplinas || []);
+    const matches  = allDiscs.filter(d => d.id !== excludeId && normalize(d.nome).includes(q)).slice(0, 8);
+
+    if (!matches.length) { dropdownEl.innerHTML = ''; dropdownEl.classList.remove('ac-open'); return; }
+
+    dropdownEl.innerHTML = matches.map(d =>
+      `<div class="ac-item" data-id="${d.id}" data-nome="${d.nome.replace(/"/g, '&quot;')}">${d.nome}</div>`
+    ).join('');
+    dropdownEl.classList.add('ac-open');
+
+    dropdownEl.querySelectorAll('.ac-item').forEach(item => {
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        hiddenEl.value          = item.dataset.id;
+        nameEl.textContent      = item.dataset.nome;
+        selectedEl.style.display = '';
+        searchEl.style.display  = 'none';
+        dropdownEl.classList.remove('ac-open');
+        dropdownEl.innerHTML = '';
+      });
+    });
+  });
+
+  searchEl.addEventListener('blur', () => {
+    setTimeout(() => { dropdownEl.classList.remove('ac-open'); }, 150);
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      clearDisciplinaPai(searchId, hiddenId, selectedId);
+    });
+  }
+}
+
+function clearDisciplinaPai(searchId, hiddenId, selectedId) {
+  const searchEl   = document.getElementById(searchId);
+  const hiddenEl   = document.getElementById(hiddenId);
+  const selectedEl = document.getElementById(selectedId);
+  if (hiddenEl)   hiddenEl.value = '';
+  if (selectedEl) selectedEl.style.display = 'none';
+  if (searchEl)   { searchEl.value = ''; searchEl.style.display = ''; }
+}
+
 /* ── EXCLUIR DISCIPLINA ──────────────────────────────── */
 function initDeleteBtn(d) {
   const btn = document.getElementById('deleteBtn');
@@ -610,6 +694,16 @@ function initEditModal(d) {
     setTimeout(() => { modal.style.display = ''; }, 210);
     document.body.style.overflow = '';
   };
+
+  initDisciplinaPaiAutocomplete(
+    'editDisciplinaPaiSearch',
+    'editDisciplinaPaiDropdown',
+    'editDisciplinaPaiId',
+    'editDisciplinaPaiSelected',
+    'editDisciplinaPaiSelectedName',
+    'editDisciplinaPaiClear',
+    d.id
+  );
 
   editBtn.addEventListener('click', openModal);
   closeBtn.addEventListener('click', closeModal);
@@ -688,6 +782,21 @@ function fillEditForm(d) {
   document.getElementById('editYoutube').value      = d.youtube      || '';
   document.getElementById('editSoundcloud').value   = d.soundcloud   || '';
   document.getElementById('editObservacoes').value  = d.obs          || '';
+
+  // Preenche o campo "Mesmo material de"
+  clearDisciplinaPai('editDisciplinaPaiSearch', 'editDisciplinaPaiId', 'editDisciplinaPaiSelected');
+  if (d.disciplina_pai_id && d.paiNome) {
+    const hiddenEl   = document.getElementById('editDisciplinaPaiId');
+    const selectedEl = document.getElementById('editDisciplinaPaiSelected');
+    const nameEl     = document.getElementById('editDisciplinaPaiSelectedName');
+    const searchEl   = document.getElementById('editDisciplinaPaiSearch');
+    if (hiddenEl && selectedEl && nameEl && searchEl) {
+      hiddenEl.value          = d.disciplina_pai_id;
+      nameEl.textContent      = d.paiNome;
+      selectedEl.style.display = '';
+      searchEl.style.display  = 'none';
+    }
+  }
 }
 
 async function saveEditedDiscipline(d, closeModal) {
@@ -731,7 +840,8 @@ async function saveEditedDiscipline(d, closeModal) {
     apostila_html:   val('editApostilaHtml'),
     youtube:         val('editYoutube'),
     soundcloud:      val('editSoundcloud'),
-    obs:             val('editObservacoes'),
+    obs:               val('editObservacoes'),
+    disciplina_pai_id: (document.getElementById('editDisciplinaPaiId') || {}).value || null,
   };
 
   const { error } = await db.from('disciplinas').update(updates).eq('id', d.id);
@@ -741,6 +851,15 @@ async function saveEditedDiscipline(d, closeModal) {
   }
 
   Object.assign(d, updates);
+  const novoPaiId = updates.disciplina_pai_id;
+  if (novoPaiId) {
+    const pai = (window._todasDisciplinas || []).find(x => x.id === novoPaiId);
+    d.paiNome = pai ? pai.nome : null;
+    d.paiId   = pai ? pai.id   : null;
+  } else {
+    d.paiNome = null;
+    d.paiId   = null;
+  }
   renderDetail(d);
   closeModal();
   showToast('Disciplina atualizada com sucesso!', 'success');

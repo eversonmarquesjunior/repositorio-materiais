@@ -109,8 +109,11 @@
 
         <!-- Cabeçalho da disciplina -->
         <div class="detail-hero">
-          <div class="detail-badges" id="detailBadges"></div>
-          <h1 class="detail-title" id="detailNome">Carregando…</h1>
+          <div class="detail-hero-top">
+            <h1 class="detail-title" id="detailNome">Carregando…</h1>
+            <div class="detail-badges" id="detailBadges"></div>
+          </div>
+          <div class="badge-linked-row" id="detailMesmoMaterial" style="display:none; margin-bottom:15px;"></div>
           <p class="detail-code" id="detailCodigo"></p>
           <div style="display:flex; align-items:center; gap:10px;">
             <div class="detail-meta-row" id="detailMetaRow"></div>
@@ -275,6 +278,18 @@
           <div class="form-group">
             <label for="editNome">Nome *</label>
             <input type="text" id="editNome" name="nome" required placeholder="Ex: Cálculo Diferencial e Integral I" />
+          </div>
+          <div class="form-group" id="editDisciplinaPaiGroup">
+            <label for="editDisciplinaPaiSearch">Mesmo material de</label>
+            <div class="ac-wrap">
+              <input type="text" id="editDisciplinaPaiSearch" placeholder="Pesquisar disciplina..." autocomplete="off" />
+              <div class="ac-dropdown" id="editDisciplinaPaiDropdown"></div>
+            </div>
+            <div class="ac-selected" id="editDisciplinaPaiSelected" style="display:none">
+              <span id="editDisciplinaPaiSelectedName"></span>
+              <button type="button" id="editDisciplinaPaiClear" class="ac-clear-btn" aria-label="Remover vínculo">✕</button>
+            </div>
+            <input type="hidden" id="editDisciplinaPaiId" name="editDisciplinaPaiId" />
           </div>
           <div class="form-row">
             <div class="form-group">

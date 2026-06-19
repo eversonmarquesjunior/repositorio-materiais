@@ -2,11 +2,22 @@
  * adicionar.js — Lógica para adicionar novas disciplinas
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('addDisciplineForm');
   const messageEl = document.getElementById('formMessage');
 
   if (!form) return;
+
+  await loadDisciplinas();
+  initDisciplinaPaiAutocomplete(
+    'disciplinaPaiSearch',
+    'disciplinaPaiDropdown',
+    'disciplinaPaiId',
+    'disciplinaPaiSelected',
+    'disciplinaPaiSelectedName',
+    'disciplinaPaiClear',
+    null
+  );
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -43,9 +54,74 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target) target.disabled = true;
       });
       if (anoInput) anoInput.style.display = 'none';
+      clearDisciplinaPai('disciplinaPaiSearch', 'disciplinaPaiId', 'disciplinaPaiSelected');
     }, 0);
   });
 });
+
+function initDisciplinaPaiAutocomplete(searchId, dropdownId, hiddenId, selectedId, selectedNameId, clearBtnId, excludeId) {
+  const searchEl   = document.getElementById(searchId);
+  const dropdownEl = document.getElementById(dropdownId);
+  const hiddenEl   = document.getElementById(hiddenId);
+  const selectedEl = document.getElementById(selectedId);
+  const nameEl     = document.getElementById(selectedNameId);
+  const clearBtn   = document.getElementById(clearBtnId);
+  if (!searchEl || !dropdownEl) return;
+
+  const normalize = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  searchEl.addEventListener('input', () => {
+    const q = normalize(searchEl.value);
+    if (!q) { dropdownEl.innerHTML = ''; dropdownEl.classList.remove('ac-open'); return; }
+
+    const matches = (window.disciplinas || [])
+      .filter(d => d.id !== excludeId && normalize(d.nome).includes(q))
+      .slice(0, 8);
+
+    if (!matches.length) { dropdownEl.innerHTML = ''; dropdownEl.classList.remove('ac-open'); return; }
+
+    dropdownEl.innerHTML = matches.map(d =>
+      `<div class="ac-item" data-id="${d.id}" data-nome="${d.nome.replace(/"/g, '&quot;')}">${d.nome}</div>`
+    ).join('');
+    dropdownEl.classList.add('ac-open');
+
+    dropdownEl.querySelectorAll('.ac-item').forEach(item => {
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        selectDisciplinaPai(item.dataset.id, item.dataset.nome, searchEl, hiddenEl, selectedEl, nameEl, dropdownEl);
+      });
+    });
+  });
+
+  searchEl.addEventListener('blur', () => {
+    setTimeout(() => { dropdownEl.classList.remove('ac-open'); }, 150);
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      clearDisciplinaPai(searchId, hiddenId, selectedId);
+    });
+  }
+}
+
+function selectDisciplinaPai(id, nome, searchEl, hiddenEl, selectedEl, nameEl, dropdownEl) {
+  hiddenEl.value      = id;
+  searchEl.value      = '';
+  nameEl.textContent  = nome;
+  selectedEl.style.display = '';
+  dropdownEl.classList.remove('ac-open');
+  dropdownEl.innerHTML = '';
+  searchEl.style.display = 'none';
+}
+
+function clearDisciplinaPai(searchId, hiddenId, selectedId) {
+  const searchEl   = document.getElementById(searchId);
+  const hiddenEl   = document.getElementById(hiddenId);
+  const selectedEl = document.getElementById(selectedId);
+  if (hiddenEl)   hiddenEl.value = '';
+  if (selectedEl) selectedEl.style.display = 'none';
+  if (searchEl)   { searchEl.value = ''; searchEl.style.display = ''; }
+}
 
 function toggleVal(id) {
   const el = document.getElementById(id);
@@ -78,7 +154,8 @@ async function addNewDiscipline() {
     apostila_html:   document.getElementById('apostilaHtml').value.trim(),
     youtube:         document.getElementById('youtube').value.trim(),
     soundcloud:      document.getElementById('soundcloud').value.trim(),
-    obs:             document.getElementById('observacoes').value.trim(),
+    obs:              document.getElementById('observacoes').value.trim(),
+    disciplina_pai_id: document.getElementById('disciplinaPaiId').value || null,
     updated_at: new Date().toISOString()
   };
 

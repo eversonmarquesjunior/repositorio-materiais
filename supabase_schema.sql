@@ -89,6 +89,10 @@ CREATE OR REPLACE TRIGGER trg_retornos_nome
   BEFORE INSERT ON retornos
   FOR EACH ROW EXECUTE FUNCTION set_nome_disciplina();
 
+-- ── Vínculo de material compartilhado ───────────────────────
+-- Execute este ALTER TABLE no Supabase SQL Editor após a criação inicial:
+-- ALTER TABLE disciplinas ADD COLUMN IF NOT EXISTS disciplina_pai_id uuid REFERENCES disciplinas(id) ON DELETE SET NULL;
+
 -- ── Row Level Security ────────────────────────────────────────
 ALTER TABLE disciplinas ENABLE ROW LEVEL SECURITY;
 

@@ -627,20 +627,26 @@ a.bc-link:hover { color: var(--accent); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 48px 22px 18px;
+  padding: 18px 22px 18px;
   margin-bottom: 16px;
   box-shadow: var(--shadow-sm);
-  position: relative;
+}
+.detail-hero-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 15px;
 }
 .detail-badges {
-  position: absolute;
-  top: 14px; right: 16px;
   display: flex; gap: 6px; flex-wrap: wrap;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  padding-top: 3px;
 }
 .detail-title {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 1.35rem; font-weight: 700; color: var(--text);
-  line-height: 1.25; margin-bottom: 13px;
+  line-height: 1.25; margin-bottom: 0; flex: 1; min-width: 0;
 }
 .detail-code { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 16px; }
 .detail-link {
@@ -1008,9 +1014,98 @@ a.bc-link:hover { color: var(--accent); }
 .add-form .form-group:nth-child(12) { grid-column: span 2; }
 .add-form .form-group:nth-child(13) { grid-column: span 2; }
 .add-form .form-group:nth-child(14) { grid-column: span 2; }
-.add-form .form-group:nth-child(15) { grid-column: span 4; }
+.add-form .form-group:nth-child(15) { grid-column: span 2; }
+.add-form .form-group:nth-child(16) { grid-column: span 4; }
 .add-form .form-actions { grid-column: span 4; }
-#nome { text-transform: uppercase; }
+
+/* Nome fica em 2 colunas; campo "Mesmo material de" ocupa as outras 2 */
+.add-form > .form-group:first-child  { grid-column: span 2; }
+#disciplinaPaiGroup                  { grid-column: span 2; }
+#editDisciplinaPaiGroup              { grid-column: span 2; }
+
+#nome, #editNome { text-transform: uppercase; }
+
+/* ── AUTOCOMPLETE "Mesmo material de" ───────────────── */
+.ac-wrap {
+  position: relative;
+}
+.ac-wrap input[type="text"] {
+  width: 100%;
+}
+.ac-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0; right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  z-index: 200;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.ac-dropdown.ac-open { display: block; }
+.ac-item {
+  padding: 7px 10px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background .1s;
+  text-transform: uppercase;
+}
+.ac-item:hover { background: var(--accent-light); color: var(--accent); }
+
+.ac-selected {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+}
+.ac-clear-btn {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--accent);
+  opacity: .7;
+  line-height: 1;
+  padding: 1px 3px;
+}
+.ac-clear-btn:hover { opacity: 1; }
+
+/* ── BADGE "Mesmo material de" nos cards e detalhe ─── */
+.badge-linked-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  padding: 2px 7px;
+  width: fit-content;
+}
+[data-theme="dark"] .badge-linked-row {
+  color: #fcd34d;
+  background: #451a03;
+  border-color: #92400e;
+}
+.badge-linked-name {
+  color: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.badge-linked-name:hover { opacity: .75; }
 
 /* Toggle de habilitar campo */
 .toggle-label {

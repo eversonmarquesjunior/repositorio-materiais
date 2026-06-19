@@ -208,6 +208,24 @@ function cardIconSVG(type) {
   return icons[type] || icons.moodle;
 }
 
+function mesmoMaterialBadge(d) {
+  const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  const all = window.disciplinas || [];
+
+  if (d.disciplina_pai_id) {
+    const pai = all.find(x => x.id === d.disciplina_pai_id);
+    if (!pai) return '';
+    return `<div class="badge-linked-row">${linkSVG}<span>Mesmo material de: <a href="pages/disciplina.html?id=${esc(pai.id)}" class="badge-linked-name" onclick="event.stopPropagation()">${esc(pai.nome)}</a></span></div>`;
+  }
+
+  const filhas = all.filter(x => x.disciplina_pai_id === d.id);
+  if (!filhas.length) return '';
+  const nomes = filhas.map(f =>
+    `<a href="pages/disciplina.html?id=${esc(f.id)}" class="badge-linked-name" onclick="event.stopPropagation()">${esc(f.nome)}</a>`
+  ).join(', ');
+  return `<div class="badge-linked-row">${linkSVG}<span>Mesmo material de: ${nomes}</span></div>`;
+}
+
 function cardHTML(d) {
   const statusBadges = {
     ativo:        '<span class="badge badge-status-ativo">Ativo</span>',
@@ -273,6 +291,7 @@ function cardHTML(d) {
         <div class="card-top">
           <span class="card-nome">${esc(d.nome)}</span>
         </div>
+        ${mesmoMaterialBadge(d)}
         ${linkBtns}
         <div class="card-footer">
           ${iconLinks}

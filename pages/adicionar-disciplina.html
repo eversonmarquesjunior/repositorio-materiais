@@ -102,6 +102,18 @@
               <label for="nome">Nome *</label>
               <input type="text" id="nome" name="nome" required placeholder="Ex: Cálculo Diferencial e Integral I" />
             </div>
+            <div class="form-group" id="disciplinaPaiGroup">
+              <label for="disciplinaPaiSearch">Mesmo material de</label>
+              <div class="ac-wrap">
+                <input type="text" id="disciplinaPaiSearch" placeholder="Pesquisar disciplina..." autocomplete="off" />
+                <div class="ac-dropdown" id="disciplinaPaiDropdown"></div>
+              </div>
+              <div class="ac-selected" id="disciplinaPaiSelected" style="display:none">
+                <span id="disciplinaPaiSelectedName"></span>
+                <button type="button" id="disciplinaPaiClear" class="ac-clear-btn" aria-label="Remover vínculo">✕</button>
+              </div>
+              <input type="hidden" id="disciplinaPaiId" name="disciplinaPaiId" />
+            </div>
             <div class="form-row">
               <div class="form-group">
                 <label for="modelo">Modelo *</label>
