@@ -180,7 +180,24 @@
           </div>
           <div class="dc-body">
             <div id="historicoNewForm" class="hist-new-form" style="display:none">
-              <input type="date" id="historicoNewData" class="hist-date-input" />
+              <div class="hist-form-row">
+                <input type="date" id="historicoNewData" class="hist-date-input" />
+                <select id="historicoNewEquipe" class="hist-select">
+                  <option value="">Equipe</option>
+                  <option value="AUDIOVISUAL">AUDIOVISUAL</option>
+                  <option value="DIAGRAMAÇÃO">DIAGRAMAÇÃO</option>
+                  <option value="INSERÇÃO">INSERÇÃO</option>
+                  <option value="REVISÃO">REVISÃO</option>
+                </select>
+                <select id="historicoNewColaborador" class="hist-select" style="display:none">
+                  <option value="">Colaborador</option>
+                </select>
+                <select id="historicoNewTipo" class="hist-select">
+                  <option value="">Tipo de Registro</option>
+                  <option value="LIBERAÇÃO">LIBERAÇÃO</option>
+                  <option value="ATUALIZAÇÃO">ATUALIZAÇÃO</option>
+                </select>
+              </div>
               <textarea id="historicoNewTexto" class="obs-textarea" rows="3" placeholder="Descreva a atualização ou liberação..."></textarea>
               <div class="obs-edit-actions">
                 <button id="historicoNewSave" class="btn btn-primary btn-sm">Salvar</button>

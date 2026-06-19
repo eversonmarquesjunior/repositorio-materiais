@@ -140,6 +140,19 @@ function renderDetail(d) {
 }
 
 /* ── HISTÓRICO DE ATUALIZAÇÕES ───────────────────────────── */
+const EQUIPE_COLABS = {
+  'AUDIOVISUAL': ['MARIA', 'THASSIANE'],
+  'DIAGRAMAÇÃO': ['BRUNA'],
+  'INSERÇÃO':    ['FELIPE', 'JUNIOR', 'LUCAS', 'NATÁLIA', 'PEDRO', 'STEFANYE'],
+  'REVISÃO':     ['CAROLAYNE', 'LOUISE', 'MARCELINO', 'JÉSSICA'],
+};
+
+function buildColabOptions(equipe, selected) {
+  const opts = EQUIPE_COLABS[equipe] || [];
+  return `<option value="">Colaborador</option>` +
+    opts.map(o => `<option value="${o}"${selected === o ? ' selected' : ''}>${o}</option>`).join('');
+}
+
 function formatHistDate(dateStr) {
   if (!dateStr) return '';
   const [y, m, d] = dateStr.split('-');
@@ -161,6 +174,9 @@ function renderHistorico(d) {
 
   if (emptyEl) emptyEl.style.display = 'none';
 
+  const equipeOpts = ['AUDIOVISUAL', 'DIAGRAMAÇÃO', 'INSERÇÃO', 'REVISÃO'];
+  const tipoOpts   = ['LIBERAÇÃO', 'ATUALIZAÇÃO'];
+
   timeline.innerHTML = items.map(item => `
     <div class="hist-entry" data-id="${esc(item.id)}">
       <div class="hist-dot"></div>
@@ -168,6 +184,8 @@ function renderHistorico(d) {
         <div class="hist-view">
           <div class="hist-header">
             <span class="hist-date">${formatHistDate(item.data)}</span>
+            ${item.equipe        ? `<span class="hist-badge hist-badge-equipe">${esc(item.equipe)}${item.colaborador ? ` · ${esc(item.colaborador)}` : ''}</span>` : ''}
+            ${item.tipo_registro ? `<span class="hist-badge hist-badge-tipo">${esc(item.tipo_registro)}</span>` : ''}
             <div class="hist-actions">
               <button class="hist-edit-btn obs-edit-btn" title="Editar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
@@ -188,7 +206,20 @@ function renderHistorico(d) {
           <p class="hist-text">${esc(item.texto)}</p>
         </div>
         <div class="hist-edit" style="display:none">
-          <input type="date" class="hist-date-input" value="${esc(item.data)}" />
+          <div class="hist-form-row">
+            <input type="date" class="hist-date-input" value="${esc(item.data)}" />
+            <select class="hist-select hist-equipe-sel">
+              <option value="">Equipe</option>
+              ${equipeOpts.map(o => `<option value="${o}"${item.equipe === o ? ' selected' : ''}>${o}</option>`).join('')}
+            </select>
+            <select class="hist-select hist-colab-sel"${!item.equipe ? ' style="display:none"' : ''}>
+              ${buildColabOptions(item.equipe, item.colaborador)}
+            </select>
+            <select class="hist-select hist-tipo-sel">
+              <option value="">Tipo de Registro</option>
+              ${tipoOpts.map(o => `<option value="${o}"${item.tipo_registro === o ? ' selected' : ''}>${o}</option>`).join('')}
+            </select>
+          </div>
           <textarea class="obs-textarea" rows="3">${esc(item.texto)}</textarea>
           <div class="obs-edit-actions">
             <button class="hist-save-btn btn btn-primary btn-sm">Salvar</button>
@@ -200,11 +231,19 @@ function renderHistorico(d) {
   `).join('');
 
   timeline.querySelectorAll('.hist-entry').forEach(entry => {
-    const id     = entry.dataset.id;
-    const viewEl = entry.querySelector('.hist-view');
-    const editEl = entry.querySelector('.hist-edit');
-    const dateIn = entry.querySelector('.hist-date-input');
-    const textIn = entry.querySelector('textarea');
+    const id          = entry.dataset.id;
+    const viewEl      = entry.querySelector('.hist-view');
+    const editEl      = entry.querySelector('.hist-edit');
+    const dateIn      = entry.querySelector('.hist-date-input');
+    const textIn      = entry.querySelector('textarea');
+    const equipeSelEl = entry.querySelector('.hist-equipe-sel');
+    const colabSelEl  = entry.querySelector('.hist-colab-sel');
+
+    equipeSelEl.addEventListener('change', () => {
+      const eq = equipeSelEl.value;
+      colabSelEl.innerHTML     = buildColabOptions(eq, '');
+      colabSelEl.style.display = eq ? '' : 'none';
+    });
 
     entry.querySelector('.hist-edit-btn').addEventListener('click', () => {
       viewEl.style.display = 'none';
@@ -227,16 +266,21 @@ function renderHistorico(d) {
     });
 
     entry.querySelector('.hist-save-btn').addEventListener('click', async () => {
-      const novoTexto = textIn.value.trim();
-      const novaData  = dateIn.value;
+      const novoTexto  = textIn.value.trim();
+      const novaData   = dateIn.value;
+      const novaEquipe = equipeSelEl.value || null;
+      const novoColab  = colabSelEl.value  || null;
+      const novoTipo   = entry.querySelector('.hist-tipo-sel').value || null;
       if (!novoTexto || !novaData) {
         showToast('Preencha a data e o texto do registro.', 'error');
         return;
       }
-      const { error } = await db.from('historico').update({ texto: novoTexto, data: novaData }).eq('id', id);
+      const { error } = await db.from('historico')
+        .update({ texto: novoTexto, data: novaData, equipe: novaEquipe, colaborador: novoColab, tipo_registro: novoTipo })
+        .eq('id', id);
       if (error) { showToast('Erro ao atualizar: ' + error.message, 'error'); return; }
       const item = (d.historico || []).find(i => i.id === id);
-      if (item) { item.texto = novoTexto; item.data = novaData; }
+      if (item) { item.texto = novoTexto; item.data = novaData; item.equipe = novaEquipe; item.colaborador = novoColab; item.tipo_registro = novoTipo; }
       renderHistorico(d);
       showToast('Registro atualizado.', 'success');
     });
@@ -250,11 +294,25 @@ function initHistorico(d) {
   const textIn    = document.getElementById('historicoNewTexto');
   const saveBtn   = document.getElementById('historicoNewSave');
   const cancelBtn = document.getElementById('historicoNewCancel');
+  const equipeEl  = document.getElementById('historicoNewEquipe');
+  const colabEl   = document.getElementById('historicoNewColaborador');
+  const tipoEl    = document.getElementById('historicoNewTipo');
   if (!addBtn || !newForm) return;
+
+  if (equipeEl && colabEl) {
+    equipeEl.addEventListener('change', () => {
+      const eq = equipeEl.value;
+      colabEl.innerHTML     = buildColabOptions(eq, '');
+      colabEl.style.display = eq ? '' : 'none';
+    });
+  }
 
   addBtn.addEventListener('click', () => {
     dateIn.value = new Date().toISOString().slice(0, 10);
     textIn.value = '';
+    if (equipeEl) equipeEl.value = '';
+    if (colabEl)  { colabEl.innerHTML = buildColabOptions('', ''); colabEl.style.display = 'none'; }
+    if (tipoEl)   tipoEl.value   = '';
     newForm.style.display = '';
     addBtn.style.display  = 'none';
     textIn.focus();
@@ -268,14 +326,17 @@ function initHistorico(d) {
   cancelBtn.addEventListener('click', cancelNew);
 
   saveBtn.addEventListener('click', async () => {
-    const texto = textIn.value.trim();
-    const data  = dateIn.value;
+    const texto         = textIn.value.trim();
+    const data          = dateIn.value;
+    const equipe        = equipeEl?.value  || null;
+    const colaborador   = colabEl?.value   || null;
+    const tipo_registro = tipoEl?.value    || null;
     if (!texto || !data) {
       showToast('Preencha a data e o texto do registro.', 'error');
       return;
     }
     const { data: novo, error } = await db.from('historico')
-      .insert([{ disciplina_id: d.id, texto, data }])
+      .insert([{ disciplina_id: d.id, texto, data, equipe, colaborador, tipo_registro }])
       .select().single();
     if (error) { showToast('Erro ao adicionar: ' + error.message, 'error'); return; }
     if (!d.historico) d.historico = [];

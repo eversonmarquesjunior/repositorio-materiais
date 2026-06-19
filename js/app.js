@@ -245,7 +245,7 @@ function cardHTML(d) {
   // Badges direita do nome: área/modelo, módulo, status
   const moduloBadge = d.modulo
     ? `<span class="badge badge-periodo">${esc(d.modulo)}</span>`
-    : (!isUrl(d.youtube) && d.youtube ? `<span class="badge badge-periodo">${esc(d.youtube)}</span>` : '');
+    : '';
 
   // Botões de link: WAE e ERP
   const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
@@ -298,7 +298,7 @@ function cardHTML(d) {
         </div>
       </div>
       <div class="card-badges">
-        <span class="badge badge-area">${esc(d.modelo)}</span>
+        ${d.modelo ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : ''}
         ${moduloBadge}
         ${statusLabel}
       </div>
