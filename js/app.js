@@ -45,20 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /* ── TEMA ────────────────────────────────────────────────── */
 function initTheme() {
-  const saved = localStorage.getItem('repo-theme') || 'light';
-  document.documentElement.setAttribute('data-theme', saved);
-  const sun  = document.getElementById('iconSun');
-  const moon = document.getElementById('iconMoon');
-  if (saved === 'dark') { sun.style.display = 'none'; moon.style.display = 'block'; }
-
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    const cur  = document.documentElement.getAttribute('data-theme');
-    const next = cur === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('repo-theme', next);
-    if (next === 'dark') { sun.style.display = 'none'; moon.style.display = 'block'; }
-    else                 { sun.style.display = 'block'; moon.style.display = 'none'; }
-  });
+  document.documentElement.setAttribute('data-theme', 'light');
+  localStorage.removeItem('repo-theme');
 }
 
 /* ── FILTROS RÁPIDOS (ÁREA) ──────────────────────────────── */
@@ -166,16 +154,15 @@ function renderResults() {
 
   resultsList.innerHTML = state.results.map(d => cardHTML(d)).join('');
 
-  // animação de entrada
+  // animação de entrada escalonada
   requestAnimationFrame(() => {
     document.querySelectorAll('.disc-card').forEach((el, i) => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(8px)';
-      setTimeout(() => {
-        el.style.transition = 'opacity .2s ease, transform .2s ease';
-        el.style.opacity = '1';
-        el.style.transform = '';
-      }, i * 40);
+      el.style.animationDelay = `${i * 55}ms`;
+      el.classList.add('card-entering');
+      el.addEventListener('animationend', () => {
+        el.classList.remove('card-entering');
+        el.style.animationDelay = '';
+      }, { once: true });
     });
   });
 }

@@ -579,20 +579,8 @@ function showNotFound() {
 
 /* ── TEMA ────────────────────────────────────────────────── */
 function initTheme() {
-  const saved = localStorage.getItem('repo-theme') || 'light';
-  document.documentElement.setAttribute('data-theme', saved);
-  const sun  = document.getElementById('iconSun');
-  const moon = document.getElementById('iconMoon');
-  if (saved === 'dark') { sun.style.display = 'none'; moon.style.display = 'block'; }
-
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    const cur  = document.documentElement.getAttribute('data-theme');
-    const next = cur === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('repo-theme', next);
-    if (next === 'dark') { sun.style.display = 'none'; moon.style.display = 'block'; }
-    else                 { sun.style.display = 'block'; moon.style.display = 'none'; }
-  });
+  document.documentElement.setAttribute('data-theme', 'light');
+  localStorage.removeItem('repo-theme');
 }
 
 /* ── HELPERS ─────────────────────────────────────────────── */
