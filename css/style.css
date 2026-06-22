@@ -446,12 +446,18 @@ svg { flex-shrink: 0; }
 }
 .card-icon svg { width: 16px; height: 16px; }
 
-.card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 13px; }
-.card-top { display: flex; align-items: center; gap: 8px; }
+.card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.card-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  align-self: flex-start;
+}
 .card-badges {
   display: flex; flex-direction: row; gap: 4px; flex-wrap: wrap;
-  align-items: flex-start; align-self: flex-start; flex-shrink: 0;
-  margin-left: auto; justify-content: flex-end;
+  align-items: flex-start; justify-content: flex-end;
 }
 .card-link-btns {
   display: flex;
@@ -473,7 +479,7 @@ svg { flex-shrink: 0; }
 .card-moodle-btn:hover { background: #1d4ed8; color: #fff; }
 .card-footer { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .card-info-btn { position: absolute; bottom: 12px; right: 14px; }
-.detail-action-btns { display: flex; gap: 6px; margin-left: auto; }
+.detail-action-btns { display: flex; gap: 6px; position: absolute; bottom: 14px; right: 22px; }
 .detail-edit-btn { padding: 3px 6px; }
 .detail-delete-btn { padding: 3px 6px; background: #fee2e2; color: #991b1b; }
 .detail-delete-btn:hover { background: #dc2626; color: #fff; }
@@ -660,15 +666,29 @@ a.bc-link:hover { color: var(--accent); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 18px 22px 18px;
+  padding: 18px 22px 40px;
   margin-bottom: 16px;
   box-shadow: var(--shadow-sm);
+  position: relative;
 }
 .detail-hero-top {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 15px;
+}
+.detail-hero-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.detail-hero-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 .detail-badges {
   display: flex; gap: 6px; flex-wrap: wrap;
@@ -679,11 +699,11 @@ a.bc-link:hover { color: var(--accent); }
 .detail-title {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 1.35rem; font-weight: 700; color: var(--text);
-  line-height: 1.25; margin-bottom: 0; flex: 1; min-width: 0;
+  line-height: 1.25; margin-bottom: 0;
   word-break: break-word;
   overflow-wrap: break-word;
 }
-.detail-code { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 16px; }
+.detail-code { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 0; }
 .detail-link {
   color: var(--accent);
   text-decoration: none;
@@ -863,7 +883,7 @@ a.bc-link:hover { color: var(--accent); }
 .hist-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .hist-date { font-size: 12px; font-weight: 700; color: var(--accent); }
 .hist-actions { margin-left: auto; display: flex; gap: 2px; }
-.hist-text { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin: 0; }
+.hist-text { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin: 0; overflow-wrap: break-word; word-break: break-word; }
 .hist-new-form {
   margin-bottom: 20px;
   padding-bottom: 20px;

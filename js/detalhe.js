@@ -363,6 +363,8 @@ function renderRetornos(d) {
 
   if (emptyEl) emptyEl.style.display = 'none';
 
+  const tipoOpts = ['APOSTILA', 'VIDEOAULA', 'ÁUDIO', 'ATIVIDADES', 'QUESTÕES', 'OUTRO'];
+
   timeline.innerHTML = items.map(item => `
     <div class="hist-entry" data-id="${esc(item.id)}">
       <div class="hist-dot"></div>
@@ -370,6 +372,7 @@ function renderRetornos(d) {
         <div class="hist-view">
           <div class="hist-header">
             <span class="hist-date">${formatHistDate(item.data)}</span>
+            ${item.tipo_retorno ? `<span class="hist-badge hist-badge-tipo">${esc(item.tipo_retorno)}</span>` : ''}
             <div class="hist-actions">
               <button class="ret-edit-btn obs-edit-btn" title="Editar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
@@ -390,7 +393,11 @@ function renderRetornos(d) {
           <p class="hist-text">${esc(item.texto)}</p>
         </div>
         <div class="hist-edit" style="display:none">
-          <input type="date" class="hist-date-input" value="${esc(item.data)}" />
+          <input type="date" class="hist-date-input" value="${esc(item.data)}" style="width:100%; margin-bottom:8px;" />
+          <select class="hist-select ret-tipo-sel" style="width:100%; margin-bottom:8px;">
+            <option value="">Tipo de Retorno</option>
+            ${tipoOpts.map(o => `<option value="${o}"${item.tipo_retorno === o ? ' selected' : ''}>${o}</option>`).join('')}
+          </select>
           <textarea class="obs-textarea" rows="3">${esc(item.texto)}</textarea>
           <div class="obs-edit-actions">
             <button class="ret-save-btn btn btn-primary btn-sm">Salvar</button>
@@ -431,14 +438,15 @@ function renderRetornos(d) {
     entry.querySelector('.ret-save-btn').addEventListener('click', async () => {
       const novoTexto = textIn.value.trim();
       const novaData  = dateIn.value;
+      const novoTipo  = entry.querySelector('.ret-tipo-sel').value || null;
       if (!novoTexto || !novaData) {
         showToast('Preencha a data e o texto do retorno.', 'error');
         return;
       }
-      const { error } = await db.from('retornos').update({ texto: novoTexto, data: novaData }).eq('id', id);
+      const { error } = await db.from('retornos').update({ texto: novoTexto, data: novaData, tipo_retorno: novoTipo }).eq('id', id);
       if (error) { showToast('Erro ao atualizar: ' + error.message, 'error'); return; }
       const item = (d.retornos || []).find(i => i.id === id);
-      if (item) { item.texto = novoTexto; item.data = novaData; }
+      if (item) { item.texto = novoTexto; item.data = novaData; item.tipo_retorno = novoTipo; }
       renderRetornos(d);
       showToast('Retorno atualizado.', 'success');
     });
@@ -450,6 +458,7 @@ function initRetornos(d) {
   const newForm   = document.getElementById('retornosNewForm');
   const dateIn    = document.getElementById('retornosNewData');
   const textIn    = document.getElementById('retornosNewTexto');
+  const tipoEl    = document.getElementById('retornosNewTipo');
   const saveBtn   = document.getElementById('retornosNewSave');
   const cancelBtn = document.getElementById('retornosNewCancel');
   if (!addBtn || !newForm) return;
@@ -457,6 +466,7 @@ function initRetornos(d) {
   addBtn.addEventListener('click', () => {
     dateIn.value = new Date().toISOString().slice(0, 10);
     textIn.value = '';
+    if (tipoEl) tipoEl.value = '';
     newForm.style.display = '';
     addBtn.style.display  = 'none';
     textIn.focus();
@@ -470,14 +480,15 @@ function initRetornos(d) {
   cancelBtn.addEventListener('click', cancelNew);
 
   saveBtn.addEventListener('click', async () => {
-    const texto = textIn.value.trim();
-    const data  = dateIn.value;
+    const texto        = textIn.value.trim();
+    const data         = dateIn.value;
+    const tipo_retorno = tipoEl?.value || null;
     if (!texto || !data) {
       showToast('Preencha a data e o texto do retorno.', 'error');
       return;
     }
     const { data: novo, error } = await db.from('retornos')
-      .insert([{ disciplina_id: d.id, texto, data }])
+      .insert([{ disciplina_id: d.id, texto, data, tipo_retorno }])
       .select().single();
     if (error) { showToast('Erro ao adicionar: ' + error.message, 'error'); return; }
     if (!d.retornos) d.retornos = [];

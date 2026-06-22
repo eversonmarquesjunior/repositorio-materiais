@@ -275,19 +275,19 @@ function cardHTML(d) {
         </svg>
       </div>
       <div class="card-body">
-        <div class="card-top">
-          <span class="card-nome">${esc(d.nome)}</span>
-        </div>
-        ${mesmoMaterialBadge(d)}
+        <span class="card-nome">${esc(d.nome)}</span>
         ${linkBtns}
         <div class="card-footer">
           ${iconLinks}
         </div>
       </div>
-      <div class="card-badges">
-        ${d.modelo ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : ''}
-        ${moduloBadge}
-        ${statusLabel}
+      <div class="card-right">
+        <div class="card-badges">
+          ${d.modelo ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : ''}
+          ${moduloBadge}
+          ${statusLabel}
+        </div>
+        ${mesmoMaterialBadge(d)}
       </div>
       <a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn card-info-btn" onclick="event.stopPropagation()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
