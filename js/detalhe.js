@@ -505,6 +505,68 @@ function initRetornos(d) {
 }
 
 /* ── OBSERVAÇÕES INLINE ──────────────────────────────────── */
+function parseObs(text) {
+  if (!text || !text.trim()) return '';
+
+  const mdPat  = /\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g;
+  const urlPat = /https?:\/\/[^\s<>"')\]]+/g;
+
+  const matches = [];
+  let m;
+
+  mdPat.lastIndex = 0;
+  while ((m = mdPat.exec(text)) !== null) {
+    matches.push({ start: m.index, end: m.index + m[0].length, type: 'md', label: m[1], url: m[2] });
+  }
+
+  urlPat.lastIndex = 0;
+  while ((m = urlPat.exec(text)) !== null) {
+    const overlaps = matches.some(ex => m.index < ex.end && m.index + m[0].length > ex.start);
+    if (!overlaps) {
+      matches.push({ start: m.index, end: m.index + m[0].length, type: 'bare', url: m[0] });
+    }
+  }
+
+  matches.sort((a, b) => a.start - b.start);
+
+  let result = '';
+  let last = 0;
+  for (const match of matches) {
+    result += esc(text.slice(last, match.start));
+    if (match.type === 'md') {
+      result += `<a href="${esc(match.url)}" target="_blank" rel="noopener noreferrer">${esc(match.label)}</a>`;
+    } else {
+      result += `<a href="${esc(match.url)}" target="_blank" rel="noopener noreferrer">${esc(match.url)}</a>`;
+    }
+    last = match.end;
+  }
+  result += esc(text.slice(last));
+  return result.replace(/\n/g, '<br>');
+}
+
+function insertLinkInTextarea(textarea) {
+  const start = textarea.selectionStart;
+  const end   = textarea.selectionEnd;
+  const sel   = textarea.value.slice(start, end).trim();
+
+  let url, label;
+  if (sel && (sel.startsWith('http://') || sel.startsWith('https://'))) {
+    // texto selecionado é uma URL — pede rótulo separado
+    label = prompt('Digite o texto que vai aparecer como link:');
+    if (!label) return;
+    url = sel;
+  } else {
+    url = prompt('Cole o endereço do link:');
+    if (!url) return;
+    label = sel || url;
+  }
+
+  const markdown = `[${label}](${url})`;
+  textarea.value = textarea.value.slice(0, start) + markdown + textarea.value.slice(end);
+  textarea.focus();
+  textarea.setSelectionRange(start + markdown.length, start + markdown.length);
+}
+
 function renderObservacoes(d) {
   const textEl  = document.getElementById('detailEmenta');
   const editMode = document.getElementById('ementaEditMode');
@@ -512,8 +574,9 @@ function renderObservacoes(d) {
   if (!textEl) return;
   if (editMode) editMode.style.display = 'none';
   if (editBtn)  editBtn.style.display  = '';
-  if (d.obs && d.obs.trim()) {
-    textEl.textContent = d.obs;
+  const parsed = parseObs(d.obs);
+  if (parsed) {
+    textEl.innerHTML = parsed;
     textEl.classList.remove('obs-empty');
   } else {
     textEl.textContent = 'Sem observações.';
@@ -530,6 +593,11 @@ function initObservacoes(d) {
   const cancelBtn = document.getElementById('ementaCancelBtn');
   const textEl   = document.getElementById('detailEmenta');
   if (!editBtn || !editMode || !textarea) return;
+
+  const insertLinkBtn = document.getElementById('ementaInsertLink');
+  if (insertLinkBtn) {
+    insertLinkBtn.addEventListener('click', () => insertLinkInTextarea(textarea));
+  }
 
   editBtn.addEventListener('click', () => {
     textarea.value = d.obs || '';

@@ -963,7 +963,34 @@ a.bc-link:hover { color: var(--accent); }
 
 .obs-edit-actions { display: flex; gap: 8px; margin-top: 10px; }
 
+.obs-toolbar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 6px;
+}
+.obs-toolbar-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+  white-space: nowrap;
+}
+.obs-toolbar-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--surface); }
+.obs-toolbar-hint {
+  font-size: 11px; color: var(--text-muted); opacity: .7;
+}
+
 .obs-empty { font-style: italic; }
+
+.detail-text a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.detail-text a:hover { opacity: .8; }
 
 .btn-sm { padding: 6px 14px; font-size: 12px; }
 

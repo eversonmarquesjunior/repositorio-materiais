@@ -35,6 +35,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Botão inserir link nas observações
+  const obsInsertLink = document.getElementById('obsInsertLink');
+  const obsTextarea   = document.getElementById('observacoes');
+  if (obsInsertLink && obsTextarea) {
+    obsInsertLink.addEventListener('click', () => {
+      const start = obsTextarea.selectionStart;
+      const end   = obsTextarea.selectionEnd;
+      const sel   = obsTextarea.value.slice(start, end).trim();
+
+      let url, label;
+      if (sel && (sel.startsWith('http://') || sel.startsWith('https://'))) {
+        label = prompt('Digite o texto que vai aparecer como link:');
+        if (!label) return;
+        url = sel;
+      } else {
+        url = prompt('Cole o endereço do link:');
+        if (!url) return;
+        label = sel || url;
+      }
+
+      const markdown = `[${label}](${url})`;
+      obsTextarea.value = obsTextarea.value.slice(0, start) + markdown + obsTextarea.value.slice(end);
+      obsTextarea.focus();
+      obsTextarea.setSelectionRange(start + markdown.length, start + markdown.length);
+    });
+  }
+
   // Habilita/desabilita campos de link ao clicar no checkbox
   document.querySelectorAll('.field-toggle').forEach(cb => {
     cb.addEventListener('change', () => {
