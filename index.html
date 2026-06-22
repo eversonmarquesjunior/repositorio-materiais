@@ -34,7 +34,6 @@
       </div>
       <nav class="sidebar-nav">
         <a href="index.html" class="sidebar-link">Pesquisar</a>
-        <a href="pages/dashboard.html" class="sidebar-link">Dashboard</a>
         <a href="pages/adicionar-disciplina.html" class="sidebar-link">Adicionar Disciplina</a>
       </nav>
     </aside>
@@ -73,7 +72,6 @@
 
       <nav class="header-nav">
         <a href="index.html" class="nav-link active">Pesquisar</a>
-        <a href="pages/dashboard.html" class="nav-link">Dashboard</a>
         <a href="pages/adicionar-disciplina.html" class="nav-link">Adicionar Disciplina</a>
       </nav>
 
@@ -94,7 +92,7 @@
   <!-- ── HERO ── -->
   <section class="hero-section">
     <div class="hero-inner">
-      <h1 class="hero-title">Pesquise por qualquer disciplina</h1>
+      <h1 class="hero-title">Pesquise por uma disciplina</h1>
       <br>
       <!--<p class="hero-sub">Pesquise por nome, código, área do conhecimento ou professor responsável.</p>-->
 
@@ -118,6 +116,32 @@
         </div>
         <!-- botão Pesquisar removido: busca é instantânea ao digitar -->
       </form>
+      <div class="filter-row" id="filterRow">
+        <select id="filterModelo" class="filter-select">
+          <option value="">Modelo</option>
+          <option value="Graduação">Graduação</option>
+          <option value="Pós-graduação">Pós-graduação</option>
+          <option value="Curso Inova">Curso Inova</option>
+        </select>
+        <select id="filterTipo" class="filter-select">
+          <option value="">Tipo de Disciplina</option>
+          <option value="ace">Ace</option>
+          <option value="estagio">Estágio</option>
+          <option value="padrao_unificada">Padrão Unificada</option>
+          <option value="projeto_integrador">Projeto Integrador</option>
+          <option value="pratica_conectada">Prática Conectada</option>
+          <option value="introducao_ao_curso">Introdução ao Curso</option>
+          <option value="pap">Proj. em Amb. Prof.</option>
+          <option value="outro">Outro</option>
+        </select>
+        <select id="filterStatus" class="filter-select">
+          <option value="">Status</option>
+          <option value="comum">Disciplina Comum</option>
+          <option value="antiga">Disciplina Antiga</option>
+          <option value="atualizacao">Atualização do Zero</option>
+          <option value="paliativa">Disciplina Paliativa</option>
+        </select>
+      </div>
     </div>
   </section>
 

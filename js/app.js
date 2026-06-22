@@ -4,10 +4,13 @@
 
 /* ── ESTADO ─────────────────────────────────────────────── */
 const state = {
-  query:    '',
-  sort:     'nome',
-  viewMode: 'list',   // 'list' | 'grid'
-  results:  []
+  query:         '',
+  sort:          'nome',
+  viewMode:      'list',
+  results:       [],
+  filterModelo:  '',
+  filterTipo:    '',
+  filterStatus:  '',
 };
 
 let searchTimeout = null;
@@ -25,7 +28,9 @@ const loadingState   = document.getElementById('loadingState');
 const sortSelect     = document.getElementById('sortSelect');
 const viewListBtn    = document.getElementById('viewList');
 const viewGridBtn    = document.getElementById('viewGrid');
-// quickFilters removed — repository search is name-only
+const filterModelo   = document.getElementById('filterModelo');
+const filterTipo     = document.getElementById('filterTipo');
+const filterStatus   = document.getElementById('filterStatus');
 
 /* ── INICIALIZAÇÃO ───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -41,6 +46,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   sortSelect.addEventListener('change', onSortChange);
   viewListBtn.addEventListener('click', () => setView('list'));
   viewGridBtn.addEventListener('click', () => setView('grid'));
+  filterModelo.addEventListener('change', onFilterChange);
+  filterTipo.addEventListener('change', onFilterChange);
+  filterStatus.addEventListener('change', onFilterChange);
 });
 
 /* ── TEMA ────────────────────────────────────────────────── */
@@ -49,8 +57,24 @@ function initTheme() {
   localStorage.removeItem('repo-theme');
 }
 
-/* ── FILTROS RÁPIDOS (ÁREA) ──────────────────────────────── */
-// area filters removed — no quick filter buttons
+/* ── FILTROS ─────────────────────────────────────────────── */
+function hasActiveFilters() {
+  return !!(state.filterModelo || state.filterTipo || state.filterStatus);
+}
+
+function onFilterChange() {
+  state.filterModelo = filterModelo.value;
+  state.filterTipo   = filterTipo.value;
+  state.filterStatus = filterStatus.value;
+  [filterModelo, filterTipo, filterStatus].forEach(sel => {
+    sel.classList.toggle('filter-active', !!sel.value);
+  });
+  if (state.query.length >= 2 || hasActiveFilters()) {
+    runSearch();
+  } else {
+    showEmpty();
+  }
+}
 
 /* ── BUSCA ───────────────────────────────────────────────── */
 function onSearchInput() {
@@ -58,13 +82,11 @@ function onSearchInput() {
   clearBtn.style.display = state.query ? 'flex' : 'none';
   if (searchTimeout) clearTimeout(searchTimeout);
 
-  // Only trigger instant search when user typed at least 2 chars.
-  if (state.query && state.query.length >= 2) {
+  if (state.query.length >= 2 || hasActiveFilters()) {
     searchTimeout = setTimeout(runSearch, 180);
-  } else if (!state.query) {
+  } else if (!state.query && !hasActiveFilters()) {
     showEmpty();
   } else {
-    // fewer than 2 chars — don't run search yet, keep results hidden
     hideAll();
   }
 }
@@ -73,21 +95,16 @@ function clearSearch() {
   searchInput.value = '';
   state.query = '';
   clearBtn.style.display = 'none';
-  if (searchTimeout) {
-    clearTimeout(searchTimeout);
-    searchTimeout = null;
-  }
+  if (searchTimeout) { clearTimeout(searchTimeout); searchTimeout = null; }
   searchInput.focus();
-  showEmpty();
+  if (hasActiveFilters()) runSearch();
+  else showEmpty();
 }
 
 function runSearch() {
-  if (searchTimeout) {
-    clearTimeout(searchTimeout);
-    searchTimeout = null;
-  }
+  if (searchTimeout) { clearTimeout(searchTimeout); searchTimeout = null; }
   state.query = searchInput.value.trim();
-  if (!state.query && !state.area) {
+  if (!state.query && !hasActiveFilters()) {
     showEmpty();
     return;
   }
@@ -103,13 +120,22 @@ function runSearch() {
 }
 
 /* ── FILTRO + ORDENAÇÃO ──────────────────────────────────── */
+function matchesStatus(dbStatus, filterVal) {
+  if (!dbStatus) return false;
+  if (dbStatus === filterVal) return true;
+  if (filterVal === 'antiga' && dbStatus.startsWith('Disciplina Antiga')) return true;
+  return false;
+}
+
 function filterAndSort() {
   const q = normalizeStr(state.query);
 
   let list = window.disciplinas.filter(d => {
-    const matchArea = !state.area || d.modelo === state.area;
-    const matchQuery = !q || normalizeStr(d.nome).includes(q);
-    return matchArea && matchQuery;
+    const matchModelo = !state.filterModelo || d.modelo === state.filterModelo;
+    const matchTipo   = !state.filterTipo   || d.tipo_disciplina === state.filterTipo;
+    const matchStatus = !state.filterStatus || matchesStatus(d.status, state.filterStatus);
+    const matchQuery  = !q || normalizeStr(d.nome).includes(q);
+    return matchModelo && matchTipo && matchStatus && matchQuery;
   });
 
   return sortList(list, state.sort);
@@ -215,39 +241,42 @@ function mesmoMaterialBadge(d) {
 
 function cardHTML(d) {
   const statusBadges = {
-    ativo:        '<span class="badge badge-status-ativo">Ativo</span>',
-    inativo:      '<span class="badge badge-status-inativo">Inativo</span>',
-    revisao:      '<span class="badge badge-status-revisao">Em Revisão</span>',
-    finalizada:   '<span class="badge badge-status-ativo">Finalizada</span>',
-    pendente:     '<span class="badge badge-status-revisao">Pendente</span>',
-    producao:     '<span class="badge badge-status-inativo">Em Produção</span>',
-    padronizada:  '<span class="badge badge-status-ativo">Disciplina Padronizada</span>',
+    comum:        '<span class="badge badge-status-ativo">Disciplina Comum</span>',
     atualizacao:  '<span class="badge badge-status-revisao">Atualização do Zero</span>',
     paliativa:    '<span class="badge badge-status-revisao">Disciplina Paliativa</span>',
     antiga:       '<span class="badge badge-status-inativo">Disciplina Antiga</span>',
   };
   const statusLabel = statusBadges[d.status]
-    || (d.status ? `<span class="badge badge-status-inativo">${d.status}</span>` : '');
+    || (d.status ? `<span class="badge badge-status-inativo">${esc(d.status)}</span>` : '');
 
-  // Badges direita do nome: área/modelo, módulo, status
-  const moduloBadge = d.modulo
-    ? `<span class="badge badge-periodo">${esc(d.modulo)}</span>`
-    : '';
+  const tipoMap = {
+    ace:                 'Ace',
+    estagio:             'Estágio',
+    padrao_unificada:    'Padrão Unificada',
+    projeto_integrador:  'Projeto Integrador',
+    pratica_conectada:   'Prática Conectada',
+    introducao_ao_curso: 'Introdução ao Curso',
+    pap:                 'Proj. em Amb. Prof.',
+    outro:               'Outro',
+  };
+  const tipoBadge = tipoMap[d.tipo_disciplina]
+    ? `<span class="badge badge-periodo">${esc(tipoMap[d.tipo_disciplina])}</span>`
+    : (d.tipo_disciplina ? `<span class="badge badge-periodo">${esc(d.tipo_disciplina)}</span>` : '');
 
   // Botões de link: WAE e ERP
-  const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
-  const waeUrl = isUrl(d.link_moodle_wae) ? d.link_moodle_wae : (d.modulo && isUrl(d.youtube) ? d.youtube : '');
+  const pillArrow = `<svg viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="link-pill__icon-svg" width="10"><path d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z" fill="currentColor"/></svg><svg viewBox="0 0 14 15" fill="none" width="10" xmlns="http://www.w3.org/2000/svg" class="link-pill__icon-svg link-pill__icon-svg--copy"><path d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z" fill="currentColor"/></svg>`;
+  const waeUrl = isUrl(d.link_moodle_wae) ? d.link_moodle_wae : '';
   const linkDefs = [
-    { label: 'Link Moodle WAE', url: waeUrl },
-    { label: 'Link DP WAE',     url: isUrl(d.link_dp_wae)     ? d.link_dp_wae     : '' },
-    { label: 'Link Moodle ERP', url: isUrl(d.link_moodle_erp) ? d.link_moodle_erp : '' },
-    { label: 'Link DP ERP',     url: isUrl(d.link_dp_erp)     ? d.link_dp_erp     : '' },
-    { label: 'Link Moodle Pós', url: isUrl(d.link_moodle_pos) ? d.link_moodle_pos : '' },
-    { label: 'Link Inova',      url: isUrl(d.link_inova)      ? d.link_inova      : '' }
+    { label: 'Moodle WAE', url: waeUrl },
+    { label: 'DP WAE',     url: isUrl(d.link_dp_wae)     ? d.link_dp_wae     : '' },
+    { label: 'Moodle ERP', url: isUrl(d.link_moodle_erp) ? d.link_moodle_erp : '' },
+    { label: 'DP ERP',     url: isUrl(d.link_dp_erp)     ? d.link_dp_erp     : '' },
+    { label: 'Moodle Pós', url: isUrl(d.link_moodle_pos) ? d.link_moodle_pos : '' },
+    { label: 'Inova',      url: isUrl(d.link_inova)      ? d.link_inova      : ''  }
   ].filter(l => l.url);
   const linkBtns = linkDefs.length
     ? `<div class="card-link-btns">${linkDefs.map(l =>
-        `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn" onclick="event.stopPropagation()">${linkSVG}${esc(l.label)}</a>`
+        `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="link-pill" onclick="event.stopPropagation()"><span class="link-pill__icon-wrapper">${pillArrow}</span>${esc(l.label)}</a>`
       ).join('')}</div>`
     : '';
 
@@ -284,19 +313,12 @@ function cardHTML(d) {
       <div class="card-right">
         <div class="card-badges">
           ${d.modelo ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : ''}
-          ${moduloBadge}
+          ${tipoBadge}
           ${statusLabel}
         </div>
         ${mesmoMaterialBadge(d)}
       </div>
-      <a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn card-info-btn" onclick="event.stopPropagation()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        Informações da Disciplina
-      </a>
+      <a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn card-info-btn" onclick="event.stopPropagation()"><span class="link-pill__icon-wrapper">${pillArrow}</span>Informações da Disciplina</a>
     </div>
   `;
 }

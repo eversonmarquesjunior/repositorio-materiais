@@ -373,6 +373,34 @@ svg { flex-shrink: 0; }
 .qf-btn:hover { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.5); }
 .qf-btn.active { background: #fff; color: var(--accent); border-color: #fff; font-weight: 600; }
 
+/* FILTROS DE CAMPO */
+.filter-row {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  margin-top: 14px; width: 100%; max-width: 640px;
+}
+.filter-select {
+  background: rgba(255,255,255,.22);
+  border: 1.5px solid rgba(255,255,255,.5);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 25px 4px 11px;
+  font-size: 11px; font-weight: 500;
+  cursor: pointer; outline: none;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 12px;
+  transition: background-color .14s, border-color .14s;
+}
+.filter-select option { background: #1e293b; color: #e2e8f0; }
+.filter-select:focus { border-color: rgba(255,255,255,.55); background-color: rgba(255,255,255,.2); }
+.filter-select.filter-active {
+  background-color: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.6);
+  color: #fff;
+}
+
 /* ═══════════════════════════════════════
    RESULTADOS
 ═══════════════════════════════════════ */
@@ -470,17 +498,20 @@ svg { flex-shrink: 0; }
 }
 
 .card-moodle-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 1px 10px;
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  padding: 1px 10px 1px 4px;
   background: #ffffff;
   color: #1d4ed8;
   border: 1px solid rgba(29, 78, 216, 0.25);
-  border-radius: 6px;
+  border-radius: 10rem;
   font-size: 10px; font-weight: 600;
   text-decoration: none;
-  transition: background .15s, color .15s;
+  overflow: hidden;
+  transition: background .15s, color .15s, border-color .15s;
 }
-.card-moodle-btn:hover { background: #1d4ed8; color: #fff; }
+.card-moodle-btn:hover { background: #1d4ed8; color: #fff; border-color: transparent; }
+.card-moodle-btn .link-pill__icon-wrapper { color: #fff; background-color: #1d4ed8; }
+.card-moodle-btn:hover .link-pill__icon-wrapper { color: #1d4ed8; background-color: #fff; }
 .card-footer { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .card-info-btn { position: absolute; bottom: 12px; right: 14px; }
 .detail-action-btns { display: flex; gap: 6px; position: absolute; bottom: 14px; right: 22px; }
@@ -489,7 +520,7 @@ svg { flex-shrink: 0; }
 .detail-delete-btn:hover { background: #dc2626; color: #fff; }
 .card-nome {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 15px; font-weight: 700; color: var(--text);
+  font-size: 17px; font-weight: 700; color: var(--text);
   line-height: 1.3;
   text-transform: uppercase;
   word-break: break-word;
@@ -528,16 +559,16 @@ svg { flex-shrink: 0; }
 [data-theme="dark"] .badge-status-ativo   { background: #064e3b; color: #6ee7b7; }
 [data-theme="dark"] .badge-status-inativo { background: #1e2d45; color: #8ba0b8; }
 
-/* Badges no card de pesquisa: sem fundo, contorno azul */
+/* Badges no card de pesquisa: fundo azul, fonte branca */
 .disc-card .badge-area,
 .disc-card .badge-periodo,
 .disc-card .badge-carga,
 .disc-card .badge-status-ativo,
 .disc-card .badge-status-inativo,
 .disc-card .badge-status-revisao {
-  background: #dbeafe;
-  color: #1d4ed8;
-  border: 1px solid #1d4ed8;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
 }
 
 [data-theme="dark"] .disc-card .badge-area,
@@ -551,15 +582,15 @@ svg { flex-shrink: 0; }
   border: 1px solid #93c5fd;
 }
 
-/* Badges na página de detalhe: sem fundo, contorno azul */
+/* Badges na página de detalhe: fundo azul, fonte branca */
 .detail-badges .badge-area,
 .detail-badges .badge-periodo,
 .detail-badges .badge-status-ativo,
 .detail-badges .badge-status-inativo,
 .detail-badges .badge-status-revisao {
-  background: #dbeafe;
-  color: #1d4ed8;
-  border: 1px solid #1d4ed8;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
 }
 
 [data-theme="dark"] .detail-badges .badge-area,
@@ -567,9 +598,9 @@ svg { flex-shrink: 0; }
 [data-theme="dark"] .detail-badges .badge-status-ativo,
 [data-theme="dark"] .detail-badges .badge-status-inativo,
 [data-theme="dark"] .detail-badges .badge-status-revisao {
-  background: transparent;
-  color: #93c5fd;
-  border: 1px solid #93c5fd;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
 }
 
 /* ─── DARK MODE: correções de cores hardcoded ─── */
@@ -590,10 +621,36 @@ svg { flex-shrink: 0; }
   color: #93c5fd;
   border-color: rgba(147,197,253,0.25);
 }
+[data-theme="dark"] .card-moodle-btn .link-pill__icon-wrapper {
+  background-color: #93c5fd;
+  color: var(--surface-2);
+}
 [data-theme="dark"] .card-moodle-btn:hover {
   background: var(--accent);
   color: #fff;
   border-color: transparent;
+}
+[data-theme="dark"] .card-moodle-btn:hover .link-pill__icon-wrapper {
+  background-color: #fff;
+  color: var(--accent);
+}
+[data-theme="dark"] .link-pill {
+  background: var(--surface-2);
+  color: #93c5fd;
+  border-color: rgba(147,197,253,0.25);
+}
+[data-theme="dark"] .link-pill .link-pill__icon-wrapper {
+  background-color: #93c5fd;
+  color: var(--surface-2);
+}
+[data-theme="dark"] .link-pill:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+[data-theme="dark"] .link-pill:hover .link-pill__icon-wrapper {
+  background-color: #fff;
+  color: var(--accent);
 }
 
 [data-theme="dark"] .hist-badge-tipo { color: #34d399; }
@@ -723,14 +780,15 @@ a.bc-link:hover { color: var(--accent); }
 .detail-meta-item { display: flex; flex-direction: column; gap: 2px; }
 .detail-meta-label { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
 .detail-meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
-.detail-meta-icon { 
-  display: inline-flex; 
-  align-items: center; 
+.detail-meta-icon {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: var(--accent-light);
+  background-color: #ffffff;
+  border: 1.5px solid var(--accent);
   color: var(--accent);
   transition: all var(--transition);
   text-decoration: none;
@@ -739,10 +797,11 @@ a.bc-link:hover { color: var(--accent); }
 .detail-meta-icon:hover {
   background-color: var(--accent);
   color: #ffffff;
+  border-color: var(--accent);
   transform: scale(1.1);
 }
 .detail-meta-icon.youtube {
-  background-color: rgba(255, 0, 0, 0.1);
+  border-color: #FF0000;
   color: #FF0000;
 }
 .detail-meta-icon.youtube:hover {
@@ -750,7 +809,7 @@ a.bc-link:hover { color: var(--accent); }
   color: #ffffff;
 }
 .detail-meta-icon.soundcloud {
-  background-color: rgba(255, 102, 0, 0.1);
+  border-color: #FF6600;
   color: #FF6600;
 }
 .detail-meta-icon.soundcloud:hover {
@@ -758,7 +817,7 @@ a.bc-link:hover { color: var(--accent); }
   color: #ffffff;
 }
 .detail-meta-icon.dropbox {
-  background-color: rgba(0, 97, 255, 0.1);
+  border-color: #0061FF;
   color: #0061FF;
 }
 .detail-meta-icon.dropbox:hover {
@@ -766,7 +825,7 @@ a.bc-link:hover { color: var(--accent); }
   color: #ffffff;
 }
 .detail-meta-icon.googledrive {
-  background-color: rgba(52, 168, 83, 0.1);
+  border-color: #34A853;
   color: #34A853;
 }
 .detail-meta-icon.googledrive:hover {
@@ -774,7 +833,7 @@ a.bc-link:hover { color: var(--accent); }
   color: #ffffff;
 }
 .detail-meta-icon.sharepoint {
-  background-color: rgba(0, 142, 125, 0.1);
+  border-color: #009aa2;
   color: #009aa2;
 }
 .detail-meta-icon.sharepoint:hover {
@@ -782,11 +841,11 @@ a.bc-link:hover { color: var(--accent); }
   color: #ffffff;
 }
 .detail-meta-icon.apostilahtml {
-  background-color: rgba(0, 141, 151, 0.1);
-  color: #26f7fb;
+  border-color: #00a5ad;
+  color: #00a5ad;
 }
 .detail-meta-icon.apostilahtml:hover {
-  background-color: #54e0ff;
+  background-color: #00a5ad;
   color: #ffffff;
 }
 .detail-meta-icon.moodle {
@@ -801,6 +860,56 @@ a.bc-link:hover { color: var(--accent); }
   width: 15px;
   height: 15px;
   fill: currentColor;
+}
+
+/* ═══════════════════════════════════════
+   LINK PILL BUTTONS
+═══════════════════════════════════════ */
+.link-pill {
+  line-height: 1;
+  text-decoration: none;
+  display: inline-flex;
+  border: 1px solid rgba(29, 78, 216, 0.25);
+  cursor: pointer;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #ffffff;
+  color: #1d4ed8;
+  border-radius: 10rem;
+  font-weight: 600;
+  font-size: 10px;
+  padding: 1px 10px 1px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.link-pill__icon-wrapper {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  position: relative;
+  color: #ffffff;
+  background-color: #1d4ed8;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.link-pill:hover { background-color: #1d4ed8; color: #fff; border-color: transparent; }
+.link-pill:hover .link-pill__icon-wrapper { color: #1d4ed8; background-color: #fff; }
+.link-pill__icon-svg--copy {
+  position: absolute;
+  transform: translate(-150%, 150%);
+}
+.link-pill:hover .link-pill__icon-svg:first-child,
+.card-moodle-btn:hover .link-pill__icon-svg:first-child {
+  transition: transform 0.3s ease-in-out;
+  transform: translate(150%, -150%);
+}
+.link-pill:hover .link-pill__icon-svg--copy,
+.card-moodle-btn:hover .link-pill__icon-svg--copy {
+  transition: transform 0.3s ease-in-out 0.1s;
+  transform: translate(0);
 }
 
 /* ═══════════════════════════════════════

@@ -50,22 +50,27 @@ function renderDetail(d) {
 
   // Badges
   const statusMap = {
-    ativo:        { cls: 'badge-status-ativo',   label: 'Ativo' },
-    inativo:      { cls: 'badge-status-inativo', label: 'Inativo' },
-    revisao:      { cls: 'badge-status-revisao', label: 'Em Revisão' },
-    finalizada:   { cls: 'badge-status-ativo',   label: 'Finalizada' },
-    pendente:     { cls: 'badge-status-revisao', label: 'Pendente' },
-    producao:     { cls: 'badge-status-inativo', label: 'Em Produção' },
-    padronizada:  { cls: 'badge-status-ativo',   label: 'Disciplina Padronizada' },
+    comum:        { cls: 'badge-status-ativo',   label: 'Disciplina Comum' },
     antiga:       { cls: 'badge-status-inativo', label: 'Disciplina Antiga' },
     atualizacao:  { cls: 'badge-status-revisao', label: 'Atualização do Zero' },
     paliativa:    { cls: 'badge-status-revisao', label: 'Disciplina Paliativa' },
   };
-  const st = statusMap[d.status] || { cls: 'badge-status-inativo', label: d.status || '—' };
+  const st = statusMap[d.status] || (d.status ? { cls: 'badge-status-inativo', label: d.status } : null);
+  const tipoMap = {
+    ace:                 'Ace',
+    estagio:             'Estágio',
+    padrao_unificada:    'Padrão Unificada',
+    projeto_integrador:  'Projeto Integrador',
+    pratica_conectada:   'Prática Conectada',
+    introducao_ao_curso: 'Introdução ao Curso',
+    pap:                 'Proj. em Amb. Profissional',
+    outro:               'Outro',
+  };
+  const tipoLabel = tipoMap[d.tipo_disciplina] || d.tipo_disciplina || '';
   document.getElementById('detailBadges').innerHTML = [
-    d.modelo ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : '',
-    d.modulo  ? `<span class="badge badge-periodo">${esc(d.modulo)}</span>` : '',
-    d.status  ? `<span class="badge ${st.cls}">${st.label}</span>` : '',
+    d.modelo  ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : '',
+    tipoLabel ? `<span class="badge badge-periodo">${esc(tipoLabel)}</span>` : '',
+    st        ? `<span class="badge ${st.cls}">${st.label}</span>` : '',
   ].join('');
 
   // Badge "Mesmo material de"
@@ -88,19 +93,19 @@ function renderDetail(d) {
   document.getElementById('detailNome').textContent = d.nome.toUpperCase();
 
   // Botões de link (mesmos do card da página inicial)
-  const linkBtnSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
-  const waeUrl = isUrl(d.link_moodle_wae) ? d.link_moodle_wae : (d.modulo && isUrl(d.youtube) ? d.youtube : '');
+  const pillArrow = `<svg viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="link-pill__icon-svg" width="10"><path d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z" fill="currentColor"/></svg><svg viewBox="0 0 14 15" fill="none" width="10" xmlns="http://www.w3.org/2000/svg" class="link-pill__icon-svg link-pill__icon-svg--copy"><path d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z" fill="currentColor"/></svg>`;
+  const waeUrl = isUrl(d.link_moodle_wae) ? d.link_moodle_wae : '';
   const detailLinkDefs = [
-    { label: 'Link Moodle WAE', url: waeUrl },
-    { label: 'Link DP WAE',     url: isUrl(d.link_dp_wae)     ? d.link_dp_wae     : '' },
-    { label: 'Link Moodle ERP', url: isUrl(d.link_moodle_erp) ? d.link_moodle_erp : '' },
-    { label: 'Link DP ERP',     url: isUrl(d.link_dp_erp)     ? d.link_dp_erp     : '' },
-    { label: 'Link Moodle Pós', url: isUrl(d.link_moodle_pos) ? d.link_moodle_pos : '' },
-    { label: 'Link Inova',      url: isUrl(d.link_inova)      ? d.link_inova      : '' }
+    { label: 'Moodle WAE', url: waeUrl },
+    { label: 'DP WAE',     url: isUrl(d.link_dp_wae)     ? d.link_dp_wae     : '' },
+    { label: 'Moodle ERP', url: isUrl(d.link_moodle_erp) ? d.link_moodle_erp : '' },
+    { label: 'DP ERP',     url: isUrl(d.link_dp_erp)     ? d.link_dp_erp     : '' },
+    { label: 'Moodle Pós', url: isUrl(d.link_moodle_pos) ? d.link_moodle_pos : '' },
+    { label: 'Inova',      url: isUrl(d.link_inova)      ? d.link_inova      : '' }
   ].filter(l => l.url);
   document.getElementById('detailCodigo').innerHTML = detailLinkDefs.length
     ? `<div class="card-link-btns">${detailLinkDefs.map(l =>
-        `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn">${linkBtnSVG}${esc(l.label)}</a>`
+        `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn"><span class="link-pill__icon-wrapper">${pillArrow}</span>${esc(l.label)}</a>`
       ).join('')}</div>`
     : '';
 
@@ -603,10 +608,12 @@ function showCard(cardId, fieldId, text) {
 
 function statusLabel(s) {
   return {
-    ativo: 'Ativo', inativo: 'Inativo', revisao: 'Em Revisão',
-    finalizada: 'Finalizada', pendente: 'Pendente', producao: 'Em Produção',
-    padronizada: 'Disciplina Padronizada', atualizacao: 'Atualização do Zero',
-    paliativa: 'Disciplina Paliativa', antiga: 'Disciplina Antiga'
+    comum: 'Disciplina Comum', atualizacao: 'Atualização do Zero',
+    paliativa: 'Disciplina Paliativa', antiga: 'Disciplina Antiga',
+    ace: 'Ace', estagio: 'Estágio', padrao_unificada: 'Padrão Unificada',
+    projeto_integrador: 'Projeto Integrador', pratica_conectada: 'Prática Conectada',
+    introducao_ao_curso: 'Introdução ao Curso', pap: 'Proj. em Amb. Profissional',
+    outro: 'Outro'
   }[s] || s;
 }
 
@@ -771,11 +778,11 @@ function initEditModal(d) {
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('modal-open')) closeModal(); });
 
-  const editStatusSel  = document.getElementById('editStatus');
+  const editModuloSel  = document.getElementById('editModulo');
   const editAnoInput   = document.getElementById('editAnoAntiga');
-  if (editStatusSel && editAnoInput) {
-    editStatusSel.addEventListener('change', () => {
-      const show = editStatusSel.value === 'antiga';
+  if (editModuloSel && editAnoInput) {
+    editModuloSel.addEventListener('change', () => {
+      const show = editModuloSel.value === 'antiga';
       editAnoInput.style.display = show ? '' : 'none';
       if (!show) editAnoInput.value = '';
     });
@@ -798,18 +805,18 @@ function initEditModal(d) {
 }
 
 function fillEditForm(d) {
-  document.getElementById('editNome').value    = d.nome    || '';
-  document.getElementById('editModelo').value  = d.modelo    || '';
-  document.getElementById('editModulo').value  = d.modulo  || '';
+  document.getElementById('editNome').value    = d.nome           || '';
+  document.getElementById('editModelo').value  = d.modelo         || '';
+  document.getElementById('editStatus').value  = d.tipo_disciplina || '';
 
   const anoAntigaInput = document.getElementById('editAnoAntiga');
-  const isAntiga = d.status && d.status.startsWith('Disciplina Antiga');
+  const isAntiga = d.status && (d.status === 'antiga' || d.status.startsWith('Disciplina Antiga'));
   if (isAntiga) {
-    document.getElementById('editStatus').value = 'antiga';
+    document.getElementById('editModulo').value = 'antiga';
     const match = d.status.match(/(\d{4})$/);
     if (anoAntigaInput) { anoAntigaInput.value = match ? match[1] : ''; anoAntigaInput.style.display = ''; }
   } else {
-    document.getElementById('editStatus').value = d.status || '';
+    document.getElementById('editModulo').value = d.status || '';
     if (anoAntigaInput) { anoAntigaInput.value = ''; anoAntigaInput.style.display = 'none'; }
   }
 
@@ -873,21 +880,15 @@ async function saveEditedDiscipline(d, closeModal) {
     return;
   }
 
-  const modulo = val('editModulo');
-  if (modulo && !/^\d{4}\/\d+$/.test(modulo)) {
-    showToast('O módulo deve seguir o formato Ano/Número (ex: 2026/1).', 'error');
-    return;
-  }
-
   const updates = {
     nome:            nome,
     modelo:          area,
+    tipo_disciplina: val('editStatus'),
     status:          (() => {
-      const s   = val('editStatus');
+      const m   = val('editModulo');
       const ano = (document.getElementById('editAnoAntiga') || {}).value?.trim();
-      return s === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : s;
+      return m === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : m;
     })(),
-    modulo:          val('editModulo'),
     link_moodle_wae: toggleVal('editLinkMoodleWAE'),
     link_dp_wae:     toggleVal('editLinkDPWAE'),
     link_moodle_erp: toggleVal('editLinkMoodleERP'),

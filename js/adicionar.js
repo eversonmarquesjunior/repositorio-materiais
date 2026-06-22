@@ -25,11 +25,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Mostra/esconde campo de ano quando "Disciplina Antiga" é selecionado
-  const statusSel = document.getElementById('status');
+  const moduloSel = document.getElementById('modulo');
   const anoInput  = document.getElementById('anoAntiga');
-  if (statusSel && anoInput) {
-    statusSel.addEventListener('change', () => {
-      const show = statusSel.value === 'antiga';
+  if (moduloSel && anoInput) {
+    moduloSel.addEventListener('change', () => {
+      const show = moduloSel.value === 'antiga';
       anoInput.style.display = show ? '' : 'none';
       if (!show) anoInput.value = '';
     });
@@ -136,12 +136,12 @@ async function addNewDiscipline() {
   const formData = {
     nome: document.getElementById('nome').value.trim(),
     modelo: document.getElementById('modelo').value.trim(),
+    tipo_disciplina: document.getElementById('status').value,
     status: (() => {
-      const s   = document.getElementById('status').value;
+      const m   = document.getElementById('modulo').value;
       const ano = document.getElementById('anoAntiga').value.trim();
-      return s === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : s;
+      return m === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : m;
     })(),
-    modulo:          document.getElementById('modulo').value.trim(),
     link_moodle_wae: toggleVal('linkMoodleWAE'),
     link_dp_wae:     toggleVal('linkDPWAE'),
     link_moodle_erp: toggleVal('linkMoodleERP'),
@@ -162,11 +162,6 @@ async function addNewDiscipline() {
   // Validação básica
   if (!formData.nome || !formData.modelo) {
     showMessage(messageEl, 'Por favor, preencha os campos obrigatórios (Nome e Modelo).', 'error');
-    return;
-  }
-
-  if (formData.modulo && !/^\d{4}\/\d+$/.test(formData.modulo)) {
-    showMessage(messageEl, 'O módulo deve seguir o formato Ano/Número (ex: 2026/1).', 'error');
     return;
   }
 

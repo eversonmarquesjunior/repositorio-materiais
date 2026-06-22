@@ -35,7 +35,6 @@
 
       <nav class="sidebar-nav">
         <a href="../index.html" class="sidebar-link">Pesquisar</a>
-        <a href="dashboard.html" class="sidebar-link">Dashboard</a>
         <a href="adicionar-disciplina.html" class="sidebar-link active">Adicionar Disciplina</a>
       </nav>
     </aside>
@@ -73,7 +72,6 @@
 
           <nav class="header-nav">
             <a href="../index.html" class="nav-link">Pesquisar</a>
-            <a href="dashboard.html" class="nav-link">Dashboard</a>
             <a href="adicionar-disciplina.html" class="nav-link active">Adicionar Disciplina</a>
           </nav>
 
@@ -123,18 +121,29 @@
                   <option value="">Selecione um modelo</option>
                   <option value="Graduação">Graduação</option>
                   <option value="Pós-graduação">Pós-graduação</option>
-                  <option value="Projeto Integrador">Projeto Integrador</option>
-                  <option value="Projeto em Ambiente Profissional">Projeto em Ambiente Profissional</option>
-                  <option value="Introdução ao Curso">Introdução ao Curso</option>
-                  <option value="Outro">Outro</option>
+                  <option value="Curso Inova">Curso Inova</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="status">Status</label>
+                <label for="status">Tipo de Disciplina (especificar quando necessário)</label>
+                <select id="status" name="status" style="width:100%">
+                  <option value="">Selecione o tipo</option>
+                  <option value="ace">Ace</option>
+                  <option value="estagio">Estágio</option>
+                  <option value="padrao_unificada">Padrão Unificada</option>
+                  <option value="projeto_integrador">Projeto Integrador</option>
+                  <option value="pratica_conectada">Prática Conectada</option>
+                  <option value="introducao_ao_curso">Introdução ao Curso</option>
+                  <option value="pap">Projeto em Ambiente Profissional</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="modulo">Status</label>
                 <div style="display:flex; gap:8px; align-items:stretch">
-                  <select id="status" name="status" style="flex:1; min-width:0">
+                  <select id="modulo" name="modulo" style="flex:1; min-width:0">
                     <option value="">Selecione um status</option>
-                    <option value="padronizada">Disciplina Padrão</option>
+                    <option value="comum">Disciplina Comum</option>
                     <option value="antiga">Disciplina Antiga</option>
                     <option value="atualizacao">Atualização do Zero</option>
                     <option value="paliativa">Disciplina Paliativa</option>
@@ -142,10 +151,6 @@
                   <input type="number" id="anoAntiga" name="anoAntiga" min="1950" max="2099"
                          placeholder="Ano" style="display:none; width:80px; flex-shrink:0" />
                 </div>
-              </div>
-              <div class="form-group">
-                <label for="modulo">Módulo</label>
-                <textarea id="modulo" name="modulo" rows="1" style="min-height:unset;resize:none;" placeholder="Use o formato Ano/Número — ex: 2026/1"></textarea>
               </div>
             </div>
             <div class="form-group">
