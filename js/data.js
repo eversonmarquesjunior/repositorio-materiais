@@ -6,5 +6,7 @@ async function loadDisciplinas() {
     console.error('Erro ao carregar disciplinas:', error.message);
     return;
   }
-  window.disciplinas = data || [];
+  let testData = [];
+  try { testData = JSON.parse(localStorage.getItem('repo_import_preview') || '[]'); } catch {}
+  window.disciplinas = [...(data || []), ...testData];
 }

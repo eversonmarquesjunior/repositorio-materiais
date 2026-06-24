@@ -35,6 +35,7 @@
       <nav class="sidebar-nav">
         <a href="index.html" class="sidebar-link">Pesquisar</a>
         <a href="pages/adicionar-disciplina.html" class="sidebar-link">Adicionar Disciplina</a>
+        <a href="pages/importar.html" class="sidebar-link">Importar Dados</a>
       </nav>
     </aside>
     <div class="sidebar-backdrop"></div>
@@ -73,6 +74,7 @@
       <nav class="header-nav">
         <a href="index.html" class="nav-link active">Pesquisar</a>
         <a href="pages/adicionar-disciplina.html" class="nav-link">Adicionar Disciplina</a>
+        <a href="pages/importar.html" class="nav-link">Importar Dados</a>
       </nav>
 
       <button id="themeToggle" class="theme-btn" title="Alternar tema">
@@ -88,6 +90,23 @@
       </button>
     </div>
   </header>
+
+  <!-- Banner de dados de teste -->
+  <div id="testImportBanner" class="test-import-banner" style="display:none">
+    <span>Modo teste ativo: <strong id="testBannerCount">0</strong> disciplinas temporárias visíveis na pesquisa (com badge "TESTE").</span>
+    <a href="pages/importar.html">Gerenciar importação →</a>
+  </div>
+  <script>
+    (function () {
+      try {
+        var d = JSON.parse(localStorage.getItem('repo_import_preview') || '[]');
+        if (d.length) {
+          document.getElementById('testImportBanner').style.display = '';
+          document.getElementById('testBannerCount').textContent = d.length;
+        }
+      } catch {}
+    })();
+  </script>
 
   <!-- ── HERO ── -->
   <section class="hero-section">

@@ -293,7 +293,7 @@ function cardHTML(d) {
     .map(l => `<a href="${esc(l.value)}" target="_blank" rel="noopener noreferrer" class="detail-meta-icon ${l.cls}" title="${l.title}" onclick="event.stopPropagation()">${cardIconSVG(l.cls)}</a>`)
     .join('');
 
-  const cardUrl = `pages/disciplina.html?id=${esc(d.id)}`;
+  const cardUrl = d._isTest ? null : `pages/disciplina.html?id=${esc(d.id)}`;
 
   return `
     <div class="disc-card">
@@ -315,10 +315,11 @@ function cardHTML(d) {
           ${d.modelo ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : ''}
           ${tipoBadge}
           ${statusLabel}
+          ${d._isTest ? '<span class="badge badge-test">TESTE</span>' : ''}
         </div>
         ${mesmoMaterialBadge(d)}
       </div>
-      <a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn card-info-btn" onclick="event.stopPropagation()"><span class="link-pill__icon-wrapper">${pillArrow}</span>Informações da Disciplina</a>
+      ${!d._isTest ? `<a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn card-info-btn" onclick="event.stopPropagation()"><span class="link-pill__icon-wrapper">${pillArrow}</span>Informações da Disciplina</a>` : ''}
     </div>
   `;
 }
