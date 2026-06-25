@@ -41,7 +41,13 @@ const COL_LABELS = {
 };
 
 /* ── ESTADO ────────────────────────────────────────────────── */
-let parsedRows = [];
+let parsedRows        = [];
+let currentMode       = 'import';
+let updateRows        = [];
+let dbDisciplinas     = null;
+let detectedLinkFields = [];
+
+const UPDATE_FIELDS = ['dropbox', 'youtube', 'soundcloud', 'apostila_html'];
 
 /* ── INIT ──────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
@@ -66,6 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSaveTeste').addEventListener('click',    saveForTest);
   document.getElementById('btnImportarReal').addEventListener('click', confirmImportReal);
   document.getElementById('btnLimparTeste').addEventListener('click',  clearTestData);
+  document.getElementById('tabImportar').addEventListener('click',     () => setMode('import'));
+  document.getElementById('tabAtualizar').addEventListener('click',    () => setMode('update'));
+  document.getElementById('btnRunUpdate').addEventListener('click',    confirmRunUpdate);
 });
 
 /* ── BANNER DE TESTE ────────────────────────────────────────── */
@@ -90,6 +99,28 @@ function clearTestData() {
   showToast('Dados de teste removidos com sucesso.', 'success');
 }
 
+/* ── TROCA DE MODO ──────────────────────────────────────────── */
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('tabImportar').classList.toggle('active', mode === 'import');
+  document.getElementById('tabAtualizar').classList.toggle('active', mode === 'update');
+
+  const modeloGroup = document.getElementById('modeloSelect').closest('.form-group');
+  modeloGroup.style.display = mode === 'import' ? '' : 'none';
+
+  parsedRows = [];
+  updateRows = [];
+  document.getElementById('previewBox').style.display        = 'none';
+  document.getElementById('actionsBox').style.display        = 'none';
+  document.getElementById('actionsUpdateBox').style.display  = 'none';
+  document.getElementById('fileChosen').style.display        = 'none';
+  document.getElementById('csvFile').value = '';
+
+  const wrap = document.querySelector('.preview-table-wrap');
+  wrap.style.maxHeight = '';
+  wrap.style.overflowY = '';
+}
+
 /* ── LEITURA E PARSE DO CSV ─────────────────────────────────── */
 function processFile(file) {
   const chosen = document.getElementById('fileChosen');
@@ -103,10 +134,14 @@ function processFile(file) {
     let text = new TextDecoder('utf-8').decode(buf);
     if (text.includes('�')) text = new TextDecoder('windows-1252').decode(buf);
 
-    const { headers, dataRows } = parseCSV(text);
-    const result = mapRows(headers, dataRows);
-    parsedRows = result.valid;
-    renderPreview(result, headers);
+    if (currentMode === 'update') {
+      processFileForUpdate(text);
+    } else {
+      const { headers, dataRows } = parseCSV(text);
+      const result = mapRows(headers, dataRows);
+      parsedRows = result.valid;
+      renderPreview(result, headers);
+    }
   };
   reader.readAsArrayBuffer(file);
 }
@@ -351,4 +386,198 @@ function showToast(text, type) {
   const remove = () => { toast.classList.remove('toast-show'); setTimeout(() => toast.remove(), 280); };
   toast.querySelector('.toast-close').addEventListener('click', remove);
   setTimeout(remove, isOk ? 4000 : 6000);
+}
+
+/* ── MODO ATUALIZAR LINKS ───────────────────────────────────── */
+function normStr(s) {
+  return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+async function ensureDbLoaded() {
+  if (dbDisciplinas) return dbDisciplinas;
+  const { data, error } = await db.from('disciplinas').select('id, nome');
+  if (error) throw error;
+  dbDisciplinas = data || [];
+  return dbDisciplinas;
+}
+
+async function processFileForUpdate(text) {
+  const previewBox  = document.getElementById('previewBox');
+  const mappingInfo = document.getElementById('mappingInfo');
+
+  previewBox.style.display = '';
+  document.getElementById('previewWrap').style.display = 'none';
+  document.getElementById('statsRow').innerHTML = '';
+  document.getElementById('actionsUpdateBox').style.display = 'none';
+  mappingInfo.className = 'mapping-info';
+  mappingInfo.innerHTML = '<span>Carregando disciplinas do banco…</span>';
+
+  let dbRows;
+  try {
+    dbRows = await ensureDbLoaded();
+  } catch (e) {
+    mappingInfo.className = 'mapping-info warn';
+    mappingInfo.innerHTML = '<span>Erro ao carregar disciplinas do banco: ' + esc(e.message) + '</span>';
+    return;
+  }
+
+  const { headers, dataRows } = parseCSV(text);
+
+  const detected = {};
+  for (const [field, candidates] of Object.entries(COL_MAP)) {
+    if (field !== 'nome' && !UPDATE_FIELDS.includes(field)) continue;
+    const idx = findCol(headers, candidates);
+    if (idx >= 0) detected[field] = idx;
+  }
+
+  if (!('nome' in detected)) {
+    mappingInfo.className = 'mapping-info warn';
+    mappingInfo.innerHTML = '<span>Coluna de nome não detectada. O CSV precisa ter uma coluna "NOME" ou "NOME DISC".</span>';
+    return;
+  }
+
+  detectedLinkFields = UPDATE_FIELDS.filter(f => f in detected);
+  if (!detectedLinkFields.length) {
+    mappingInfo.className = 'mapping-info warn';
+    mappingInfo.innerHTML = '<span>Nenhuma coluna de link detectada (dropbox, youtube, soundcloud, apostila html).</span>';
+    return;
+  }
+
+  const dbMap = new Map();
+  dbRows.forEach(r => dbMap.set(normStr(r.nome), r));
+
+  updateRows = [];
+  dataRows.forEach(row => {
+    const nome = ((detected.nome !== undefined ? row[detected.nome] : '') || '').trim();
+    if (!nome) return;
+
+    const links = {};
+    detectedLinkFields.forEach(f => {
+      const val = (row[detected[f]] || '').trim();
+      if (isUrl(val)) links[f] = val;
+    });
+
+    const dbMatch = dbMap.get(normStr(nome));
+    updateRows.push({ csvNome: nome, dbId: dbMatch?.id, dbNome: dbMatch?.nome, matched: !!dbMatch, links });
+  });
+
+  const foundCount    = updateRows.filter(r => r.matched).length;
+  const notFoundCount = updateRows.filter(r => !r.matched).length;
+
+  const linkLabels = detectedLinkFields.map(f => COL_LABELS[f]).join(', ');
+  mappingInfo.innerHTML = '<span><strong>Links detectados:</strong> ' + esc(linkLabels) + '</span>';
+
+  refreshUpdateStatsRow();
+  renderUpdatePreview();
+
+  if (foundCount) {
+    document.getElementById('actionsUpdateBox').style.display = '';
+    refreshUpdateActionStats();
+  }
+}
+
+function renderUpdatePreview() {
+  const previewWrap = document.getElementById('previewWrap');
+  if (!updateRows.length) { previewWrap.style.display = 'none'; return; }
+  previewWrap.style.display = '';
+
+  const wrap = document.querySelector('.preview-table-wrap');
+  wrap.style.maxHeight = '460px';
+  wrap.style.overflowY = 'auto';
+
+  document.getElementById('previewHead').innerHTML = '<tr>' +
+    '<th>Status</th><th>Nome no CSV</th><th>Nome no banco</th>' +
+    detectedLinkFields.map(f => '<th>' + (COL_LABELS[f] || f) + '</th>').join('') +
+    '<th></th></tr>';
+
+  document.getElementById('previewBody').innerHTML = updateRows.map((r, i) => {
+    const status = r.matched
+      ? '<span class="match-chip found">✓ Encontrada</span>'
+      : '<span class="match-chip not-found">✗ Não encontrada</span>';
+
+    const dbNomeCell = r.dbNome
+      ? '<td title="' + esc(r.dbNome) + '" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.dbNome) + '</td>'
+      : '<td style="color:#94a3b8">—</td>';
+
+    const linkCells = detectedLinkFields.map(f => {
+      const v = r.links[f];
+      return v
+        ? '<td><a href="' + esc(v) + '" target="_blank" rel="noopener" style="color:#3b82f6;text-decoration:underline">link</a></td>'
+        : '<td style="color:#94a3b8">—</td>';
+    }).join('');
+
+    return '<tr' + (r.matched ? '' : ' style="opacity:.55"') + '>' +
+      '<td>' + status + '</td>' +
+      '<td title="' + esc(r.csvNome) + '" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.csvNome) + '</td>' +
+      dbNomeCell + linkCells +
+      '<td><button class="btn-remove-row" onclick="removeUpdateRow(' + i + ')" title="Remover linha">✕</button></td></tr>';
+  }).join('');
+
+  document.getElementById('previewMore').style.display = 'none';
+}
+
+function removeUpdateRow(index) {
+  updateRows.splice(index, 1);
+  renderUpdatePreview();
+  refreshUpdateStatsRow();
+  refreshUpdateActionStats();
+  const foundCount = updateRows.filter(r => r.matched).length;
+  document.getElementById('actionsUpdateBox').style.display = foundCount ? '' : 'none';
+}
+
+function refreshUpdateStatsRow() {
+  const foundCount    = updateRows.filter(r => r.matched).length;
+  const notFoundCount = updateRows.filter(r => !r.matched).length;
+  document.getElementById('statsRow').innerHTML =
+    '<span class="stat-chip valid">' + foundCount + ' encontrada' + (foundCount !== 1 ? 's' : '') + ' no banco</span>' +
+    (notFoundCount ? '<span class="stat-chip skip">' + notFoundCount + ' não encontrada' + (notFoundCount !== 1 ? 's' : '') + '</span>' : '');
+}
+
+function refreshUpdateActionStats() {
+  const found = updateRows.filter(r => r.matched).length;
+  document.getElementById('updateStats').innerHTML =
+    '<span class="stat-chip valid">' + found + ' disciplina' + (found !== 1 ? 's' : '') + ' será' + (found !== 1 ? 'ão' : '') + ' atualizada' + (found !== 1 ? 's' : '') + '</span>';
+}
+
+async function confirmRunUpdate() {
+  const found = updateRows.filter(r => r.matched);
+  if (!found.length) return;
+  const ok = confirm('Atualizar links de ' + found.length + ' disciplina' + (found.length !== 1 ? 's' : '') + ' no banco?\n\nEssa ação modifica registros existentes no Supabase.');
+  if (ok) await runUpdate();
+}
+
+async function runUpdate() {
+  const progressWrap = document.getElementById('progressUpdateWrap');
+  const progressBar  = document.getElementById('progressUpdateBar');
+  const importLog    = document.getElementById('importUpdateLog');
+  const btn          = document.getElementById('btnRunUpdate');
+
+  progressWrap.style.display = '';
+  btn.disabled = true;
+
+  const matched = updateRows.filter(r => r.matched);
+  let updated = 0, errors = 0;
+
+  for (let i = 0; i < matched.length; i++) {
+    const r = matched[i];
+    const { error } = await db.from('disciplinas').update(r.links).eq('id', r.dbId);
+    if (error) { errors++; console.error('Erro ao atualizar:', r.csvNome, error.message); }
+    else updated++;
+
+    const pct = Math.round(((i + 1) / matched.length) * 100);
+    progressBar.style.width = pct + '%';
+    importLog.textContent = 'Atualizando… ' + (i + 1) + ' de ' + matched.length;
+  }
+
+  if (errors === 0) {
+    progressBar.style.background = '#22c55e';
+    importLog.textContent = '✓ ' + updated + ' disciplinas atualizadas com sucesso!';
+    showToast(updated + ' disciplinas atualizadas com sucesso!', 'success');
+  } else {
+    progressBar.style.background = '#ef4444';
+    importLog.textContent = updated + ' atualizadas · ' + errors + ' com erro (veja o console).';
+    showToast('Atualização com erros: ' + updated + ' ok, ' + errors + ' falha(s).', 'error');
+  }
+
+  btn.disabled = false;
 }

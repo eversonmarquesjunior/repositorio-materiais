@@ -122,6 +122,39 @@
     .progress-bar { height: 100%; background: #3b82f6; transition: width .3s; border-radius: 6px; }
     .import-log { font-size: .8rem; color: #64748b; margin-top: .45rem; min-height: 1.2em; }
     .hint-text { font-size: .78rem; color: #94a3b8; margin: .65rem 0 0; line-height: 1.5; }
+    .mode-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border, #e2e8f0);
+      margin-bottom: 1.5rem;
+    }
+    .mode-tab {
+      padding: .6rem 1.4rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: .875rem;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color .2s, border-color .2s;
+    }
+    .mode-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+    .match-chip {
+      padding: .2rem .65rem;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .match-chip.found     { background: #dcfce7; color: #166534; }
+    .match-chip.not-found { background: #fee2e2; color: #991b1b; }
+    .btn-remove-row {
+      background: none; border: none; color: #94a3b8;
+      cursor: pointer; font-size: .95rem; padding: .2rem .5rem;
+      border-radius: 4px; transition: color .15s, background .15s; line-height: 1;
+    }
+    .btn-remove-row:hover { color: #dc2626; background: #fee2e2; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
@@ -207,6 +240,11 @@
         <div class="page-shell">
           <h1 class="page-title">Importar Disciplinas</h1>
 
+          <div class="mode-tabs">
+            <button class="mode-tab active" id="tabImportar">Importar Disciplinas</button>
+            <button class="mode-tab" id="tabAtualizar">Atualizar Links</button>
+          </div>
+
           <!-- Status de dados de teste ativos -->
           <div id="testActiveCard" class="test-active-card" style="display:none">
             <span>Dados de teste ativos: <strong id="testActiveCount">0</strong> disciplinas temporárias visíveis na pesquisa.</span>
@@ -277,6 +315,22 @@
             <div id="progressWrap" style="display:none;margin-top:1rem">
               <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
               <p class="import-log" id="importLog"></p>
+            </div>
+          </div>
+
+          <!-- Etapa 3b: Ações de atualização de links -->
+          <div class="import-box" id="actionsUpdateBox" style="display:none">
+            <h2>3. Confirmar atualização</h2>
+            <div id="updateStats" style="margin-bottom:.85rem"></div>
+            <div class="import-actions">
+              <button id="btnRunUpdate" class="btn-real">Atualizar no banco</button>
+            </div>
+            <p class="hint-text">
+              Apenas as disciplinas <strong>encontradas</strong> (verde) serão atualizadas. Remova linhas indesejadas antes de confirmar.
+            </p>
+            <div id="progressUpdateWrap" style="display:none;margin-top:1rem">
+              <div class="progress-bar-wrap"><div class="progress-bar" id="progressUpdateBar" style="width:0%"></div></div>
+              <p class="import-log" id="importUpdateLog"></p>
             </div>
           </div>
 
