@@ -138,39 +138,6 @@
           </div>
         </div>
 
-        <!-- Observações -->
-        <div class="detail-card" id="cardEmenta">
-          <div class="dc-header">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg>
-            <h2 class="dc-title">OBSERVAÇÕES</h2>
-            <button id="ementaEditBtn" class="obs-edit-btn" title="Editar observações">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-          </div>
-          <div class="dc-body">
-            <p class="detail-text" id="detailEmenta"></p>
-            <div id="ementaEditMode" style="display:none">
-              <div class="obs-toolbar">
-                <button type="button" id="ementaInsertLink" class="obs-toolbar-btn" title="Inserir link">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                  Inserir link
-                </button>
-              </div>
-              <textarea id="ementaTextarea" class="obs-textarea" rows="5" placeholder="Adicione observações sobre esta disciplina..."></textarea>
-              <div class="obs-edit-actions">
-                <button id="ementaSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
-                <button id="ementaCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Plano de Ensino -->
         <div class="detail-card" id="cardPlanoEnsino">
           <div class="dc-header">
@@ -221,6 +188,39 @@
                 </svg>
                 <p>Este arquivo não pode ser visualizado aqui.</p>
                 <a id="planoNoEmbedLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Abrir arquivo ↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="detail-card" id="cardEmenta">
+          <div class="dc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <h2 class="dc-title">OBSERVAÇÕES</h2>
+            <button id="ementaEditBtn" class="obs-edit-btn" title="Editar observações">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="dc-body">
+            <p class="detail-text" id="detailEmenta"></p>
+            <div id="ementaEditMode" style="display:none">
+              <div class="obs-toolbar">
+                <button type="button" id="ementaInsertLink" class="obs-toolbar-btn" title="Inserir link">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  Inserir link
+                </button>
+              </div>
+              <textarea id="ementaTextarea" class="obs-textarea" rows="5" placeholder="Adicione observações sobre esta disciplina..."></textarea>
+              <div class="obs-edit-actions">
+                <button id="ementaSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
+                <button id="ementaCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
               </div>
             </div>
           </div>

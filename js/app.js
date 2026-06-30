@@ -343,6 +343,7 @@ function cardHTML(d) {
           ${tipoBadge}
           ${statusLabel}
           ${d._isTest ? '<span class="badge badge-test">TESTE</span>' : ''}
+          ${d.plano_ensino_url ? '<span class="badge-plano-row"><span class="badge badge-plano-ensino">Plano de Ensino</span></span>' : ''}
         </div>
         ${mesmoMaterialBadge(d)}
       </div>

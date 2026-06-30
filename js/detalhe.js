@@ -75,6 +75,7 @@ function renderDetail(d) {
     modeloBadges,
     tipoLabel ? `<span class="badge badge-periodo">${esc(tipoLabel)}</span>` : '',
     st        ? `<span class="badge ${st.cls}">${st.label}</span>` : '',
+    d.plano_ensino_url ? '<span class="badge-plano-row"><span class="badge badge-plano-ensino">Plano de Ensino</span></span>' : '',
   ].join('');
 
   // Badge "Mesmo material de"
@@ -1124,6 +1125,7 @@ saveBtn.addEventListener('click', async () => {
 
     d.plano_ensino_url = url;
     renderPlanoEnsino(d);
+    renderDetail(d);
     if (body) { body.classList.add('expanded'); toggleBtn?.setAttribute('aria-expanded', 'true'); }
     showToast('Plano de ensino salvo!', 'success');
   });
@@ -1145,6 +1147,7 @@ saveBtn.addEventListener('click', async () => {
     if (error) { showToast('Erro ao remover: ' + error.message, 'error'); return; }
     d.plano_ensino_url = null;
     renderPlanoEnsino(d);
+    renderDetail(d);
     showToast('Plano de ensino removido.', 'success');
   });
 

@@ -604,7 +604,7 @@ svg { flex-shrink: 0; }
   white-space: nowrap;
 }
 .badge-area          { background: #dbfee7; color: #1d4ed8; }
-.badge-area-grad-pos { background: #f3e8ff; color: #7e22ce; }
+.badge-area-grad-pos, .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
 .badge-periodo { background: #dcfce7; color: #15803d; }
 .badge-carga   { background: #fef3c7; color: #92400e; }
 .badge-status-ativo    { background: #d1fae5; color: #065f46; }
@@ -619,7 +619,7 @@ svg { flex-shrink: 0; }
 }
 .test-import-banner a { color: #92400e; font-weight: 600; text-decoration: underline; }
 [data-theme="dark"] .badge-area          { background: #1e3a8a; color: #93c5fd; }
-[data-theme="dark"] .badge-area-grad-pos { background: #3b0764; color: #d8b4fe; }
+[data-theme="dark"] .badge-area-grad-pos, [data-theme="dark"] .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
 [data-theme="dark"] .badge-periodo { background: #14532d; color: #86efac; }
 [data-theme="dark"] .badge-carga   { background: #451a03; color: #fcd34d; }
 [data-theme="dark"] .badge-status-ativo   { background: #064e3b; color: #6ee7b7; }
@@ -648,8 +648,8 @@ svg { flex-shrink: 0; }
   border: 1px solid #93c5fd;
 }
 
-.disc-card .badge-area-grad-pos { background: #7e22ce; color: #ffffff; border: none; }
-[data-theme="dark"] .disc-card .badge-area-grad-pos { background: transparent; color: #d8b4fe; border: 1px solid #d8b4fe; }
+.disc-card .badge-area-grad-pos, .disc-card .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+[data-theme="dark"] .disc-card .badge-area-grad-pos, [data-theme="dark"] .disc-card .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
 
 /* Badges na página de detalhe: fundo azul, fonte branca */
 .detail-badges .badge-area,
@@ -672,8 +672,10 @@ svg { flex-shrink: 0; }
   border: none;
 }
 
-.detail-badges .badge-area-grad-pos { background: #7e22ce; color: #ffffff; border: none; }
-[data-theme="dark"] .detail-badges .badge-area-grad-pos { background: #7e22ce; color: #ffffff; border: none; }
+.detail-badges .badge-area-grad-pos, .detail-badges .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+[data-theme="dark"] .detail-badges .badge-area-grad-pos, [data-theme="dark"] .detail-badges .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+
+.badge-plano-row { flex-basis: 100%; display: flex; justify-content: flex-end; }
 
 /* ─── DARK MODE: correções de cores hardcoded ─── */
 [data-theme="dark"] .search-field {
