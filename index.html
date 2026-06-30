@@ -136,30 +136,49 @@
         <!-- botão Pesquisar removido: busca é instantânea ao digitar -->
       </form>
       <div class="filter-row" id="filterRow">
-        <select id="filterModelo" class="filter-select">
-          <option value="">Modelo</option>
-          <option value="Graduação">Graduação</option>
-          <option value="Pós-graduação">Pós-graduação</option>
-          <option value="Curso Inova">Curso Inova</option>
-        </select>
-        <select id="filterTipo" class="filter-select">
-          <option value="">Tipo de Disciplina</option>
-          <option value="ace">Ace</option>
-          <option value="estagio">Estágio</option>
-          <option value="padrao_unificada">Padrão Unificada</option>
-          <option value="projeto_integrador">Projeto Integrador</option>
-          <option value="pratica_conectada">Prática Conectada</option>
-          <option value="introducao_ao_curso">Introdução ao Curso</option>
-          <option value="pap">Proj. em Amb. Prof.</option>
-          <option value="outro">Outro</option>
-        </select>
-        <select id="filterStatus" class="filter-select">
-          <option value="">Status</option>
-          <option value="comum">Disciplina Comum</option>
-          <option value="antiga">Disciplina Antiga</option>
-          <option value="atualizacao">Atualização do Zero</option>
-          <option value="paliativa">Disciplina Paliativa</option>
-        </select>
+        <!-- Modelo -->
+        <div class="ms-wrap" id="msModeloWrap">
+          <button type="button" class="ms-btn" id="msModeloBtn">
+            <span class="ms-label" id="msModeloLabel">Modelo</span>
+            <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="ms-panel" id="msModeloPanel">
+            <label class="ms-option"><input type="checkbox" value="Graduação"> Graduação</label>
+            <label class="ms-option"><input type="checkbox" value="Pós-graduação"> Pós-graduação</label>
+            <label class="ms-option"><input type="checkbox" value="Curso Inova"> Curso Inova</label>
+            <label class="ms-option"><input type="checkbox" value="Graduação & Pós"> Graduação &amp; Pós</label>
+          </div>
+        </div>
+        <!-- Tipo -->
+        <div class="ms-wrap" id="msTipoWrap">
+          <button type="button" class="ms-btn" id="msTipoBtn">
+            <span class="ms-label" id="msTipoLabel">Tipo de Disciplina</span>
+            <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="ms-panel" id="msTipoPanel">
+            <label class="ms-option"><input type="checkbox" value="ace"> Ace</label>
+            <label class="ms-option"><input type="checkbox" value="estagio"> Estágio</label>
+            <label class="ms-option"><input type="checkbox" value="padrao_unificada"> Padrão Unificada</label>
+            <label class="ms-option"><input type="checkbox" value="projeto_integrador"> Projeto Integrador</label>
+            <label class="ms-option"><input type="checkbox" value="pratica_conectada"> Prática Conectada</label>
+            <label class="ms-option"><input type="checkbox" value="introducao_ao_curso"> Introdução ao Curso</label>
+            <label class="ms-option"><input type="checkbox" value="pap"> Proj. em Amb. Prof.</label>
+            <label class="ms-option"><input type="checkbox" value="outro"> Outro</label>
+          </div>
+        </div>
+        <!-- Status -->
+        <div class="ms-wrap" id="msStatusWrap">
+          <button type="button" class="ms-btn" id="msStatusBtn">
+            <span class="ms-label" id="msStatusLabel">Status</span>
+            <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="ms-panel" id="msStatusPanel">
+            <label class="ms-option"><input type="checkbox" value="comum"> Disciplina Comum</label>
+            <label class="ms-option"><input type="checkbox" value="antiga"> Disciplina Origem</label>
+            <label class="ms-option"><input type="checkbox" value="atualizacao"> Atualização do Zero</label>
+            <label class="ms-option"><input type="checkbox" value="paliativa"> Disciplina Paliativa</label>
+          </div>
+        </div>
       </div>
     </div>
   </section>

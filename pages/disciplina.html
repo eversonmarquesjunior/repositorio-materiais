@@ -171,6 +171,61 @@
           </div>
         </div>
 
+        <!-- Plano de Ensino -->
+        <div class="detail-card" id="cardPlanoEnsino">
+          <div class="dc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <h2 class="dc-title">PLANO DE ENSINO</h2>
+            <button id="planoToggleBtn" class="plano-toggle-btn" title="Expandir / Recolher" aria-expanded="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div id="planoHeaderBtns" class="plano-header-btns" style="display:none">
+              <button id="planoEditBtn" class="obs-edit-btn" title="Alterar link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button id="planoDeleteBtn" class="obs-edit-btn" title="Remover link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="dc-body">
+            <!-- Formulário de link -->
+            <div id="planoLinkForm" class="plano-link-form">
+              <input type="url" id="planoLinkInput" class="plano-link-input" placeholder="Cole o link do PDF (Google Drive, SharePoint, Dropbox…)" />
+              <button id="planoLinkSave" class="btn btn-primary btn-sm">Salvar</button>
+              <button id="planoLinkCancel" class="btn btn-secondary btn-sm" style="display:none">Cancelar</button>
+            </div>
+            <!-- Visualizador -->
+            <div id="planoViewer" style="display:none">
+              <div class="plano-file-bar" id="planoFileBar"></div>
+              <iframe id="planoIframe" class="plano-iframe" src="" allow="fullscreen"></iframe>
+              <div id="planoNoEmbed" class="plano-no-embed" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36" style="opacity:.35">
+                  <path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/>
+                  <path d="M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                <p>Este arquivo não pode ser visualizado aqui.</p>
+                <a id="planoNoEmbedLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Abrir arquivo ↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Histórico de Atualizações -->
         <div class="detail-card" id="cardHistorico">
           <div class="dc-header">
@@ -327,13 +382,13 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="editModelo">Modelo *</label>
-              <select id="editModelo" name="modelo" required>
-                <option value="">Selecione um modelo</option>
-                <option value="Graduação">Graduação</option>
-                <option value="Pós-graduação">Pós-graduação</option>
-                <option value="Curso Inova">Curso Inova</option>
-              </select>
+              <label>Modelo *</label>
+              <div id="editModeloCheckboxes" class="modelo-checkboxes">
+                <label class="modelo-check-label"><input type="checkbox" class="modelo-cb" value="Graduação"> Graduação</label>
+                <label class="modelo-check-label"><input type="checkbox" class="modelo-cb" value="Pós-graduação"> Pós-graduação</label>
+                <label class="modelo-check-label"><input type="checkbox" class="modelo-cb" value="Curso Inova"> Curso Inova</label>
+                <label class="modelo-check-label"><input type="checkbox" class="modelo-cb" value="Graduação & Pós"> Graduação &amp; Pós</label>
+              </div>
             </div>
             <div class="form-group">
               <label for="editStatus">Tipo de Disciplina</label>
@@ -355,7 +410,7 @@
                 <select id="editModulo" name="modulo" style="flex:1; min-width:0">
                   <option value="">Selecione um status</option>
                   <option value="comum">Disciplina Comum</option>
-                  <option value="antiga">Disciplina Antiga</option>
+                  <option value="antiga">Disciplina Origem</option>
                   <option value="atualizacao">Atualização do Zero</option>
                   <option value="paliativa">Disciplina Paliativa</option>
                 </select>

@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initEditModal(disc);
   initDeleteBtn(disc);
   initObservacoes(disc);
+  initPlanoEnsino(disc);
   initHistorico(disc);
   initRetornos(disc);
 });
@@ -51,7 +52,7 @@ function renderDetail(d) {
   // Badges
   const statusMap = {
     comum:        { cls: 'badge-status-ativo',   label: 'Disciplina Comum' },
-    antiga:       { cls: 'badge-status-inativo', label: 'Disciplina Antiga' },
+    antiga:       { cls: 'badge-status-inativo', label: 'Disciplina Origem' },
     atualizacao:  { cls: 'badge-status-revisao', label: 'Atualização do Zero' },
     paliativa:    { cls: 'badge-status-revisao', label: 'Disciplina Paliativa' },
   };
@@ -67,8 +68,11 @@ function renderDetail(d) {
     outro:               'Outro',
   };
   const tipoLabel = tipoMap[d.tipo_disciplina] || d.tipo_disciplina || '';
+  const modeloBadges = d.modelo
+    ? d.modelo.split(',').map(m => { const v = m.trim(); return `<span class="badge ${v === 'Graduação & Pós' ? 'badge-area-grad-pos' : 'badge-area'}">${esc(v)}</span>`; }).join('')
+    : '';
   document.getElementById('detailBadges').innerHTML = [
-    d.modelo  ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : '',
+    modeloBadges,
     tipoLabel ? `<span class="badge badge-periodo">${esc(tipoLabel)}</span>` : '',
     st        ? `<span class="badge ${st.cls}">${st.label}</span>` : '',
   ].join('');
@@ -126,6 +130,9 @@ function renderDetail(d) {
       </a>
     </div>
   `).join('');
+
+  // Plano de Ensino
+  renderPlanoEnsino(d);
 
   // Observações
   renderObservacoes(d);
@@ -677,7 +684,7 @@ function showCard(cardId, fieldId, text) {
 function statusLabel(s) {
   return {
     comum: 'Disciplina Comum', atualizacao: 'Atualização do Zero',
-    paliativa: 'Disciplina Paliativa', antiga: 'Disciplina Antiga',
+    paliativa: 'Disciplina Paliativa', antiga: 'Disciplina Origem',
     ace: 'Ace', estagio: 'Estágio', padrao_unificada: 'Padrão Unificada',
     projeto_integrador: 'Projeto Integrador', pratica_conectada: 'Prática Conectada',
     introducao_ao_curso: 'Introdução ao Curso', pap: 'Proj. em Amb. Profissional',
@@ -874,11 +881,14 @@ function initEditModal(d) {
 
 function fillEditForm(d) {
   document.getElementById('editNome').value    = d.nome           || '';
-  document.getElementById('editModelo').value  = d.modelo         || '';
+  const modeloValues = (d.modelo || '').split(',').map(s => s.trim()).filter(Boolean);
+  document.querySelectorAll('#editModeloCheckboxes .modelo-cb').forEach(cb => {
+    cb.checked = modeloValues.includes(cb.value);
+  });
   document.getElementById('editStatus').value  = d.tipo_disciplina || '';
 
   const anoAntigaInput = document.getElementById('editAnoAntiga');
-  const isAntiga = d.status && (d.status === 'antiga' || d.status.startsWith('Disciplina Antiga'));
+  const isAntiga = d.status && (d.status === 'antiga' || d.status.startsWith('Disciplina Origem') || d.status.startsWith('Disciplina Antiga'));
   if (isAntiga) {
     document.getElementById('editModulo').value = 'antiga';
     const match = d.status.match(/(\d{4})$/);
@@ -942,20 +952,20 @@ async function saveEditedDiscipline(d, closeModal) {
   };
 
   const nome = val('editNome');
-  const area = val('editModelo');
-  if (!nome || !area) {
+  const modelo = Array.from(document.querySelectorAll('#editModeloCheckboxes .modelo-cb:checked')).map(cb => cb.value).join(', ');
+  if (!nome || !modelo) {
     showToast('Por favor, preencha os campos obrigatórios (Nome e Modelo).', 'error');
     return;
   }
 
   const updates = {
     nome:            nome,
-    modelo:          area,
+    modelo:          modelo,
     tipo_disciplina: val('editStatus'),
     status:          (() => {
       const m   = val('editModulo');
       const ano = (document.getElementById('editAnoAntiga') || {}).value?.trim();
-      return m === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : m;
+      return m === 'antiga' && ano ? `Disciplina Origem - ${ano}` : m;
     })(),
     link_moodle_wae: toggleVal('editLinkMoodleWAE'),
     link_dp_wae:     toggleVal('editLinkDPWAE'),
@@ -1010,4 +1020,133 @@ function showToast(text, type) {
   };
   toast.querySelector('.toast-close').addEventListener('click', remove);
   setTimeout(remove, isSuccess ? 4000 : 6000);
+}
+
+/* ── PLANO DE ENSINO ─────────────────────────────────────── */
+function toPlanoEmbedUrl(url) {
+  if (!url) return '';
+
+  // Google Drive: embed nativo
+  const gd = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+  if (gd) return `https://drive.google.com/file/d/${gd[1]}/preview`;
+
+  // Dropbox: força download direto com dl=1 e usa Google Docs Viewer
+  if (url.includes('dropbox.com')) {
+    let direct = url.replace(/([?&])(dl|raw)=\d/, '$1dl=1');
+    if (!/[?&](dl|raw)=/.test(direct)) {
+      direct += (direct.includes('?') ? '&' : '?') + 'dl=1';
+    }
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(direct)}&embedded=true`;
+  }
+
+  return url;
+}
+
+function urlDisplayName(url) {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split('/').filter(Boolean);
+    const last = decodeURIComponent(parts[parts.length - 1] || '');
+    return last || url;
+  } catch {
+    return url;
+  }
+}
+
+function renderPlanoEnsino(d) {
+  const linkForm   = document.getElementById('planoLinkForm');
+  const viewer     = document.getElementById('planoViewer');
+  const headerBtns = document.getElementById('planoHeaderBtns');
+  const iframe     = document.getElementById('planoIframe');
+  const fileBar    = document.getElementById('planoFileBar');
+  const noEmbed    = document.getElementById('planoNoEmbed');
+  const input      = document.getElementById('planoLinkInput');
+  const cancelBtn  = document.getElementById('planoLinkCancel');
+  if (!linkForm || !viewer) return;
+
+  if (d.plano_ensino_url) {
+    linkForm.style.display   = 'none';
+    viewer.style.display     = '';
+    headerBtns.style.display = 'flex';
+    if (cancelBtn) cancelBtn.style.display = 'none';
+
+    const displayName = urlDisplayName(d.plano_ensino_url);
+    const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+    fileBar.innerHTML = `${linkSVG}<span title="${esc(d.plano_ensino_url)}">${esc(displayName)}</span><a href="${esc(d.plano_ensino_url)}" target="_blank" rel="noopener noreferrer" class="plano-open-btn">Abrir ↗</a>`;
+
+    const embedSrc = toPlanoEmbedUrl(d.plano_ensino_url);
+    if (embedSrc) {
+      iframe.style.display = '';
+      if (noEmbed) noEmbed.style.display = 'none';
+      if (iframe.src !== embedSrc) iframe.src = embedSrc;
+    } else {
+      iframe.style.display = 'none';
+      iframe.src = 'about:blank';
+      if (noEmbed) {
+        noEmbed.style.display = '';
+        const noEmbedLink = document.getElementById('planoNoEmbedLink');
+        if (noEmbedLink) noEmbedLink.href = d.plano_ensino_url;
+      }
+    }
+  } else {
+    linkForm.style.display   = '';
+    viewer.style.display     = 'none';
+    headerBtns.style.display = 'none';
+    if (input) input.value   = '';
+    if (iframe) iframe.src   = '';
+  }
+}
+
+function initPlanoEnsino(d) {
+  const saveBtn   = document.getElementById('planoLinkSave');
+  const editBtn   = document.getElementById('planoEditBtn');
+  const deleteBtn = document.getElementById('planoDeleteBtn');
+  const input     = document.getElementById('planoLinkInput');
+  const linkForm  = document.getElementById('planoLinkForm');
+  const cancelBtn = document.getElementById('planoLinkCancel');
+  if (!saveBtn) return;
+
+  const toggleBtn = document.getElementById('planoToggleBtn');
+  const body      = document.querySelector('#cardPlanoEnsino .dc-body');
+  if (toggleBtn && body) {
+    toggleBtn.addEventListener('click', () => {
+      const expanded = body.classList.toggle('expanded');
+      toggleBtn.setAttribute('aria-expanded', expanded);
+    });
+  }
+
+saveBtn.addEventListener('click', async () => {
+    const url = input.value.trim();
+    if (!url) { showToast('Cole um link válido antes de salvar.', 'error'); return; }
+
+    const { error } = await db.from('disciplinas').update({ plano_ensino_url: url }).eq('id', d.id);
+    if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+
+    d.plano_ensino_url = url;
+    renderPlanoEnsino(d);
+    if (body) { body.classList.add('expanded'); toggleBtn?.setAttribute('aria-expanded', 'true'); }
+    showToast('Plano de ensino salvo!', 'success');
+  });
+
+  editBtn.addEventListener('click', () => {
+    input.value              = d.plano_ensino_url || '';
+    linkForm.style.display   = '';
+    cancelBtn.style.display  = '';
+    document.getElementById('planoViewer').style.display     = 'none';
+    document.getElementById('planoHeaderBtns').style.display = 'none';
+    input.focus();
+  });
+
+  cancelBtn.addEventListener('click', () => renderPlanoEnsino(d));
+
+  deleteBtn.addEventListener('click', async () => {
+    if (!confirm('Remover o plano de ensino desta disciplina?')) return;
+    const { error } = await db.from('disciplinas').update({ plano_ensino_url: null }).eq('id', d.id);
+    if (error) { showToast('Erro ao remover: ' + error.message, 'error'); return; }
+    d.plano_ensino_url = null;
+    renderPlanoEnsino(d);
+    showToast('Plano de ensino removido.', 'success');
+  });
+
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn.click(); });
 }

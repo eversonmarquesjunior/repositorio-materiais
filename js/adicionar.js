@@ -162,12 +162,12 @@ async function addNewDiscipline() {
   // Coleta dados do formulário
   const formData = {
     nome: document.getElementById('nome').value.trim(),
-    modelo: document.getElementById('modelo').value.trim(),
+    modelo: Array.from(document.querySelectorAll('#modeloCheckboxes .modelo-cb:checked')).map(cb => cb.value).join(', '),
     tipo_disciplina: document.getElementById('status').value,
     status: (() => {
       const m   = document.getElementById('modulo').value;
       const ano = document.getElementById('anoAntiga').value.trim();
-      return m === 'antiga' && ano ? `Disciplina Antiga - ${ano}` : m;
+      return m === 'antiga' && ano ? `Disciplina Origem - ${ano}` : m;
     })(),
     link_moodle_wae: toggleVal('linkMoodleWAE'),
     link_dp_wae:     toggleVal('linkDPWAE'),

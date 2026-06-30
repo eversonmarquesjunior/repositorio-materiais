@@ -118,13 +118,13 @@
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label for="modelo">Modelo *</label>
-                <select id="modelo" name="modelo" required>
-                  <option value="">Selecione um modelo</option>
-                  <option value="Graduação">Graduação</option>
-                  <option value="Pós-graduação">Pós-graduação</option>
-                  <option value="Curso Inova">Curso Inova</option>
-                </select>
+                <label>Modelo *</label>
+                <div id="modeloCheckboxes" class="modelo-checkboxes">
+                  <label class="modelo-check-label"><input type="checkbox" class="modelo-cb" value="Graduação"> Graduação</label>
+                  <label class="modelo-check-label"><input type="checkbox" class="modelo-cb" value="Pós-graduação"> Pós-graduação</label>
+                  <label class="modelo-check-label"><input type="checkbox" class="modelo-cb" value="Curso Inova"> Curso Inova</label>
+                  <label class="modelo-check-label"><input type="checkbox" class="modelo-cb" value="Graduação & Pós"> Graduação &amp; Pós</label>
+                </div>
               </div>
               <div class="form-group">
                 <label for="status">Tipo de Disciplina (especificar quando necessário)</label>
@@ -146,7 +146,7 @@
                   <select id="modulo" name="modulo" style="flex:1; min-width:0">
                     <option value="">Selecione um status</option>
                     <option value="comum">Disciplina Comum</option>
-                    <option value="antiga">Disciplina Antiga</option>
+                    <option value="antiga">Disciplina Origem</option>
                     <option value="atualizacao">Atualização do Zero</option>
                     <option value="paliativa">Disciplina Paliativa</option>
                   </select>

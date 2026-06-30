@@ -8,9 +8,9 @@ const state = {
   sort:          'nome',
   viewMode:      'list',
   results:       [],
-  filterModelo:  '',
-  filterTipo:    '',
-  filterStatus:  '',
+  filterModelo:  [],
+  filterTipo:    [],
+  filterStatus:  [],
 };
 
 let searchTimeout = null;
@@ -28,9 +28,6 @@ const loadingState   = document.getElementById('loadingState');
 const sortSelect     = document.getElementById('sortSelect');
 const viewListBtn    = document.getElementById('viewList');
 const viewGridBtn    = document.getElementById('viewGrid');
-const filterModelo   = document.getElementById('filterModelo');
-const filterTipo     = document.getElementById('filterTipo');
-const filterStatus   = document.getElementById('filterStatus');
 
 /* ── INICIALIZAÇÃO ───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -46,9 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   sortSelect.addEventListener('change', onSortChange);
   viewListBtn.addEventListener('click', () => setView('list'));
   viewGridBtn.addEventListener('click', () => setView('grid'));
-  filterModelo.addEventListener('change', onFilterChange);
-  filterTipo.addEventListener('change', onFilterChange);
-  filterStatus.addEventListener('change', onFilterChange);
+  initMultiFilters();
 });
 
 /* ── TEMA ────────────────────────────────────────────────── */
@@ -57,23 +52,55 @@ function initTheme() {
   localStorage.removeItem('repo-theme');
 }
 
-/* ── FILTROS ─────────────────────────────────────────────── */
+/* ── FILTROS MULTI-SELECT ────────────────────────────────── */
 function hasActiveFilters() {
-  return !!(state.filterModelo || state.filterTipo || state.filterStatus);
+  return !!(state.filterModelo.length || state.filterTipo.length || state.filterStatus.length);
 }
 
-function onFilterChange() {
-  state.filterModelo = filterModelo.value;
-  state.filterTipo   = filterTipo.value;
-  state.filterStatus = filterStatus.value;
-  [filterModelo, filterTipo, filterStatus].forEach(sel => {
-    sel.classList.toggle('filter-active', !!sel.value);
+function initMultiFilters() {
+  initMultiSelect('msModeloBtn', 'msModeloPanel', 'msModeloLabel', 'Modelo',           'filterModelo');
+  initMultiSelect('msTipoBtn',   'msTipoPanel',   'msTipoLabel',   'Tipo de Disciplina','filterTipo');
+  initMultiSelect('msStatusBtn', 'msStatusPanel', 'msStatusLabel', 'Status',            'filterStatus');
+
+  document.addEventListener('click', () => closeAllMultiSelects());
+}
+
+function initMultiSelect(btnId, panelId, labelId, placeholder, stateKey) {
+  const btn   = document.getElementById(btnId);
+  const panel = document.getElementById(panelId);
+  const label = document.getElementById(labelId);
+  if (!btn || !panel) return;
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = panel.classList.contains('ms-open');
+    closeAllMultiSelects();
+    if (!isOpen) { panel.classList.add('ms-open'); btn.classList.add('ms-open'); }
   });
-  if (state.query.length >= 2 || hasActiveFilters()) {
-    runSearch();
-  } else {
-    showEmpty();
-  }
+
+  panel.addEventListener('click', e => e.stopPropagation());
+
+  panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const vals = Array.from(panel.querySelectorAll('input:checked')).map(c => c.value);
+      state[stateKey] = vals;
+      if (!vals.length) {
+        label.textContent = placeholder;
+      } else if (vals.length === 1) {
+        label.textContent = cb.closest('.ms-option').textContent.trim();
+      } else {
+        label.textContent = `${placeholder} (${vals.length})`;
+      }
+      btn.classList.toggle('filter-active', vals.length > 0);
+      if (state.query.length >= 2 || hasActiveFilters()) runSearch();
+      else showEmpty();
+    });
+  });
+}
+
+function closeAllMultiSelects() {
+  document.querySelectorAll('.ms-panel').forEach(p => p.classList.remove('ms-open'));
+  document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('ms-open'));
 }
 
 /* ── BUSCA ───────────────────────────────────────────────── */
@@ -123,7 +150,7 @@ function runSearch() {
 function matchesStatus(dbStatus, filterVal) {
   if (!dbStatus) return false;
   if (dbStatus === filterVal) return true;
-  if (filterVal === 'antiga' && dbStatus.startsWith('Disciplina Antiga')) return true;
+  if (filterVal === 'antiga' && (dbStatus.startsWith('Disciplina Origem') || dbStatus.startsWith('Disciplina Antiga'))) return true;
   return false;
 }
 
@@ -131,9 +158,9 @@ function filterAndSort() {
   const q = normalizeStr(state.query);
 
   let list = window.disciplinas.filter(d => {
-    const matchModelo = !state.filterModelo || d.modelo === state.filterModelo;
-    const matchTipo   = !state.filterTipo   || d.tipo_disciplina === state.filterTipo;
-    const matchStatus = !state.filterStatus || matchesStatus(d.status, state.filterStatus);
+    const matchModelo = !state.filterModelo.length || state.filterModelo.some(f => d.modelo && d.modelo.split(',').map(s => s.trim()).includes(f));
+    const matchTipo   = !state.filterTipo.length   || state.filterTipo.includes(d.tipo_disciplina);
+    const matchStatus = !state.filterStatus.length  || state.filterStatus.some(f => matchesStatus(d.status, f));
     const matchQuery  = !q || normalizeStr(d.nome).includes(q);
     return matchModelo && matchTipo && matchStatus && matchQuery;
   });
@@ -244,7 +271,7 @@ function cardHTML(d) {
     comum:        '<span class="badge badge-status-ativo">Disciplina Comum</span>',
     atualizacao:  '<span class="badge badge-status-revisao">Atualização do Zero</span>',
     paliativa:    '<span class="badge badge-status-revisao">Disciplina Paliativa</span>',
-    antiga:       '<span class="badge badge-status-inativo">Disciplina Antiga</span>',
+    antiga:       '<span class="badge badge-status-inativo">Disciplina Origem</span>',
   };
   const statusLabel = statusBadges[d.status]
     || (d.status ? `<span class="badge badge-status-inativo">${esc(d.status)}</span>` : '');
@@ -312,7 +339,7 @@ function cardHTML(d) {
       </div>
       <div class="card-right">
         <div class="card-badges">
-          ${d.modelo ? `<span class="badge badge-area">${esc(d.modelo)}</span>` : ''}
+          ${d.modelo ? d.modelo.split(',').map(m => { const v = m.trim(); return `<span class="badge ${v === 'Graduação & Pós' ? 'badge-area-grad-pos' : 'badge-area'}">${esc(v)}</span>`; }).join('') : ''}
           ${tipoBadge}
           ${statusLabel}
           ${d._isTest ? '<span class="badge badge-test">TESTE</span>' : ''}
