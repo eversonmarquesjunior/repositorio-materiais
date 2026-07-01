@@ -271,7 +271,7 @@ function cardHTML(d) {
     comum:        '<span class="badge badge-status-ativo">Disciplina Comum</span>',
     atualizacao:  '<span class="badge badge-status-revisao">Atualização do Zero</span>',
     paliativa:    '<span class="badge badge-status-revisao">Disciplina Paliativa</span>',
-    antiga:       '<span class="badge badge-status-inativo">Disciplina Origem</span>',
+    antiga:       '<span class="badge badge-status-inativo">Disciplina Origem Grad.</span>',
   };
   const statusLabel = statusBadges[d.status]
     || (d.status ? `<span class="badge badge-status-inativo">${esc(d.status)}</span>` : '');
@@ -343,7 +343,7 @@ function cardHTML(d) {
           ${tipoBadge}
           ${statusLabel}
           ${d._isTest ? '<span class="badge badge-test">TESTE</span>' : ''}
-          ${d.plano_ensino_url ? '<span class="badge-plano-row"><span class="badge badge-plano-ensino">Plano de Ensino</span></span>' : ''}
+          ${d.plano_ensino_url ? `<span class="badge-plano-row"><span class="badge badge-plano-ensino">Plano de Ensino<svg class="badge-plano-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="M20 6L9 17l-5-5"/></svg></span></span>` : ''}
         </div>
         ${mesmoMaterialBadge(d)}
       </div>

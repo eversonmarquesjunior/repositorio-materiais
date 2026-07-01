@@ -604,7 +604,8 @@ svg { flex-shrink: 0; }
   white-space: nowrap;
 }
 .badge-area          { background: #dbfee7; color: #1d4ed8; }
-.badge-area-grad-pos, .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+.badge-area-grad-pos { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+.badge-plano-ensino { background: var(--accent-light); color: var(--accent); border: 1.5px solid var(--accent); }
 .badge-periodo { background: #dcfce7; color: #15803d; }
 .badge-carga   { background: #fef3c7; color: #92400e; }
 .badge-status-ativo    { background: #d1fae5; color: #065f46; }
@@ -619,7 +620,7 @@ svg { flex-shrink: 0; }
 }
 .test-import-banner a { color: #92400e; font-weight: 600; text-decoration: underline; }
 [data-theme="dark"] .badge-area          { background: #1e3a8a; color: #93c5fd; }
-[data-theme="dark"] .badge-area-grad-pos, [data-theme="dark"] .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+[data-theme="dark"] .badge-area-grad-pos { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
 [data-theme="dark"] .badge-periodo { background: #14532d; color: #86efac; }
 [data-theme="dark"] .badge-carga   { background: #451a03; color: #fcd34d; }
 [data-theme="dark"] .badge-status-ativo   { background: #064e3b; color: #6ee7b7; }
@@ -631,7 +632,8 @@ svg { flex-shrink: 0; }
 .disc-card .badge-carga,
 .disc-card .badge-status-ativo,
 .disc-card .badge-status-inativo,
-.disc-card .badge-status-revisao {
+.disc-card .badge-status-revisao,
+.disc-card .badge-plano-ensino {
   background: var(--accent);
   color: #ffffff;
   border: none;
@@ -642,21 +644,23 @@ svg { flex-shrink: 0; }
 [data-theme="dark"] .disc-card .badge-carga,
 [data-theme="dark"] .disc-card .badge-status-ativo,
 [data-theme="dark"] .disc-card .badge-status-inativo,
-[data-theme="dark"] .disc-card .badge-status-revisao {
+[data-theme="dark"] .disc-card .badge-status-revisao,
+[data-theme="dark"] .disc-card .badge-plano-ensino {
   background: transparent;
   color: #93c5fd;
   border: 1px solid #93c5fd;
 }
 
-.disc-card .badge-area-grad-pos, .disc-card .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
-[data-theme="dark"] .disc-card .badge-area-grad-pos, [data-theme="dark"] .disc-card .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+.disc-card .badge-area-grad-pos { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+[data-theme="dark"] .disc-card .badge-area-grad-pos { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
 
 /* Badges na página de detalhe: fundo azul, fonte branca */
 .detail-badges .badge-area,
 .detail-badges .badge-periodo,
 .detail-badges .badge-status-ativo,
 .detail-badges .badge-status-inativo,
-.detail-badges .badge-status-revisao {
+.detail-badges .badge-status-revisao,
+.detail-badges .badge-plano-ensino {
   background: var(--accent);
   color: #ffffff;
   border: none;
@@ -666,16 +670,18 @@ svg { flex-shrink: 0; }
 [data-theme="dark"] .detail-badges .badge-periodo,
 [data-theme="dark"] .detail-badges .badge-status-ativo,
 [data-theme="dark"] .detail-badges .badge-status-inativo,
-[data-theme="dark"] .detail-badges .badge-status-revisao {
+[data-theme="dark"] .detail-badges .badge-status-revisao,
+[data-theme="dark"] .detail-badges .badge-plano-ensino {
   background: var(--accent);
   color: #ffffff;
   border: none;
 }
 
-.detail-badges .badge-area-grad-pos, .detail-badges .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
-[data-theme="dark"] .detail-badges .badge-area-grad-pos, [data-theme="dark"] .detail-badges .badge-plano-ensino { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+.detail-badges .badge-area-grad-pos { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
+[data-theme="dark"] .detail-badges .badge-area-grad-pos { background: #ffffff; color: #b8860b; border: 1.5px solid #b8860b; }
 
 .badge-plano-row { flex-basis: 100%; display: flex; justify-content: flex-end; }
+.badge-plano-check { color: #ffffff; flex-shrink: 0; }
 
 /* ─── DARK MODE: correções de cores hardcoded ─── */
 [data-theme="dark"] .search-field {
@@ -789,7 +795,7 @@ a.bc-link:hover { color: var(--accent); }
 ═══════════════════════════════════════ */
 .detail-section { padding: 32px 24px 80px; }
 .detail-inner {
-  max-width: 1100px; margin: 0 auto;
+  max-width: 1280px; margin: 0 auto;
   display: grid; grid-template-columns: 1fr 280px; gap: 28px; align-items: start;
 }
 @media (max-width: 768px) {

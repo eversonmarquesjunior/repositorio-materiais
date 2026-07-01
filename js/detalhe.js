@@ -52,7 +52,7 @@ function renderDetail(d) {
   // Badges
   const statusMap = {
     comum:        { cls: 'badge-status-ativo',   label: 'Disciplina Comum' },
-    antiga:       { cls: 'badge-status-inativo', label: 'Disciplina Origem' },
+    antiga:       { cls: 'badge-status-inativo', label: 'Disciplina Origem Grad.' },
     atualizacao:  { cls: 'badge-status-revisao', label: 'Atualização do Zero' },
     paliativa:    { cls: 'badge-status-revisao', label: 'Disciplina Paliativa' },
   };
@@ -75,7 +75,7 @@ function renderDetail(d) {
     modeloBadges,
     tipoLabel ? `<span class="badge badge-periodo">${esc(tipoLabel)}</span>` : '',
     st        ? `<span class="badge ${st.cls}">${st.label}</span>` : '',
-    d.plano_ensino_url ? '<span class="badge-plano-row"><span class="badge badge-plano-ensino">Plano de Ensino</span></span>' : '',
+    d.plano_ensino_url ? `<span class="badge-plano-row"><span class="badge badge-plano-ensino">Plano de Ensino<svg class="badge-plano-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="M20 6L9 17l-5-5"/></svg></span></span>` : '',
   ].join('');
 
   // Badge "Mesmo material de"
@@ -685,7 +685,7 @@ function showCard(cardId, fieldId, text) {
 function statusLabel(s) {
   return {
     comum: 'Disciplina Comum', atualizacao: 'Atualização do Zero',
-    paliativa: 'Disciplina Paliativa', antiga: 'Disciplina Origem',
+    paliativa: 'Disciplina Paliativa', antiga: 'Disciplina Origem Grad.',
     ace: 'Ace', estagio: 'Estágio', padrao_unificada: 'Padrão Unificada',
     projeto_integrador: 'Projeto Integrador', pratica_conectada: 'Prática Conectada',
     introducao_ao_curso: 'Introdução ao Curso', pap: 'Proj. em Amb. Profissional',
@@ -966,7 +966,7 @@ async function saveEditedDiscipline(d, closeModal) {
     status:          (() => {
       const m   = val('editModulo');
       const ano = (document.getElementById('editAnoAntiga') || {}).value?.trim();
-      return m === 'antiga' && ano ? `Disciplina Origem - ${ano}` : m;
+      return m === 'antiga' && ano ? `Disciplina Origem Grad. - ${ano}` : m;
     })(),
     link_moodle_wae: toggleVal('editLinkMoodleWAE'),
     link_dp_wae:     toggleVal('editLinkDPWAE'),

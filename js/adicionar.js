@@ -167,7 +167,7 @@ async function addNewDiscipline() {
     status: (() => {
       const m   = document.getElementById('modulo').value;
       const ano = document.getElementById('anoAntiga').value.trim();
-      return m === 'antiga' && ano ? `Disciplina Origem - ${ano}` : m;
+      return m === 'antiga' && ano ? `Disciplina Origem Grad. - ${ano}` : m;
     })(),
     link_moodle_wae: toggleVal('linkMoodleWAE'),
     link_dp_wae:     toggleVal('linkDPWAE'),
