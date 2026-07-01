@@ -3,7 +3,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  initTheme();
   document.getElementById('footerYear').textContent = new Date().getFullYear();
 
   const id = new URLSearchParams(window.location.search).get('id');
@@ -669,12 +668,6 @@ function showNotFound() {
   `;
 }
 
-/* ── TEMA ────────────────────────────────────────────────── */
-function initTheme() {
-  document.documentElement.setAttribute('data-theme', 'light');
-  localStorage.removeItem('repo-theme');
-}
-
 /* ── HELPERS ─────────────────────────────────────────────── */
 function showCard(cardId, fieldId, text) {
   if (!text || !text.trim()) return;
@@ -1109,8 +1102,10 @@ function initPlanoEnsino(d) {
 
   const toggleBtn = document.getElementById('planoToggleBtn');
   const body      = document.querySelector('#cardPlanoEnsino .dc-body');
-  if (toggleBtn && body) {
-    toggleBtn.addEventListener('click', () => {
+  const header    = document.querySelector('#cardPlanoEnsino .dc-header');
+  if (toggleBtn && body && header) {
+    header.addEventListener('click', e => {
+      if (e.target.closest('#planoHeaderBtns')) return;
       const expanded = body.classList.toggle('expanded');
       toggleBtn.setAttribute('aria-expanded', expanded);
     });

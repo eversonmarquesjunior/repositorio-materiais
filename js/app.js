@@ -31,8 +31,8 @@ const viewGridBtn    = document.getElementById('viewGrid');
 
 /* ── INICIALIZAÇÃO ───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
-  initTheme();
   await loadDisciplinas();
+  renderEmptyStats();
   restoreFromURL();
   document.getElementById('footerYear').textContent = new Date().getFullYear();
 
@@ -43,14 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   sortSelect.addEventListener('change', onSortChange);
   viewListBtn.addEventListener('click', () => setView('list'));
   viewGridBtn.addEventListener('click', () => setView('grid'));
+  document.getElementById('clearFiltersBtn')?.addEventListener('click', clearAllFilters);
   initMultiFilters();
 });
-
-/* ── TEMA ────────────────────────────────────────────────── */
-function initTheme() {
-  document.documentElement.setAttribute('data-theme', 'light');
-  localStorage.removeItem('repo-theme');
-}
 
 /* ── FILTROS MULTI-SELECT ────────────────────────────────── */
 function hasActiveFilters() {
@@ -126,6 +121,25 @@ function clearSearch() {
   searchInput.focus();
   if (hasActiveFilters()) runSearch();
   else showEmpty();
+}
+
+function clearAllFilters() {
+  state.query = '';
+  state.filterModelo = [];
+  state.filterTipo = [];
+  state.filterStatus = [];
+  if (searchTimeout) { clearTimeout(searchTimeout); searchTimeout = null; }
+  searchInput.value = '';
+  clearBtn.style.display = 'none';
+
+  document.querySelectorAll('.ms-panel input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+  document.getElementById('msModeloLabel').textContent = 'Modelo';
+  document.getElementById('msTipoLabel').textContent = 'Tipo de Disciplina';
+  document.getElementById('msStatusLabel').textContent = 'Status';
+  document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('filter-active'));
+
+  showEmpty();
+  updateURL();
 }
 
 function runSearch() {
@@ -376,6 +390,47 @@ function hideAll() {
   resultsToolbar.style.display = 'none';
 }
 function showEmpty()   { hideAll(); emptyState.style.display = 'flex'; }
+
+function countByModelo(list, modelo) {
+  return list.filter(d => d.modelo && d.modelo.split(',').map(s => s.trim()).includes(modelo)).length;
+}
+
+const BOOK_HTML = `
+  <div class="book">
+    <div class="book__pg-shadow"></div>
+    <div class="book__pg"></div>
+    <div class="book__pg book__pg--2"></div>
+    <div class="book__pg book__pg--3"></div>
+    <div class="book__pg book__pg--4"></div>
+    <div class="book__pg book__pg--5"></div>
+  </div>
+`;
+
+function renderEmptyStats() {
+  const el = document.getElementById('emptyStatsGrid');
+  if (!el) return;
+  const list = window.disciplinas || [];
+  if (!list.length) { el.innerHTML = ''; return; }
+
+  const stats = [
+    { label: 'Total de Disciplinas', value: list.length },
+    { label: 'Graduação',        value: countByModelo(list, 'Graduação') },
+    { label: 'Pós-graduação',    value: countByModelo(list, 'Pós-graduação') },
+    { label: 'Graduação & Pós',  value: countByModelo(list, 'Graduação & Pós') },
+  ].filter(s => s.value > 0);
+
+  const cards = stats.map(s => `
+    <div class="stat-card stat-card--highlight">
+      <span class="stat-number">${s.value}</span>
+      <span class="stat-label">${esc(s.label)}</span>
+    </div>
+  `);
+
+  // Livro animado inserido no meio dos cards: Total, Graduação, [Livro], Pós-graduação, Graduação & Pós
+  cards.splice(Math.min(2, cards.length), 0, BOOK_HTML);
+
+  el.innerHTML = cards.join('');
+}
 function showLoading() { hideAll(); loadingState.style.display = 'flex'; }
 
 /* ── URL STATE ───────────────────────────────────────────── */
