@@ -396,13 +396,15 @@ function countByModelo(list, modelo) {
 }
 
 const BOOK_HTML = `
-  <div class="book">
-    <div class="book__pg-shadow"></div>
-    <div class="book__pg"></div>
-    <div class="book__pg book__pg--2"></div>
-    <div class="book__pg book__pg--3"></div>
-    <div class="book__pg book__pg--4"></div>
-    <div class="book__pg book__pg--5"></div>
+  <div class="book-anim-wrap">
+    <div class="book">
+      <div class="book__pg-shadow"></div>
+      <div class="book__pg"></div>
+      <div class="book__pg book__pg--2"></div>
+      <div class="book__pg book__pg--3"></div>
+      <div class="book__pg book__pg--4"></div>
+      <div class="book__pg book__pg--5"></div>
+    </div>
   </div>
 `;
 
@@ -421,7 +423,7 @@ function renderEmptyStats() {
 
   const cards = stats.map(s => `
     <div class="stat-card stat-card--highlight">
-      <span class="stat-number">${s.value}</span>
+      <span class="stat-number" data-count-to="${s.value}">0</span>
       <span class="stat-label">${esc(s.label)}</span>
     </div>
   `);
@@ -430,6 +432,33 @@ function renderEmptyStats() {
   cards.splice(Math.min(2, cards.length), 0, BOOK_HTML);
 
   el.innerHTML = cards.join('');
+
+  // Entrada escalonada dos cards
+  el.querySelectorAll(':scope > *').forEach((card, i) => {
+    card.classList.add('stat-anim-in');
+    card.style.animationDelay = `${i * 160}ms`;
+  });
+
+  animateStatCounts(el);
+}
+
+/* Anima os números dos cards de 0 até o valor final */
+function animateStatCounts(container) {
+  const numbers = container.querySelectorAll('.stat-number[data-count-to]');
+  const duration = 1600;
+
+  numbers.forEach(numEl => {
+    const target = parseInt(numEl.dataset.countTo, 10) || 0;
+    const start = performance.now();
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+      numEl.textContent = Math.round(eased * target);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
 }
 function showLoading() { hideAll(); loadingState.style.display = 'flex'; }
 
