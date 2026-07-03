@@ -68,7 +68,7 @@ function renderDetail(d) {
   };
   const tipoLabel = tipoMap[d.tipo_disciplina] || d.tipo_disciplina || '';
   const modeloBadges = d.modelo
-    ? d.modelo.split(',').map(m => { const v = m.trim(); return `<span class="badge ${v === 'Graduação & Pós' ? 'badge-area-grad-pos' : 'badge-area'}">${esc(v)}</span>`; }).join('')
+    ? d.modelo.split(',').map(m => { const v = m.trim(); return v === 'Graduação & Pós' ? `<span class="badge badge-area-grad-pos"><span class="badge-grad-text">${esc(v)}</span></span>` : `<span class="badge badge-area">${esc(v)}</span>`; }).join('')
     : '';
   document.getElementById('detailBadges').innerHTML = [
     modeloBadges,

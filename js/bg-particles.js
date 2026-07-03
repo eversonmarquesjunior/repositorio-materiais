@@ -137,7 +137,7 @@
   createStarField(document.getElementById('bgParticles'), {
     spacing: 42,
     starSize: 5,
-    color: '59, 91, 219',   // --accent
+    color: '255, 171, 0',   // --accent
     alpha: 0.28,
     repelRadius: 90,
     repelStrength: 34,

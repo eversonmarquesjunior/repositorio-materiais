@@ -133,7 +133,7 @@ function exportToExcel() {
       const cell = ws[cellRef];
       if (cell) {
         cell.l = { Target: url };
-        cell.s = { font: { color: { rgb: '0563C1' }, underline: true } };
+        cell.s = { font: { color: { rgb: 'FF8F00' }, underline: true } };
       }
     });
   });
@@ -188,13 +188,13 @@ function exportToPDF() {
     body,
     startY: metaY,
     styles: { fontSize: 6, cellPadding: 3, overflow: 'linebreak' },
-    headStyles: { fillColor: [59, 91, 219] },
+    headStyles: { fillColor: [255, 143, 0] },
     margin: { top: 30, left: 20, right: 20 },
     didDrawCell: data => {
       if (data.section !== 'body') return;
       const url = linkMap[`${data.row.index}_${data.column.index}`];
       if (url) {
-        doc.setTextColor(37, 99, 235);
+        doc.setTextColor(255, 143, 0);
         doc.textWithLink('Abrir', data.cell.x + 3, data.cell.y + data.cell.height / 2 + 2, { url });
         doc.setTextColor(0, 0, 0);
       }

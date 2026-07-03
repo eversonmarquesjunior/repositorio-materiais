@@ -287,7 +287,7 @@ function renderPreview({ detected, valid, skipped }, headers) {
       const cells = detFields.map(f => {
         const val = r[f] || '';
         return isUrl(val)
-          ? '<td><a href="' + esc(val) + '" target="_blank" rel="noopener" style="color:#3b82f6;text-decoration:underline">' + esc(val) + '</a></td>'
+          ? '<td><a href="' + esc(val) + '" target="_blank" rel="noopener" style="color:#ff8f00;text-decoration:underline">' + esc(val) + '</a></td>'
           : '<td title="' + esc(val) + '">' + esc(val) + '</td>';
       }).join('');
       return '<tr><td style="color:#94a3b8;width:36px">' + (i + 1) + '</td>' + cells + '</tr>';
@@ -502,7 +502,7 @@ function renderUpdatePreview() {
     const linkCells = detectedLinkFields.map(f => {
       const v = r.links[f];
       return v
-        ? '<td><a href="' + esc(v) + '" target="_blank" rel="noopener" style="color:#3b82f6;text-decoration:underline">link</a></td>'
+        ? '<td><a href="' + esc(v) + '" target="_blank" rel="noopener" style="color:#ff8f00;text-decoration:underline">link</a></td>'
         : '<td style="color:#94a3b8">—</td>';
     }).join('');
 

@@ -279,10 +279,6 @@ function animateCardsIn(cards) {
   });
 }
 
-function isUrl(s) {
-  return Boolean(s && (s.startsWith('http://') || s.startsWith('https://')));
-}
-
 function normalizeStr(s) {
   return String(s || '')
     .normalize('NFD')
@@ -293,19 +289,6 @@ function normalizeStr(s) {
     .toLowerCase();
 }
 
-
-function cardIconSVG(type) {
-  const icons = {
-    moodle: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`,
-    youtube: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
-    soundcloud: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M1.175 12.225c-.051 0-.175.016-.175.175v1.2c0 .159.124.175.175.175.051 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm1.633 1.751h.35c.059 0 .175-.016.175-.175v-1.533c0-.159-.116-.175-.175-.175h-.35c-.058 0-.174.016-.174.175v1.533c0 .159.116.175.174.175zm1.35-1.751h-.35c-.058 0-.174.016-.174.175v1.2c0 .159.116.175.174.175h.35c.059 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm1.99 1.751h.35c.059 0 .175-.016.175-.175v-.875c0-.159-.116-.175-.175-.175h-.35c-.059 0-.175.016-.175.175v.875c0 .159.116.175.175.175zm1.35-1.751h-.35c-.059 0-.175.016-.175.175v1.2c0 .159.116.175.175.175h.35c.058 0 .174-.016.174-.175v-1.2c0-.159-.116-.175-.174-.175zm1.99 1.751h.35c.058 0 .174-.016.174-.175v-.525c0-.159-.116-.175-.175-.175h-.35c-.058 0-.174.016-.174.175v.525c0 .159.116.175.175.175zm1.35-1.751h-.35c-.059 0-.175.016-.175.175v1.2c0 .159.116.175.175.175h.35c.059 0 .175-.016.175-.175v-1.2c0-.159-.116-.175-.175-.175zm2.158 2.066c1.453-.607 2.515-2.068 2.515-3.766 0-2.262-1.884-4.105-4.205-4.105-.276 0-.554.025-.816.074-.165-2.565-2.4-4.609-5.135-4.609-2.858 0-5.197 2.287-5.197 5.141 0 .347.037.684.104 1.016C1.306 8.93 0 10.834 0 13.008c0 2.509 2.079 4.547 4.647 4.547h13.205c1.913 0 3.461-1.565 3.461-3.5 0-1.763-1.252-3.236-2.897-3.528z"/></svg>`,
-    dropbox: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M6 2L11 6L6 10L1 6zM18 2L23 6L18 10L13 6zM12 8L17 12L12 16L7 12zM6 14L11 18L6 22L1 18zM18 14L23 18L18 22L13 18z"/></svg>`,
-    googledrive: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M7.5 3L1 14.5l3.25 5.5 6.5-11zm9 0H7.5l6.5 11h9zm-9.25 13L4 21.5h16l-3.25-5.5z"/></svg>`,
-    sharepoint: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm9.5 4c-1.8 0-2.8.8-2.8 2 0 1 .68 1.7 2.04 2.02l.96.24c.78.18 1.1.48 1.1.96 0 .6-.56 1-1.52 1-.98 0-1.58-.42-1.68-1.16H9.22c.1 1.38 1.14 2.2 3.06 2.2s3.04-.84 3.04-2.12c0-1.04-.66-1.7-2.08-2.04l-.86-.2c-.78-.2-1.1-.48-1.1-.94 0-.58.52-.96 1.36-.96s1.4.4 1.5 1.08h1.28C15.3 9.82 14.3 9 12.5 9z"/></svg>`,
-    apostilahtml: `<svg viewBox="0 0 24 24" fill="currentColor" class="meta-icon"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>`
-  };
-  return icons[type] || icons.moodle;
-}
 
 function mesmoMaterialBadge(d) {
   const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
@@ -349,35 +332,8 @@ function cardHTML(d) {
     ? `<span class="badge badge-periodo">${esc(tipoMap[d.tipo_disciplina])}</span>`
     : (d.tipo_disciplina ? `<span class="badge badge-periodo">${esc(d.tipo_disciplina)}</span>` : '');
 
-  // Botões de link: WAE e ERP
+  // Seta usada no botão "Informações da Disciplina"
   const pillArrow = `<svg viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="link-pill__icon-svg" width="10"><path d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z" fill="currentColor"/></svg><svg viewBox="0 0 14 15" fill="none" width="10" xmlns="http://www.w3.org/2000/svg" class="link-pill__icon-svg link-pill__icon-svg--copy"><path d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z" fill="currentColor"/></svg>`;
-  const waeUrl = isUrl(d.link_moodle_wae) ? d.link_moodle_wae : '';
-  const linkDefs = [
-    { label: 'Moodle WAE', url: waeUrl },
-    { label: 'DP WAE',     url: isUrl(d.link_dp_wae)     ? d.link_dp_wae     : '' },
-    { label: 'Moodle ERP', url: isUrl(d.link_moodle_erp) ? d.link_moodle_erp : '' },
-    { label: 'DP ERP',     url: isUrl(d.link_dp_erp)     ? d.link_dp_erp     : '' },
-    { label: 'Moodle Pós', url: isUrl(d.link_moodle_pos) ? d.link_moodle_pos : '' },
-    { label: 'Inova',      url: isUrl(d.link_inova)      ? d.link_inova      : ''  }
-  ].filter(l => l.url);
-  const linkBtns = linkDefs.length
-    ? `<div class="card-link-btns">${linkDefs.map(l =>
-        `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="link-pill" onclick="event.stopPropagation()"><span class="link-pill__icon-wrapper">${pillArrow}</span>${esc(l.label)}</a>`
-      ).join('')}</div>`
-    : '';
-
-  // Ícones circulares: Dropbox, Google Drive, YouTube, Soundcloud
-  const iconLinks = [
-    { value: d.dropbox,      cls: 'dropbox',      title: 'Dropbox' },
-    { value: d.google_drive,  cls: 'googledrive',  title: 'Google Drive' },
-    { value: d.sharepoint,    cls: 'sharepoint',   title: 'SharePoint' },
-    { value: d.apostila_html, cls: 'apostilahtml', title: 'Apostila HTML' },
-    { value: d.youtube,      cls: 'youtube',      title: 'YouTube' },
-    { value: d.soundcloud,   cls: 'soundcloud',   title: 'Soundcloud' }
-  ]
-    .filter(l => isUrl(l.value))
-    .map(l => `<a href="${esc(l.value)}" target="_blank" rel="noopener noreferrer" class="detail-meta-icon ${l.cls}" title="${l.title}" onclick="event.stopPropagation()">${cardIconSVG(l.cls)}</a>`)
-    .join('');
 
   const cardUrl = d._isTest ? null : `pages/disciplina.html?id=${esc(d.id)}`;
 
@@ -391,14 +347,11 @@ function cardHTML(d) {
       </div>
       <div class="card-body">
         <span class="card-nome">${esc(d.nome)}</span>
-        ${linkBtns}
-        <div class="card-footer">
-          ${iconLinks}
-        </div>
+        ${!d._isTest ? `<a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn card-info-btn" onclick="event.stopPropagation()"><span class="link-pill__icon-wrapper">${pillArrow}</span>Informações da Disciplina</a>` : ''}
       </div>
       <div class="card-right">
         <div class="card-badges">
-          ${d.modelo ? d.modelo.split(',').map(m => { const v = m.trim(); return `<span class="badge ${v === 'Graduação & Pós' ? 'badge-area-grad-pos' : 'badge-area'}">${esc(v)}</span>`; }).join('') : ''}
+          ${d.modelo ? d.modelo.split(',').map(m => { const v = m.trim(); return v === 'Graduação & Pós' ? `<span class="badge badge-area-grad-pos"><span class="badge-grad-text">${esc(v)}</span></span>` : `<span class="badge badge-area">${esc(v)}</span>`; }).join('') : ''}
           ${tipoBadge}
           ${statusLabel}
           ${d._isTest ? '<span class="badge badge-test">TESTE</span>' : ''}
@@ -406,7 +359,6 @@ function cardHTML(d) {
         </div>
         ${mesmoMaterialBadge(d)}
       </div>
-      ${!d._isTest ? `<a href="${cardUrl}" target="_blank" rel="noopener noreferrer" class="card-moodle-btn card-info-btn" onclick="event.stopPropagation()"><span class="link-pill__icon-wrapper">${pillArrow}</span>Informações da Disciplina</a>` : ''}
     </div>
   `;
 }

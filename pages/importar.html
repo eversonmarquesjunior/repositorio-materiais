@@ -32,12 +32,12 @@
       transition: border-color .2s, background .2s;
     }
     .upload-zone:hover, .upload-zone.drag-over {
-      border-color: #3b82f6;
-      background: #eff6ff;
+      border-color: var(--accent, #ffab00);
+      background: var(--accent-light, #fff8e1);
     }
     .upload-zone svg { margin: 0 auto .85rem; display: block; color: #94a3b8; }
     .upload-zone p { color: #64748b; font-size: .875rem; margin: 0; }
-    .upload-zone strong { color: #3b82f6; }
+    .upload-zone strong { color: var(--accent, #ffab00); }
     .file-chosen { margin-top: .6rem; font-size: .8rem; color: #475569; }
     .mapping-info {
       background: #f0fdf4;
@@ -85,13 +85,13 @@
     .preview-more { font-size: .78rem; color: #94a3b8; padding: .55rem .9rem; }
     .import-actions { display: flex; gap: .65rem; flex-wrap: wrap; }
     .btn-test {
-      background: var(--accent, #3b5bdb); color: #fff; border: 1px solid transparent;
+      background: var(--accent, #ffab00); color: #fff; border: 1px solid transparent;
       border-radius: 8px; padding: .6rem 1.3rem;
       font-size: .875rem; font-weight: 600; cursor: pointer;
       box-shadow: 0 1px 2px rgba(0,0,0,.06);
       transition: background .2s;
     }
-    .btn-test:hover { background: var(--accent-hover, #2f4ac0); }
+    .btn-test:hover { background: var(--accent-hover, #ff8f00); }
     .btn-real {
       background: var(--surface, #fff); color: var(--text, #1e293b);
       border: 1px solid var(--border, #e2e8f0); border-radius: 8px;
@@ -121,7 +121,7 @@
       background: #f1f5f9; border-radius: 6px;
       height: 7px; margin-top: .85rem; overflow: hidden;
     }
-    .progress-bar { height: 100%; background: #3b82f6; transition: width .3s; border-radius: 6px; }
+    .progress-bar { height: 100%; background: var(--accent, #ffab00); transition: width .3s; border-radius: 6px; }
     .import-log { font-size: .8rem; color: #64748b; margin-top: .45rem; min-height: 1.2em; }
     .hint-text { font-size: .78rem; color: #94a3b8; margin: .65rem 0 0; line-height: 1.5; }
     .mode-tabs {
@@ -141,7 +141,7 @@
       margin-bottom: -2px;
       transition: color .2s, border-color .2s;
     }
-    .mode-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+    .mode-tab.active { color: var(--accent, #ffab00); border-bottom-color: var(--accent, #ffab00); }
     .match-chip {
       padding: .2rem .65rem;
       border-radius: 20px;
@@ -165,14 +165,26 @@
       <div class="sidebar-brand">
         <div class="logo-icon">
           <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <polygon fill="#CFD8DC" points="39.4,23 38.6,19 26,21.6 26,8 22,8 22,20.3 8.1,11.3 5.9,14.7 21.1,24.5 9.4,39.8 12.6,42.2 23.9,27.4 32.3,40.1 35.7,37.9 27.3,25.4"/>
-            <circle fill="#3F51B5" cx="24" cy="24" r="7"/>
-            <g fill="#00BCD4">
-              <circle cx="24" cy="8" r="5"/>
-              <circle cx="39" cy="21" r="5"/>
-              <circle cx="7" cy="13" r="5"/>
-              <circle cx="11" cy="41" r="5"/>
-              <circle cx="34" cy="39" r="5"/>
+            <g fill="#FF9800">
+              <rect x="1" y="38" width="46" height="2"/>
+              <rect x="25" y="18" width="4" height="16"/>
+              <rect x="31" y="18" width="4" height="16"/>
+              <rect x="37" y="18" width="4" height="16"/>
+              <rect x="19" y="18" width="4" height="16"/>
+              <rect x="13" y="18" width="4" height="16"/>
+              <rect x="7" y="18" width="4" height="16"/>
+              <polygon points="43,16 5,16 5,13 24,4 43,13"/>
+              <rect x="5" y="34" width="38" height="2"/>
+            </g>
+            <g fill="#EF6C00">
+              <rect x="25" y="16" width="4" height="2"/>
+              <rect x="31" y="16" width="4" height="2"/>
+              <rect x="37" y="16" width="4" height="2"/>
+              <rect x="19" y="16" width="4" height="2"/>
+              <rect x="13" y="16" width="4" height="2"/>
+              <rect x="7" y="16" width="4" height="2"/>
+              <rect x="3" y="36" width="42" height="2"/>
+              <circle cx="24" cy="11" r="2"/>
             </g>
           </svg>
         </div>
