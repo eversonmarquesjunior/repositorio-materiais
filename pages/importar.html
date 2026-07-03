@@ -85,26 +85,28 @@
     .preview-more { font-size: .78rem; color: #94a3b8; padding: .55rem .9rem; }
     .import-actions { display: flex; gap: .65rem; flex-wrap: wrap; }
     .btn-test {
-      background: #3b82f6; color: #fff; border: none;
+      background: var(--accent, #3b5bdb); color: #fff; border: 1px solid transparent;
       border-radius: 8px; padding: .6rem 1.3rem;
       font-size: .875rem; font-weight: 600; cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,.06);
       transition: background .2s;
     }
-    .btn-test:hover { background: #2563eb; }
+    .btn-test:hover { background: var(--accent-hover, #2f4ac0); }
     .btn-real {
-      background: #fff; color: #1e293b;
-      border: 1.5px solid #e2e8f0; border-radius: 8px;
+      background: var(--surface, #fff); color: var(--text, #1e293b);
+      border: 1px solid var(--border, #e2e8f0); border-radius: 8px;
       padding: .6rem 1.3rem; font-size: .875rem; font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03);
       cursor: pointer; transition: border-color .2s, background .2s;
     }
-    .btn-real:hover { border-color: #94a3b8; background: #f8fafc; }
+    .btn-real:hover { border-color: var(--border-strong, #94a3b8); background: var(--surface-2, #f8fafc); }
     .btn-danger {
-      background: #fff; color: #dc2626;
-      border: 1.5px solid #fca5a5; border-radius: 8px;
+      background: var(--surface, #fff); color: var(--danger, #dc2626);
+      border: 1px solid #fca5a5; border-radius: 8px;
       padding: .6rem 1.3rem; font-size: .875rem; font-weight: 600;
       cursor: pointer; transition: border-color .2s, background .2s;
     }
-    .btn-danger:hover { border-color: #dc2626; background: #fef2f2; }
+    .btn-danger:hover { border-color: var(--danger, #dc2626); background: #fef2f2; }
     button:disabled { opacity: .45; cursor: not-allowed; }
     .test-active-card {
       background: #fef3c7; border: 1px solid #fde68a;
@@ -183,6 +185,7 @@
         <a href="../index.html" class="sidebar-link">Pesquisar</a>
         <a href="adicionar-disciplina.html" class="sidebar-link">Adicionar Disciplina</a>
         <a href="importar.html" class="sidebar-link active">Importar Dados</a>
+        <a href="dashboard.html" class="sidebar-link">Dashboard</a>
       </nav>
     </aside>
     <div class="sidebar-backdrop"></div>
@@ -217,9 +220,12 @@
             </svg>
           </button>
           <nav class="header-nav">
-            <a href="../index.html" class="nav-link">Pesquisar</a>
-            <a href="adicionar-disciplina.html" class="nav-link">Adicionar Disciplina</a>
-            <a href="importar.html" class="nav-link active">Importar Dados</a>
+            <div class="nav-links">
+              <a href="../index.html" class="nav-link">Pesquisar</a>
+              <a href="importar.html" class="nav-link active">Importar Dados</a>
+              <a href="dashboard.html" class="nav-link">Dashboard</a>
+            </div>
+            <a href="adicionar-disciplina.html" class="nav-link nav-cta">Adicionar Disciplina</a>
           </nav>
         </div>
       </header>

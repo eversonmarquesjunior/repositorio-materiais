@@ -72,6 +72,32 @@ function getExportList() {
   return (typeof state !== 'undefined' && Array.isArray(state.results)) ? state.results : [];
 }
 
+/* ── METADADOS DO RELATÓRIO (filtros, data, quantidade) ──── */
+function getFilterSummary() {
+  if (typeof state === 'undefined') return 'Nenhum filtro aplicado';
+
+  const parts = [];
+  if (state.query) parts.push(`Busca: "${state.query}"`);
+  if (state.filterModelo?.length) parts.push(`Modelo: ${state.filterModelo.join(', ')}`);
+  if (state.filterTipo?.length) {
+    parts.push(`Tipo de Disciplina: ${state.filterTipo.map(t => EXPORT_TIPO_LABELS[t] || t).join(', ')}`);
+  }
+  if (state.filterStatus?.length) {
+    parts.push(`Status: ${state.filterStatus.map(s => EXPORT_STATUS_LABELS[s] || s).join(', ')}`);
+  }
+  return parts.length ? parts.join('  |  ') : 'Nenhum filtro aplicado';
+}
+
+function getExportMeta(list) {
+  const now = new Date();
+  const dateStr = `${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+  return {
+    dateStr,
+    filtersStr: getFilterSummary(),
+    count: list.length,
+  };
+}
+
 /* Mantém só as colunas em que ao menos uma disciplina do conjunto exportado tem valor */
 function getActiveColumns(list) {
   return EXPORT_COLUMNS.filter(col => list.some(d => col.get(d)));
@@ -83,17 +109,27 @@ function exportToExcel() {
   if (!list.length) { window.showToast?.('Nenhum resultado para exportar.', 'error'); return; }
 
   const columns = getActiveColumns(list);
+  const meta = getExportMeta(list);
   const headerRow = columns.map(c => c.header);
-  const rows = list.map(d => columns.map(c => c.get(d)));
+  const dataRows = list.map(d => columns.map(c => c.get(d)));
 
-  const ws = XLSX.utils.aoa_to_sheet([headerRow, ...rows]);
+  const metaRows = [
+    ['Relatório de Disciplinas Filtradas'],
+    [`Gerado em: ${meta.dateStr}`],
+    [`Filtros utilizados: ${meta.filtersStr}`],
+    [`Quantidade de disciplinas filtradas: ${meta.count}`],
+    [],
+  ];
+  const offset = metaRows.length; // linhas antes do cabeçalho da tabela
+
+  const ws = XLSX.utils.aoa_to_sheet([...metaRows, headerRow, ...dataRows]);
 
   columns.forEach((col, colIdx) => {
     if (!col.link) return;
-    rows.forEach((row, rowIdx) => {
+    dataRows.forEach((row, rowIdx) => {
       const url = row[colIdx];
       if (!url) return;
-      const cellRef = XLSX.utils.encode_cell({ r: rowIdx + 1, c: colIdx });
+      const cellRef = XLSX.utils.encode_cell({ r: rowIdx + offset + 1, c: colIdx });
       const cell = ws[cellRef];
       if (cell) {
         cell.l = { Target: url };
@@ -103,6 +139,7 @@ function exportToExcel() {
   });
 
   ws['!cols'] = columns.map(c => ({ wch: c.link ? 28 : 20 }));
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: Math.max(columns.length - 1, 0) } }];
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Disciplinas');
@@ -110,13 +147,31 @@ function exportToExcel() {
 }
 
 /* ── PDF ─────────────────────────────────────────────────── */
+function drawWrappedText(doc, text, x, y, maxWidth, lineHeight) {
+  const lines = doc.splitTextToSize(text, maxWidth);
+  lines.forEach((line, i) => doc.text(line, x, y + i * lineHeight));
+  return y + lines.length * lineHeight;
+}
+
 function exportToPDF() {
   const list = getExportList();
   if (!list.length) { window.showToast?.('Nenhum resultado para exportar.', 'error'); return; }
 
   const columns = getActiveColumns(list);
+  const meta = getExportMeta(list);
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(12);
+  doc.text('Relatório de Disciplinas Filtradas', 20, 20);
+
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(9);
+  let metaY = 34;
+  metaY = drawWrappedText(doc, `Gerado em: ${meta.dateStr}`, 20, metaY, 800, 11) + 2;
+  metaY = drawWrappedText(doc, `Filtros utilizados: ${meta.filtersStr}`, 20, metaY, 800, 11) + 2;
+  metaY = drawWrappedText(doc, `Quantidade de disciplinas filtradas: ${meta.count}`, 20, metaY, 800, 11) + 8;
 
   const head = [columns.map(c => c.header)];
   const body = list.map(d => columns.map(c => c.get(d)));
@@ -131,6 +186,7 @@ function exportToPDF() {
   doc.autoTable({
     head,
     body,
+    startY: metaY,
     styles: { fontSize: 6, cellPadding: 3, overflow: 'linebreak' },
     headStyles: { fillColor: [59, 91, 219] },
     margin: { top: 30, left: 20, right: 20 },

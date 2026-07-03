@@ -36,6 +36,7 @@
         <a href="index.html" class="sidebar-link">Pesquisar</a>
         <a href="pages/adicionar-disciplina.html" class="sidebar-link">Adicionar Disciplina</a>
         <a href="pages/importar.html" class="sidebar-link">Importar Dados</a>
+        <a href="pages/dashboard.html" class="sidebar-link">Dashboard</a>
       </nav>
     </aside>
     <div class="sidebar-backdrop"></div>
@@ -72,9 +73,12 @@
       </button>
 
       <nav class="header-nav">
-        <a href="index.html" class="nav-link active">Pesquisar</a>
-        <a href="pages/adicionar-disciplina.html" class="nav-link">Adicionar Disciplina</a>
-        <a href="pages/importar.html" class="nav-link">Importar Dados</a>
+        <div class="nav-links">
+          <a href="index.html" class="nav-link active">Pesquisar</a>
+          <a href="pages/importar.html" class="nav-link">Importar Dados</a>
+          <a href="pages/dashboard.html" class="nav-link">Dashboard</a>
+        </div>
+        <a href="pages/adicionar-disciplina.html" class="nav-link nav-cta">Adicionar Disciplina</a>
       </nav>
 
     </div>
@@ -101,80 +105,92 @@
   <section class="hero-section">
     <div class="hero-inner">
       <h1 class="hero-title">Pesquise por uma disciplina</h1>
-      <br>
-      <!--<p class="hero-sub">Pesquise por nome, código, área do conhecimento ou professor responsável.</p>-->
 
-      <form id="searchForm" class="search-box" onsubmit="return false;">
-        <div class="search-field-wrap">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            id="searchInput"
-            type="text"
-            class="search-field"
-            placeholder="..."
-            autocomplete="off"
-          />
-          <button type="button" id="clearBtn" class="clear-btn" style="display:none" title="Limpar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      <div class="hero-search-card">
+        <form id="searchForm" class="search-box" onsubmit="return false;">
+          <div class="search-field-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-          </button>
-        </div>
-        <!-- botão Pesquisar removido: busca é instantânea ao digitar -->
-      </form>
-      <div class="filter-row" id="filterRow">
-        <!-- Modelo -->
-        <div class="ms-wrap" id="msModeloWrap">
-          <button type="button" class="ms-btn" id="msModeloBtn">
-            <span class="ms-label" id="msModeloLabel">Modelo</span>
-            <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="ms-panel" id="msModeloPanel">
-            <label class="ms-option"><input type="checkbox" value="Graduação"> Graduação</label>
-            <label class="ms-option"><input type="checkbox" value="Pós-graduação"> Pós-graduação</label>
-            <label class="ms-option"><input type="checkbox" value="Curso Inova"> Curso Inova</label>
-            <label class="ms-option"><input type="checkbox" value="Graduação & Pós"> Graduação &amp; Pós</label>
+            <input
+              id="searchInput"
+              type="text"
+              class="search-field"
+              placeholder="..."
+              autocomplete="off"
+            />
+            <button type="button" id="clearBtn" class="clear-btn" style="display:none" title="Limpar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <!-- botão Pesquisar removido: busca é instantânea ao digitar -->
+        </form>
+        <div class="filter-row" id="filterRow">
+          <!-- Modelo -->
+          <div class="ms-wrap" id="msModeloWrap">
+            <button type="button" class="ms-btn" id="msModeloBtn">
+              <span class="ms-label" id="msModeloLabel">Modelo</span>
+              <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="ms-panel" id="msModeloPanel">
+              <label class="ms-option"><input type="checkbox" value="Graduação"> Graduação</label>
+              <label class="ms-option"><input type="checkbox" value="Pós-graduação"> Pós-graduação</label>
+              <label class="ms-option"><input type="checkbox" value="Curso Inova"> Curso Inova</label>
+              <label class="ms-option"><input type="checkbox" value="Graduação & Pós"> Graduação &amp; Pós</label>
+            </div>
+          </div>
+          <!-- Tipo -->
+          <div class="ms-wrap" id="msTipoWrap">
+            <button type="button" class="ms-btn" id="msTipoBtn">
+              <span class="ms-label" id="msTipoLabel">Tipo de Disciplina</span>
+              <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="ms-panel" id="msTipoPanel">
+              <label class="ms-option"><input type="checkbox" value="ace"> Ace</label>
+              <label class="ms-option"><input type="checkbox" value="estagio"> Estágio</label>
+              <label class="ms-option"><input type="checkbox" value="padrao_unificada"> Padrão Unificada</label>
+              <label class="ms-option"><input type="checkbox" value="projeto_integrador"> Projeto Integrador</label>
+              <label class="ms-option"><input type="checkbox" value="pratica_conectada"> Prática Conectada</label>
+              <label class="ms-option"><input type="checkbox" value="introducao_ao_curso"> Introdução ao Curso</label>
+              <label class="ms-option"><input type="checkbox" value="pap"> Proj. em Amb. Prof.</label>
+              <label class="ms-option"><input type="checkbox" value="outro"> Outro</label>
+            </div>
+          </div>
+          <!-- Status -->
+          <div class="ms-wrap" id="msStatusWrap">
+            <button type="button" class="ms-btn" id="msStatusBtn">
+              <span class="ms-label" id="msStatusLabel">Status</span>
+              <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="ms-panel" id="msStatusPanel">
+              <label class="ms-option"><input type="checkbox" value="comum"> Disciplina Comum</label>
+              <label class="ms-option"><input type="checkbox" value="antiga"> Disciplina Origem Grad.</label>
+              <label class="ms-option"><input type="checkbox" value="atualizacao"> Atualização do Zero</label>
+              <label class="ms-option"><input type="checkbox" value="paliativa"> Disciplina Paliativa</label>
+            </div>
           </div>
         </div>
-        <!-- Tipo -->
-        <div class="ms-wrap" id="msTipoWrap">
-          <button type="button" class="ms-btn" id="msTipoBtn">
-            <span class="ms-label" id="msTipoLabel">Tipo de Disciplina</span>
-            <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="ms-panel" id="msTipoPanel">
-            <label class="ms-option"><input type="checkbox" value="ace"> Ace</label>
-            <label class="ms-option"><input type="checkbox" value="estagio"> Estágio</label>
-            <label class="ms-option"><input type="checkbox" value="padrao_unificada"> Padrão Unificada</label>
-            <label class="ms-option"><input type="checkbox" value="projeto_integrador"> Projeto Integrador</label>
-            <label class="ms-option"><input type="checkbox" value="pratica_conectada"> Prática Conectada</label>
-            <label class="ms-option"><input type="checkbox" value="introducao_ao_curso"> Introdução ao Curso</label>
-            <label class="ms-option"><input type="checkbox" value="pap"> Proj. em Amb. Prof.</label>
-            <label class="ms-option"><input type="checkbox" value="outro"> Outro</label>
-          </div>
-        </div>
-        <!-- Status -->
-        <div class="ms-wrap" id="msStatusWrap">
-          <button type="button" class="ms-btn" id="msStatusBtn">
-            <span class="ms-label" id="msStatusLabel">Status</span>
-            <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="ms-panel" id="msStatusPanel">
-            <label class="ms-option"><input type="checkbox" value="comum"> Disciplina Comum</label>
-            <label class="ms-option"><input type="checkbox" value="antiga"> Disciplina Origem Grad.</label>
-            <label class="ms-option"><input type="checkbox" value="atualizacao"> Atualização do Zero</label>
-            <label class="ms-option"><input type="checkbox" value="paliativa"> Disciplina Paliativa</label>
-          </div>
-        </div>
+      </div>
+
+      <div class="quick-filters" id="quickChips">
+        <span class="qf-label">Populares:</span>
+        <button type="button" class="qf-btn" data-modelo="Graduação">Graduação</button>
+        <button type="button" class="qf-btn" data-modelo="Pós-graduação">Pós-graduação</button>
+        <button type="button" class="qf-btn" data-modelo="Curso Inova">Curso Inova</button>
+        <button type="button" class="qf-btn" data-modelo="Graduação & Pós">Graduação &amp; Pós</button>
+        <button type="button" id="clearAllFiltersBtn" class="qf-btn qf-clear-btn" title="Limpar todos os filtros" aria-label="Limpar todos os filtros">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3.27 5L2 6.27l6.97 6.97L6.5 19h3l1.57-3.66L16.73 21 18 19.73 3.55 5.27 3.27 5zM6 5v.18L8.82 8h2.4l-.72 1.68 2.1 2.1L14.21 8H20V5H6z"/>
+          </svg>
+        </button>
       </div>
     </div>
   </section>
 
   <!-- ── RESULTADOS ── -->
   <main class="results-section">
-    <canvas id="bgParticles" class="bg-particles-canvas"></canvas>
     <div class="results-inner">
 
       <!-- Barra de controles -->
@@ -222,6 +238,11 @@
       <!-- Lista de resultados -->
       <div id="resultsList" class="results-list"></div>
 
+      <!-- Ver mais -->
+      <div id="loadMoreWrap" class="load-more-wrap" style="display:none">
+        <button type="button" id="loadMoreBtn" class="btn btn-secondary">Ver mais disciplinas</button>
+      </div>
+
       <!-- Estado vazio / inicial -->
       <div id="emptyState" class="empty-state">
         <div class="empty-stats-grid" id="emptyStatsGrid"></div>
@@ -268,7 +289,6 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="js/export.js"></script>
   <script src="js/mascot.js"></script>
-  <script src="js/bg-particles.js"></script>
     </div>
   </div>
 </body>

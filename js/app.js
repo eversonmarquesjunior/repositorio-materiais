@@ -3,11 +3,14 @@
  */
 
 /* ── ESTADO ─────────────────────────────────────────────── */
+const PAGE_SIZE = 10;
+
 const state = {
   query:         '',
   sort:          'nome',
   viewMode:      'list',
   results:       [],
+  visibleCount:  PAGE_SIZE,
   filterModelo:  [],
   filterTipo:    [],
   filterStatus:  [],
@@ -28,6 +31,8 @@ const loadingState   = document.getElementById('loadingState');
 const sortSelect     = document.getElementById('sortSelect');
 const viewListBtn    = document.getElementById('viewList');
 const viewGridBtn    = document.getElementById('viewGrid');
+const loadMoreWrap   = document.getElementById('loadMoreWrap');
+const loadMoreBtn    = document.getElementById('loadMoreBtn');
 
 /* ── INICIALIZAÇÃO ───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -44,8 +49,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   viewListBtn.addEventListener('click', () => setView('list'));
   viewGridBtn.addEventListener('click', () => setView('grid'));
   document.getElementById('clearFiltersBtn')?.addEventListener('click', clearAllFilters);
+  document.getElementById('clearAllFiltersBtn')?.addEventListener('click', clearAllFilters);
+  loadMoreBtn?.addEventListener('click', loadMoreResults);
   initMultiFilters();
+  initQuickChips();
 });
+
+/* ── CHIPS "POPULARES" (atalho para filtro de Modelo) ───── */
+function initQuickChips() {
+  document.querySelectorAll('.qf-btn[data-modelo]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const val = chip.dataset.modelo;
+      const panel = document.getElementById('msModeloPanel');
+      const cb = panel && Array.from(panel.querySelectorAll('input[type="checkbox"]')).find(c => c.value === val);
+      if (!cb) return;
+      cb.checked = !cb.checked;
+      cb.dispatchEvent(new Event('change'));
+      chip.classList.toggle('active', cb.checked);
+    });
+  });
+}
 
 /* ── FILTROS MULTI-SELECT ────────────────────────────────── */
 function hasActiveFilters() {
@@ -137,6 +160,7 @@ function clearAllFilters() {
   document.getElementById('msTipoLabel').textContent = 'Tipo de Disciplina';
   document.getElementById('msStatusLabel').textContent = 'Status';
   document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('filter-active'));
+  document.querySelectorAll('.qf-btn[data-modelo]').forEach(b => b.classList.remove('active'));
 
   showEmpty();
   updateURL();
@@ -219,11 +243,32 @@ function renderResults() {
     return;
   }
 
-  resultsList.innerHTML = state.results.map(d => cardHTML(d)).join('');
+  state.visibleCount = Math.min(PAGE_SIZE, state.results.length);
+  resultsList.innerHTML = state.results.slice(0, state.visibleCount).map(d => cardHTML(d)).join('');
+  animateCardsIn(document.querySelectorAll('.disc-card'));
+  updateLoadMoreButton();
+}
 
-  // animação de entrada escalonada
+function loadMoreResults() {
+  const nextBatch = state.results.slice(state.visibleCount, state.visibleCount + PAGE_SIZE);
+  if (!nextBatch.length) return;
+
+  state.visibleCount += nextBatch.length;
+  resultsList.insertAdjacentHTML('beforeend', nextBatch.map(d => cardHTML(d)).join(''));
+
+  const allCards = document.querySelectorAll('.disc-card');
+  animateCardsIn(Array.from(allCards).slice(-nextBatch.length));
+  updateLoadMoreButton();
+}
+
+function updateLoadMoreButton() {
+  loadMoreWrap.style.display = state.visibleCount < state.results.length ? 'flex' : 'none';
+}
+
+// animação de entrada escalonada
+function animateCardsIn(cards) {
   requestAnimationFrame(() => {
-    document.querySelectorAll('.disc-card').forEach((el, i) => {
+    cards.forEach((el, i) => {
       el.style.animationDelay = `${i * 55}ms`;
       el.classList.add('card-entering');
       el.addEventListener('animationend', () => {
@@ -388,25 +433,13 @@ function hideAll() {
   resultsList.innerHTML      = '';
   resultsList.style.display  = 'none';
   resultsToolbar.style.display = 'none';
+  loadMoreWrap.style.display = 'none';
 }
 function showEmpty()   { hideAll(); emptyState.style.display = 'flex'; }
 
 function countByModelo(list, modelo) {
   return list.filter(d => d.modelo && d.modelo.split(',').map(s => s.trim()).includes(modelo)).length;
 }
-
-const BOOK_HTML = `
-  <div class="book-anim-wrap">
-    <div class="book">
-      <div class="book__pg-shadow"></div>
-      <div class="book__pg"></div>
-      <div class="book__pg book__pg--2"></div>
-      <div class="book__pg book__pg--3"></div>
-      <div class="book__pg book__pg--4"></div>
-      <div class="book__pg book__pg--5"></div>
-    </div>
-  </div>
-`;
 
 function renderEmptyStats() {
   const el = document.getElementById('emptyStatsGrid');
@@ -427,9 +460,6 @@ function renderEmptyStats() {
       <span class="stat-label">${esc(s.label)}</span>
     </div>
   `);
-
-  // Livro animado inserido no meio dos cards: Total, Graduação, [Livro], Pós-graduação, Graduação & Pós
-  cards.splice(Math.min(2, cards.length), 0, BOOK_HTML);
 
   el.innerHTML = cards.join('');
 
