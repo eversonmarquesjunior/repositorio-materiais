@@ -1,3 +1,18 @@
+function initThemeToggle() {
+  const checkbox = document.getElementById('themeToggle');
+  if (!checkbox) return;
+  checkbox.checked = document.documentElement.getAttribute('data-theme') === 'dark';
+  checkbox.addEventListener('change', () => {
+    if (checkbox.checked) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  });
+}
+
 function initResponsiveSidebar() {
   const body = document.body;
   const toggle = document.getElementById('sidebarToggle');
@@ -28,3 +43,4 @@ function initResponsiveSidebar() {
 }
 
 window.addEventListener('DOMContentLoaded', initResponsiveSidebar);
+window.addEventListener('DOMContentLoaded', initThemeToggle);

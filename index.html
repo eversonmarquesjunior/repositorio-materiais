@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');</script>
   <title>Repositório</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -102,7 +103,13 @@
           <a href="pages/importar.html" class="nav-link">Importar Dados</a>
           <a href="pages/dashboard.html" class="nav-link">Dashboard</a>
         </div>
-        <a href="pages/adicionar-disciplina.html" class="nav-link nav-cta">Adicionar Disciplina</a>
+        <div class="header-actions">
+          <label class="switch" title="Alternar modo escuro" aria-label="Alternar modo escuro">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+          </label>
+          <a href="pages/adicionar-disciplina.html" class="nav-link nav-cta">Adicionar Disciplina</a>
+        </div>
       </nav>
 
     </div>

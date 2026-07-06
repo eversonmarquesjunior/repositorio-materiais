@@ -22,6 +22,31 @@
 }
 
 /* ═══════════════════════════════════════
+   TOKENS — DARK
+═══════════════════════════════════════ */
+html[data-theme="dark"] {
+  --bg:           #0f172a;
+  --surface:      #1e293b;
+  --surface-2:    #16213a;
+  --accent:       #ffab00;
+  --accent-light: rgba(255, 171, 0, .16);
+  --accent-hover: #ffc107;
+  --success:      #2dd4bf;
+  --warning:      #f59e0b;
+  --danger:       #f87171;
+  --text:         #e2e8f0;
+  --text-muted:   #94a3b8;
+  --border:       #334155;
+  --border-strong:#475569;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.35), 0 1px 6px rgba(0,0,0,.25);
+  --shadow:       0 2px 8px rgba(0,0,0,.35), 0 4px 20px rgba(0,0,0,.3);
+}
+html[data-theme="dark"] body.bg-slate-50 {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* ═══════════════════════════════════════
    RESET
 ═══════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -265,6 +290,52 @@ svg { flex-shrink: 0; }
 .nav-link.nav-cta:hover { filter: brightness(1.1); color: #fff; }
 .nav-link.nav-cta.active { filter: brightness(1.1); color: #fff; }
 
+.header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+/* Theme toggle — Uiverse.io by satyamchaudharydev (adaptado) */
+.switch {
+  display: block;
+  --width-of-switch: 3.5em;
+  --height-of-switch: 2em;
+  --size-of-icon: 1.4em;
+  --slider-offset: 0.3em;
+  position: relative;
+  width: var(--width-of-switch);
+  height: var(--height-of-switch);
+  flex-shrink: 0;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #f4f4f5;
+  transition: .4s;
+  border-radius: 30px;
+}
+.switch .slider:before {
+  position: absolute;
+  content: "";
+  height: var(--size-of-icon, 1.4em);
+  width: var(--size-of-icon, 1.4em);
+  border-radius: 20px;
+  left: var(--slider-offset, 0.3em);
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(40deg, #ff0080, #ff8c00 70%);
+  transition: .4s;
+}
+.switch input:checked + .slider { background-color: #303136; }
+.switch input:checked + .slider:before {
+  left: calc(100% - (var(--size-of-icon, 1.4em) + var(--slider-offset, 0.3em)));
+  background: #303136;
+  box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -4px 0 0 #a3dafb;
+}
+
 /* ═══════════════════════════════════════
    HERO (página inicial)
 ═══════════════════════════════════════ */
@@ -309,7 +380,7 @@ svg { flex-shrink: 0; }
 .hero-search-card {
   width: 100%; max-width: 700px;
   margin: 0 auto;
-  background: #fff;
+  background: var(--surface);
   border-radius: 16px;
   padding: 12px;
   box-shadow: 0 16px 36px rgba(15, 23, 42, .25);
@@ -333,7 +404,7 @@ svg { flex-shrink: 0; }
   background: var(--surface);
   border: 1.5px solid var(--border-strong);
   border-radius: 8px;
-  font-size: 13px; font-weight: 600; color: #0f172a;
+  font-size: 13px; font-weight: 600; color: var(--text);
   outline: none;
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
   transition: border-color .15s, box-shadow .15s;
@@ -386,6 +457,7 @@ svg { flex-shrink: 0; }
 }
 .qf-btn:hover { background: rgba(255,255,255,.32); border-color: #fff; }
 .qf-btn.active { background: #fff; color: var(--accent-hover); border-color: #fff; font-weight: 700; text-shadow: none; }
+html[data-theme="dark"] .qf-btn.active { background: var(--surface); color: var(--accent); border-color: var(--surface); }
 
 .qf-clear-btn {
   margin-left: 4px;
@@ -574,7 +646,7 @@ svg { flex-shrink: 0; }
   width: 34px; height: 34px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; font-size: 11px; font-weight: 700;
-  color: #e65100; background: #fff; border: 1.5px solid #e65100;
+  color: #e65100; background: var(--surface-2); border: 1.5px solid #e65100;
 }
 .card-icon svg { width: 16px; height: 16px; }
 
@@ -600,7 +672,7 @@ svg { flex-shrink: 0; }
 .card-moodle-btn {
   display: inline-flex; align-items: center; gap: 0.6rem;
   padding: 1px 10px 1px 4px;
-  background: #ffffff;
+  background: var(--surface);
   color: #ff8f00;
   border: 1px solid rgba(255, 143, 0, 0.25);
   border-radius: 10rem;
@@ -611,22 +683,36 @@ svg { flex-shrink: 0; }
 }
 .card-moodle-btn:hover { background: #ff8f00; color: #fff; border-color: transparent; }
 .card-moodle-btn .link-pill__icon-wrapper { color: #fff; background-color: #ff8f00; }
+html[data-theme="dark"] .card-moodle-btn .link-pill__icon-wrapper { color: #1f2937; }
 .card-moodle-btn:hover .link-pill__icon-wrapper { color: #ff8f00; background-color: #fff; }
 .card-footer { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Links de materiais da disciplina (Moodle WAE, DP WAE...) — mesma estilização do botão de info */
+.card-link-btns .card-moodle-btn { color: #e65100; }
+.card-link-btns .card-moodle-btn .link-pill__icon-wrapper { color: #fff; background-color: #e65100; }
+html[data-theme="dark"] .card-link-btns .card-moodle-btn .link-pill__icon-wrapper { color: #1f2937; }
+.card-link-btns .card-moodle-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #fff; }
+html[data-theme="dark"] .card-link-btns .card-moodle-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #1f2937; }
+html[data-theme="dark"] .card-link-btns .card-moodle-btn:hover { color: #1f2937; }
 .card-info-btn {
   align-self: flex-start; margin-top: 2px;
+  color: #e65100;
+  transition: background .15s, color .15s, border-color .15s, filter .15s;
+}
+.card-info-btn .link-pill__icon-wrapper { color: #fff; background-color: #e65100; }
+html[data-theme="dark"] .card-info-btn .link-pill__icon-wrapper { color: #1f2937; background-color: #e65100; }
+.card-info-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #fff; }
+html[data-theme="dark"] .card-info-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #1f2937; }
+.card-info-btn:hover {
   background: radial-gradient(circle at 50% 50%, #e65100 0%, #f57c00 35%, #ff9800 65%, #ffb300 85%, #ffc107 100%);
   color: #fff;
   border-color: transparent;
-  transition: filter .15s;
+  filter: brightness(1.1);
 }
-.card-info-btn .link-pill__icon-wrapper { color: #e65100; background-color: #fff; }
-.card-info-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #fff; }
-.card-info-btn:hover { filter: brightness(1.1); color: #fff; border-color: transparent; }
+html[data-theme="dark"] .card-info-btn:hover { color: #1f2937; }
 .detail-action-btns { display: flex; gap: 6px; position: absolute; bottom: 14px; right: 22px; }
 .detail-edit-btn { padding: 3px 6px; }
-.detail-delete-btn { padding: 3px 6px; background: #fee2e2; color: #991b1b; }
-.detail-delete-btn:hover { background: #dc2626; color: #fff; }
+.detail-delete-btn { padding: 3px 6px; }
 .card-nome {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 17px; font-weight: 700; color: var(--text);
@@ -723,6 +809,29 @@ svg { flex-shrink: 0; }
     radial-gradient(circle at 50% 50%, #e65100 0%, #f57c00 35%, #ff9800 65%, #ffb300 85%, #ffc107 100%) border-box;
 }
 .detail-badges .badge-plano-check { color: #e65100; }
+
+html[data-theme="dark"] .disc-card .badge-area,
+html[data-theme="dark"] .disc-card .badge-periodo,
+html[data-theme="dark"] .disc-card .badge-carga,
+html[data-theme="dark"] .disc-card .badge-status-ativo,
+html[data-theme="dark"] .disc-card .badge-status-inativo,
+html[data-theme="dark"] .disc-card .badge-status-revisao,
+html[data-theme="dark"] .disc-card .badge-plano-ensino,
+html[data-theme="dark"] .detail-badges .badge-area,
+html[data-theme="dark"] .detail-badges .badge-periodo,
+html[data-theme="dark"] .detail-badges .badge-carga,
+html[data-theme="dark"] .detail-badges .badge-status-ativo,
+html[data-theme="dark"] .detail-badges .badge-status-inativo,
+html[data-theme="dark"] .detail-badges .badge-status-revisao,
+html[data-theme="dark"] .detail-badges .badge-plano-ensino {
+  background: var(--surface-2);
+}
+html[data-theme="dark"] .disc-card .badge-area-grad-pos,
+html[data-theme="dark"] .detail-badges .badge-area-grad-pos {
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    radial-gradient(circle at 50% 50%, #e65100 0%, #f57c00 35%, #ff9800 65%, #ffb300 85%, #ffc107 100%) border-box;
+}
 
 .badge-plano-row { flex-basis: 100%; display: flex; justify-content: flex-end; }
 .badge-plano-check { color: #ffffff; flex-shrink: 0; }
@@ -949,7 +1058,7 @@ a.bc-link:hover { color: var(--accent); }
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--surface);
   border: 1.5px solid var(--accent);
   color: var(--accent);
   transition: all var(--transition);
