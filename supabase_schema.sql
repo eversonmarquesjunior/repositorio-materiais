@@ -99,19 +99,35 @@ ALTER TABLE disciplinas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE historico ENABLE ROW LEVEL SECURITY;
 ALTER TABLE retornos  ENABLE ROW LEVEL SECURITY;
 
--- Acesso público total (sem autenticação)
--- Quando adicionar auth, substituir "true" por: auth.role() = 'authenticated'
-CREATE POLICY "leitura_publica"  ON disciplinas FOR SELECT USING (true);
-CREATE POLICY "escrita_publica"  ON disciplinas FOR INSERT WITH CHECK (true);
-CREATE POLICY "edicao_publica"   ON disciplinas FOR UPDATE USING (true);
-CREATE POLICY "exclusao_publica" ON disciplinas FOR DELETE USING (true);
+-- Leitura pública (visitantes e admins), escrita somente para usuários
+-- autenticados via Supabase Auth (os 5 admins). Execute este bloco no
+-- SQL Editor do Supabase para atualizar as policies já existentes.
+DROP POLICY IF EXISTS "leitura_publica"  ON disciplinas;
+DROP POLICY IF EXISTS "escrita_publica"  ON disciplinas;
+DROP POLICY IF EXISTS "edicao_publica"   ON disciplinas;
+DROP POLICY IF EXISTS "exclusao_publica" ON disciplinas;
 
-CREATE POLICY "leitura_publica"  ON historico FOR SELECT USING (true);
-CREATE POLICY "escrita_publica"  ON historico FOR INSERT WITH CHECK (true);
-CREATE POLICY "edicao_publica"   ON historico FOR UPDATE USING (true);
-CREATE POLICY "exclusao_publica" ON historico FOR DELETE USING (true);
+CREATE POLICY "leitura_publica"    ON disciplinas FOR SELECT USING (true);
+CREATE POLICY "escrita_admin"      ON disciplinas FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "edicao_admin"       ON disciplinas FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "exclusao_admin"     ON disciplinas FOR DELETE USING (auth.role() = 'authenticated');
 
-CREATE POLICY "leitura_publica"  ON retornos FOR SELECT USING (true);
-CREATE POLICY "escrita_publica"  ON retornos FOR INSERT WITH CHECK (true);
-CREATE POLICY "edicao_publica"   ON retornos FOR UPDATE USING (true);
-CREATE POLICY "exclusao_publica" ON retornos FOR DELETE USING (true);
+DROP POLICY IF EXISTS "leitura_publica"  ON historico;
+DROP POLICY IF EXISTS "escrita_publica"  ON historico;
+DROP POLICY IF EXISTS "edicao_publica"   ON historico;
+DROP POLICY IF EXISTS "exclusao_publica" ON historico;
+
+CREATE POLICY "leitura_publica"    ON historico FOR SELECT USING (true);
+CREATE POLICY "escrita_admin"      ON historico FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "edicao_admin"       ON historico FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "exclusao_admin"     ON historico FOR DELETE USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "leitura_publica"  ON retornos;
+DROP POLICY IF EXISTS "escrita_publica"  ON retornos;
+DROP POLICY IF EXISTS "edicao_publica"   ON retornos;
+DROP POLICY IF EXISTS "exclusao_publica" ON retornos;
+
+CREATE POLICY "leitura_publica"    ON retornos FOR SELECT USING (true);
+CREATE POLICY "escrita_admin"      ON retornos FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "edicao_admin"       ON retornos FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "exclusao_admin"     ON retornos FOR DELETE USING (auth.role() = 'authenticated');

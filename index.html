@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="bg-slate-50 text-slate-800 min-h-screen" style="visibility:hidden">
   <div class="app-shell">
     <aside class="app-sidebar">
       <div class="sidebar-brand">
@@ -47,9 +47,9 @@
       </div>
       <nav class="sidebar-nav">
         <a href="index.html" class="sidebar-link">Pesquisar</a>
-        <a href="pages/adicionar-disciplina.html" class="sidebar-link">Adicionar Disciplina</a>
-        <a href="pages/importar.html" class="sidebar-link">Importar Dados</a>
-        <a href="pages/dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="pages/adicionar-disciplina.html" class="sidebar-link admin-only">Adicionar Disciplina</a>
+        <a href="pages/importar.html" class="sidebar-link admin-only">Importar Dados</a>
+        <a href="pages/dashboard.html" class="sidebar-link admin-only">Dashboard</a>
       </nav>
     </aside>
     <div class="sidebar-backdrop"></div>
@@ -100,15 +100,16 @@
       <nav class="header-nav">
         <div class="nav-links">
           <a href="index.html" class="nav-link active">Pesquisar</a>
-          <a href="pages/importar.html" class="nav-link">Importar Dados</a>
-          <a href="pages/dashboard.html" class="nav-link">Dashboard</a>
+          <a href="pages/importar.html" class="nav-link admin-only">Importar Dados</a>
+          <a href="pages/dashboard.html" class="nav-link admin-only">Dashboard</a>
         </div>
         <div class="header-actions">
+          <a href="pages/adicionar-disciplina.html" class="nav-link nav-cta admin-only">Adicionar Disciplina</a>
           <label class="switch" title="Alternar modo escuro" aria-label="Alternar modo escuro">
             <input type="checkbox" id="themeToggle">
             <span class="slider"></span>
           </label>
-          <a href="pages/adicionar-disciplina.html" class="nav-link nav-cta">Adicionar Disciplina</a>
+          <div id="authStatus" class="auth-status"></div>
         </div>
       </nav>
 
@@ -227,7 +228,7 @@
       <!-- Barra de controles -->
       <div class="results-toolbar" id="resultsToolbar" style="display:none">
         <div class="results-count" id="resultsCount">0 disciplinas encontradas</div>
-        <div class="toolbar-export">
+        <div class="toolbar-export admin-only">
           <button type="button" id="exportExcelBtn" class="card-moodle-btn export-btn" title="Exportar resultados filtrados para Excel">
             <span class="link-pill__icon-wrapper">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -312,6 +313,8 @@
   <script src="js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script>window.__AUTH_CONFIG__ = { adminOnly: false, loginPath: 'login.html', homePath: 'index.html' };</script>
+  <script src="js/auth.js"></script>
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
   <script src="js/ui.js"></script>

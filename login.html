@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>if (localStorage.getItem('theme') !== 'light') document.documentElement.setAttribute('data-theme', 'dark');</script>
+  <title>Entrar — Repositório</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#FF9800">
+              <rect x="1" y="38" width="46" height="2"/>
+              <rect x="25" y="18" width="4" height="16"/>
+              <rect x="31" y="18" width="4" height="16"/>
+              <rect x="37" y="18" width="4" height="16"/>
+              <rect x="19" y="18" width="4" height="16"/>
+              <rect x="13" y="18" width="4" height="16"/>
+              <rect x="7" y="18" width="4" height="16"/>
+              <polygon points="43,16 5,16 5,13 24,4 43,13"/>
+              <rect x="5" y="34" width="38" height="2"/>
+            </g>
+            <g fill="#EF6C00">
+              <rect x="25" y="16" width="4" height="2"/>
+              <rect x="31" y="16" width="4" height="2"/>
+              <rect x="37" y="16" width="4" height="2"/>
+              <rect x="19" y="16" width="4" height="2"/>
+              <rect x="13" y="16" width="4" height="2"/>
+              <rect x="7" y="16" width="4" height="2"/>
+              <rect x="3" y="36" width="42" height="2"/>
+              <circle cx="24" cy="11" r="2"/>
+            </g>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-name">Repositório</span>
+          <span class="logo-sub">Acervo de Disciplinas</span>
+        </div>
+      </div>
+
+      <h1 class="login-title">Acessar o repositório</h1>
+      <p class="login-subtitle">Entre com sua conta de administrador ou continue como visitante.</p>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="loginEmail">E-mail</label>
+          <input type="email" id="loginEmail" required autocomplete="username" placeholder="seuemail@fatecie.edu.br" />
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Senha</label>
+          <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="••••••••" />
+        </div>
+        <div id="loginError" class="login-error" style="display:none"></div>
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary login-submit-btn">Entrar como Admin</button>
+      </form>
+
+      <div class="login-divider"><span>ou</span></div>
+
+      <button type="button" id="visitorBtn" class="btn btn-secondary login-visitor-btn">Apenas Visitante</button>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script>
+    (async function redirectIfAlreadyLogged() {
+      const { data } = await db.auth.getSession();
+      if (data.session) window.location.replace('index.html');
+    })();
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      const submitBtn = document.getElementById('loginSubmitBtn');
+      errorEl.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Entrando…';
+
+      const { error } = await db.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        errorEl.textContent = 'E-mail ou senha inválidos.';
+        errorEl.style.display = '';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Entrar como Admin';
+        return;
+      }
+
+      localStorage.removeItem('repo_visitor');
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('visitorBtn').addEventListener('click', () => {
+      localStorage.setItem('repo_visitor', '1');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
