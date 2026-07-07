@@ -582,6 +582,18 @@ html[data-theme="dark"] .qf-btn.active { background: var(--surface); color: var(
 }
 .export-btn .link-pill__icon-wrapper { width: 20px; height: 20px; }
 .export-btn svg { width: 12px; height: 12px; display: block; }
+#exportExcelBtn.card-moodle-btn, #exportPdfBtn.card-moodle-btn { color: #e65100; }
+#exportExcelBtn.card-moodle-btn .link-pill__icon-wrapper, #exportPdfBtn.card-moodle-btn .link-pill__icon-wrapper { color: #fff; background-color: #e65100; }
+html[data-theme="dark"] #exportExcelBtn.card-moodle-btn .link-pill__icon-wrapper, html[data-theme="dark"] #exportPdfBtn.card-moodle-btn .link-pill__icon-wrapper { color: #1f2937; background-color: #e65100; }
+#exportExcelBtn.card-moodle-btn:hover .link-pill__icon-wrapper, #exportPdfBtn.card-moodle-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #fff; }
+html[data-theme="dark"] #exportExcelBtn.card-moodle-btn:hover .link-pill__icon-wrapper, html[data-theme="dark"] #exportPdfBtn.card-moodle-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #1f2937; }
+#exportExcelBtn.card-moodle-btn:hover, #exportPdfBtn.card-moodle-btn:hover {
+  background: radial-gradient(circle at 50% 50%, #e65100 0%, #f57c00 35%, #ff9800 65%, #ffb300 85%, #ffc107 100%);
+  color: #fff;
+  border-color: transparent;
+  filter: brightness(1.1);
+}
+html[data-theme="dark"] #exportExcelBtn.card-moodle-btn:hover, html[data-theme="dark"] #exportPdfBtn.card-moodle-btn:hover { color: #1f2937; }
 
 .toolbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 .sort-label { font-size: 12px; color: var(--text-muted); }
@@ -618,6 +630,12 @@ html[data-theme="dark"] .qf-btn.active { background: var(--surface); color: var(
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes plano-panel-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.plano-panel-in { animation: plano-panel-in .22s ease both; }
 
 .disc-card {
   background: var(--surface);
@@ -693,6 +711,12 @@ html[data-theme="dark"] .card-moodle-btn .link-pill__icon-wrapper { color: #1f29
 html[data-theme="dark"] .card-link-btns .card-moodle-btn .link-pill__icon-wrapper { color: #1f2937; }
 .card-link-btns .card-moodle-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #fff; }
 html[data-theme="dark"] .card-link-btns .card-moodle-btn:hover .link-pill__icon-wrapper { color: #e65100; background-color: #1f2937; }
+.card-link-btns .card-moodle-btn:hover {
+  background: radial-gradient(circle at 50% 50%, #e65100 0%, #f57c00 35%, #ff9800 65%, #ffb300 85%, #ffc107 100%);
+  color: #fff;
+  border-color: transparent;
+  filter: brightness(1.1);
+}
 html[data-theme="dark"] .card-link-btns .card-moodle-btn:hover { color: #1f2937; }
 .card-info-btn {
   align-self: flex-start; margin-top: 2px;
@@ -711,12 +735,11 @@ html[data-theme="dark"] .card-info-btn:hover .link-pill__icon-wrapper { color: #
 }
 html[data-theme="dark"] .card-info-btn:hover { color: #1f2937; }
 .detail-action-btns { display: flex; gap: 6px; position: absolute; bottom: 14px; right: 22px; }
-.detail-edit-btn { padding: 3px 6px; }
-.detail-delete-btn { padding: 3px 6px; }
 .card-nome {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 17px; font-weight: 700; color: var(--text);
+  font-size: 19px; font-weight: 800; color: var(--text);
   line-height: 1.3;
+  letter-spacing: 0.2px;
   text-transform: uppercase;
   word-break: break-word;
   overflow-wrap: break-word;
@@ -1214,6 +1237,15 @@ a.bc-link:hover { color: var(--accent); }
 }
 .dc-header svg { width: 16px; height: 16px; color: var(--accent); }
 .dc-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.plano-reload-warning {
+  font-size: 11px; font-weight: 600;
+  color: #e65100;
+  background: rgba(230, 81, 0, 0.12);
+  border: 1px solid rgba(230, 81, 0, 0.3);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
 .dc-body { padding: 20px; }
 
 .detail-text { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
@@ -1228,6 +1260,7 @@ a.bc-link:hover { color: var(--accent); }
 }
 .obs-edit-btn svg { width: 13px; height: 13px; }
 .obs-edit-btn:hover { background: var(--border); color: var(--accent); }
+.dc-header .obs-edit-btn svg { color: inherit; }
 
 .obs-textarea {
   width: 100%;

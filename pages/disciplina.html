@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');</script>
+  <script>if (localStorage.getItem('theme') !== 'light') document.documentElement.setAttribute('data-theme', 'dark');</script>
   <title>Detalhe da Disciplina — Repositório</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -147,13 +147,13 @@
             </div>
           </div>
           <div class="detail-action-btns">
-            <button id="editBtn" class="card-moodle-btn detail-edit-btn" title="Editar disciplina">
+            <button id="editBtn" class="obs-edit-btn detail-edit-btn" title="Editar disciplina">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
             </button>
-            <button id="deleteBtn" class="card-moodle-btn detail-delete-btn" title="Excluir disciplina">
+            <button id="deleteBtn" class="obs-edit-btn detail-delete-btn" title="Excluir disciplina">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
                 <polyline points="3 6 5 6 21 6"/>
                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -174,6 +174,7 @@
               <line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
             <h2 class="dc-title">PLANO DE ENSINO</h2>
+            <span id="planoReloadWarning" class="plano-reload-warning" style="display:none">Não carregou? Atualize a página</span>
             <button id="planoToggleBtn" class="plano-toggle-btn" title="Expandir / Recolher" aria-expanded="false">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
                 <polyline points="6 9 12 15 18 9"/>
@@ -199,7 +200,7 @@
           <div class="dc-body">
             <!-- Formulário de link -->
             <div id="planoLinkForm" class="plano-link-form">
-              <input type="url" id="planoLinkInput" class="plano-link-input" placeholder="Cole o link do PDF (Google Drive, SharePoint, Dropbox…)" />
+              <input type="url" id="planoLinkInput" class="plano-link-input" placeholder="Cole o link do arquivo (Google Drive, SharePoint, Dropbox…)" />
               <button id="planoLinkSave" class="btn btn-primary btn-sm">Salvar</button>
               <button id="planoLinkCancel" class="btn btn-secondary btn-sm" style="display:none">Cancelar</button>
             </div>

@@ -1047,22 +1047,37 @@ function urlDisplayName(url) {
   }
 }
 
+let planoReloadTimer = null;
+
+function animatePlanoPanelIn(el) {
+  if (!el) return;
+  el.classList.remove('plano-panel-in');
+  void el.offsetWidth; // força reflow para reiniciar a animação
+  el.classList.add('plano-panel-in');
+  el.addEventListener('animationend', () => el.classList.remove('plano-panel-in'), { once: true });
+}
+
 function renderPlanoEnsino(d) {
-  const linkForm   = document.getElementById('planoLinkForm');
-  const viewer     = document.getElementById('planoViewer');
-  const headerBtns = document.getElementById('planoHeaderBtns');
-  const iframe     = document.getElementById('planoIframe');
-  const fileBar    = document.getElementById('planoFileBar');
-  const noEmbed    = document.getElementById('planoNoEmbed');
-  const input      = document.getElementById('planoLinkInput');
-  const cancelBtn  = document.getElementById('planoLinkCancel');
+  const linkForm      = document.getElementById('planoLinkForm');
+  const viewer        = document.getElementById('planoViewer');
+  const headerBtns    = document.getElementById('planoHeaderBtns');
+  const iframe        = document.getElementById('planoIframe');
+  const fileBar       = document.getElementById('planoFileBar');
+  const noEmbed       = document.getElementById('planoNoEmbed');
+  const input         = document.getElementById('planoLinkInput');
+  const cancelBtn     = document.getElementById('planoLinkCancel');
+  const reloadWarning = document.getElementById('planoReloadWarning');
   if (!linkForm || !viewer) return;
+
+  clearTimeout(planoReloadTimer);
+  if (reloadWarning) reloadWarning.style.display = 'none';
 
   if (d.plano_ensino_url) {
     linkForm.style.display   = 'none';
     viewer.style.display     = '';
     headerBtns.style.display = 'flex';
     if (cancelBtn) cancelBtn.style.display = 'none';
+    animatePlanoPanelIn(viewer);
 
     const displayName = urlDisplayName(d.plano_ensino_url);
     const linkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
@@ -1072,7 +1087,20 @@ function renderPlanoEnsino(d) {
     if (embedSrc) {
       iframe.style.display = '';
       if (noEmbed) noEmbed.style.display = 'none';
-      if (iframe.src !== embedSrc) iframe.src = embedSrc;
+      if (iframe.src !== embedSrc) {
+        iframe.src = embedSrc;
+        // Em alguns casos o Google Docs Viewer não consegue buscar o arquivo
+        // (link do Dropbox ainda não propagado/acessível) e dispara um download
+        // quebrado em vez de renderizar — o iframe nunca chega a carregar.
+        // Se o 'load' não disparar a tempo, avisamos o usuário a atualizar a página.
+        planoReloadTimer = setTimeout(() => {
+          if (reloadWarning) reloadWarning.style.display = '';
+        }, 6000);
+        iframe.addEventListener('load', () => {
+          clearTimeout(planoReloadTimer);
+          if (reloadWarning) reloadWarning.style.display = 'none';
+        }, { once: true });
+      }
     } else {
       iframe.style.display = 'none';
       iframe.src = 'about:blank';
@@ -1088,6 +1116,7 @@ function renderPlanoEnsino(d) {
     headerBtns.style.display = 'none';
     if (input) input.value   = '';
     if (iframe) iframe.src   = '';
+    animatePlanoPanelIn(linkForm);
   }
 }
 
@@ -1131,6 +1160,7 @@ saveBtn.addEventListener('click', async () => {
     cancelBtn.style.display  = '';
     document.getElementById('planoViewer').style.display     = 'none';
     document.getElementById('planoHeaderBtns').style.display = 'none';
+    animatePlanoPanelIn(linkForm);
     input.focus();
   });
 

@@ -427,7 +427,7 @@ function renderEmptyStats() {
 /* Anima os números dos cards de 0 até o valor final */
 function animateStatCounts(container) {
   const numbers = container.querySelectorAll('.stat-number[data-count-to]');
-  const duration = 1600;
+  const duration = 1000;
 
   numbers.forEach(numEl => {
     const target = parseInt(numEl.dataset.countTo, 10) || 0;
