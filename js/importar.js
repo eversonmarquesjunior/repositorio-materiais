@@ -20,6 +20,7 @@ const COL_MAP = {
   apostila_html:   ['apostila html', 'link apostila html', 'html'],
   youtube:         ['link youtube', 'youtube'],
   soundcloud:      ['link soundcloud', 'soundcloud'],
+  plano_ensino_url: ['plano de ensino', 'link plano de ensino', 'plano ensino'],
   obs:             ['observacao', 'obs', 'observação'],
 };
 
@@ -37,6 +38,7 @@ const COL_LABELS = {
   apostila_html:   'Apostila HTML',
   youtube:         'YouTube',
   soundcloud:      'SoundCloud',
+  plano_ensino_url: 'Plano de Ensino',
   obs:             'Observação',
 };
 
@@ -47,7 +49,7 @@ let updateRows        = [];
 let dbDisciplinas     = null;
 let detectedLinkFields = [];
 
-const UPDATE_FIELDS = ['dropbox', 'youtube', 'soundcloud', 'apostila_html'];
+const UPDATE_FIELDS = ['dropbox', 'youtube', 'soundcloud', 'apostila_html', 'plano_ensino_url'];
 
 /* ── INIT ──────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
