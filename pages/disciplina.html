@@ -221,6 +221,38 @@
           </div>
         </div>
 
+        <!-- Ementa -->
+        <div class="detail-card" id="cardEmentaTexto">
+          <div class="dc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <h2 class="dc-title">EMENTA</h2>
+            <button id="ementaTextoToggleBtn" class="plano-toggle-btn" title="Expandir / Recolher" aria-expanded="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <button id="ementaTextoEditBtn" class="obs-edit-btn admin-only" title="Editar ementa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="dc-body">
+            <p class="detail-text" id="detailEmentaTexto"></p>
+            <div id="ementaTextoEditMode" style="display:none">
+              <textarea id="ementaTextoTextarea" class="obs-textarea" rows="5" placeholder="Cole ou digite a ementa desta disciplina..."></textarea>
+              <div class="obs-edit-actions">
+                <button id="ementaTextoSaveBtn" class="btn btn-primary btn-sm">Salvar</button>
+                <button id="ementaTextoCancelBtn" class="btn btn-secondary btn-sm">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Observações + Histórico (lado a lado) -->
         <div class="detail-cards-row">
         <div class="detail-card" id="cardEmenta">
@@ -514,6 +546,10 @@
           <div class="form-group">
             <label for="editSoundcloud">Soundcloud</label>
             <input type="url" id="editSoundcloud" name="soundcloud" placeholder="https://soundcloud.com/..." />
+          </div>
+          <div class="form-group">
+            <label for="editEmenta">Ementa</label>
+            <textarea id="editEmenta" name="ementa" rows="4" placeholder="Ementa da disciplina..."></textarea>
           </div>
           <div class="form-group">
             <label for="editObservacoes">Observações</label>

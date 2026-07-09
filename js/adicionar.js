@@ -181,6 +181,7 @@ async function addNewDiscipline() {
     apostila_html:   document.getElementById('apostilaHtml').value.trim(),
     youtube:         document.getElementById('youtube').value.trim(),
     soundcloud:      document.getElementById('soundcloud').value.trim(),
+    ementa:           document.getElementById('ementa').value.trim(),
     obs:              document.getElementById('observacoes').value.trim(),
     disciplina_pai_id: document.getElementById('disciplinaPaiId').value || null,
     updated_at: new Date().toISOString()

@@ -170,6 +170,32 @@
     html[data-theme="dark"] .test-active-card a { color: #fde68a !important; }
     html[data-theme="dark"] .btn-danger { color: #fca5a5; border-color: rgba(239,68,68,.4); }
     html[data-theme="dark"] .btn-danger:hover { background: rgba(239,68,68,.12); border-color: #fca5a5; }
+
+    .ementa-nome-input {
+      width: 100%; min-width: 180px; padding: .35rem .55rem;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: .83rem; background: var(--surface); color: var(--text);
+    }
+    .ementa-preview-cell { max-width: 320px; }
+    .ementa-preview-text {
+      white-space: normal; overflow: hidden; text-overflow: ellipsis;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      color: var(--text-muted); font-size: .82rem; line-height: 1.4;
+    }
+    .btn-toggle-ementa {
+      background: none; border: none; color: var(--accent); cursor: pointer;
+      font-size: .78rem; font-weight: 600; padding: 0; margin-top: .25rem;
+    }
+    .ementa-edit-row td {
+      background: var(--surface-2); padding: .85rem .9rem;
+      white-space: normal;
+    }
+    .ementa-edit-row textarea {
+      width: 100%; min-height: 140px; padding: .6rem .75rem;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: .83rem; line-height: 1.5;
+      background: var(--surface); color: var(--text); resize: vertical;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen" style="visibility:hidden">
@@ -281,6 +307,7 @@
           <div class="mode-tabs">
             <button class="mode-tab active" id="tabImportar">Importar Disciplinas</button>
             <button class="mode-tab" id="tabAtualizar">Atualizar Links</button>
+            <button class="mode-tab" id="tabEmentas">Importar Ementas</button>
           </div>
 
           <!-- Status de dados de teste ativos -->
@@ -294,7 +321,7 @@
           </div>
 
           <!-- Etapa 1: Upload -->
-          <div class="import-box">
+          <div class="import-box" id="csvUploadBox">
             <h2>1. Configure e selecione o arquivo CSV</h2>
 
             <div class="form-group" style="margin-bottom:1rem">
@@ -320,6 +347,25 @@
               </svg>
               <p>Arraste o arquivo aqui ou <strong>clique para selecionar</strong></p>
               <p id="fileChosen" class="file-chosen" style="display:none"></p>
+            </div>
+          </div>
+
+          <!-- Etapa 1 (modo Ementas): Upload de .docx -->
+          <div class="import-box" id="ementasUploadBox" style="display:none">
+            <h2>1. Selecione os arquivos de Plano de Ensino (.docx)</h2>
+            <p style="font-size:.83rem;color:#64748b;margin:0 0 .85rem">
+              Envie um ou mais arquivos <strong>.docx</strong>. O nome da disciplina e o texto da ementa são
+              extraídos automaticamente de cada arquivo e podem ser corrigidos antes de salvar.
+            </p>
+            <div class="upload-zone" id="ementasUploadZone">
+              <input type="file" id="ementasFile" accept=".docx" multiple style="display:none" />
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p>Arraste os arquivos .docx aqui ou <strong>clique para selecionar</strong></p>
+              <p id="ementasFileChosen" class="file-chosen" style="display:none"></p>
             </div>
           </div>
 
@@ -372,6 +418,23 @@
             </div>
           </div>
 
+          <!-- Etapa 3c: Ações de salvar ementas -->
+          <div class="import-box" id="actionsEmentasBox" style="display:none">
+            <h2>3. Confirmar importação de ementas</h2>
+            <div id="ementasStats" style="margin-bottom:.85rem"></div>
+            <div class="import-actions">
+              <button id="btnSaveEmentas" class="btn-real">Salvar ementas no banco</button>
+            </div>
+            <p class="hint-text">
+              Apenas as disciplinas <strong>encontradas</strong> (verde) terão a ementa salva. Corrija o nome extraído
+              ou o texto da ementa antes de confirmar, se necessário.
+            </p>
+            <div id="progressEmentasWrap" style="display:none;margin-top:1rem">
+              <div class="progress-bar-wrap"><div class="progress-bar" id="progressEmentasBar" style="width:0%"></div></div>
+              <p class="import-log" id="importEmentasLog"></p>
+            </div>
+          </div>
+
         </div>
       </main>
 
@@ -387,6 +450,7 @@
 
   <script src="../js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js"></script>
   <script src="../js/supabase-client.js"></script>
   <script>window.__AUTH_CONFIG__ = { adminOnly: true, loginPath: '../login.html', homePath: '../index.html' };</script>
   <script src="../js/auth.js"></script>

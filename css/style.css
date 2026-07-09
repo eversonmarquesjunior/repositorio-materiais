@@ -1404,6 +1404,13 @@ a.bc-link:hover { color: var(--accent); }
   transition: max-height .35s ease, padding .25s ease;
 }
 #cardPlanoEnsino .dc-body.expanded { max-height: 2000px; padding: 20px; }
+#cardEmentaTexto .dc-header { cursor: pointer; }
+#cardEmentaTexto .dc-body {
+  overflow: hidden; max-height: 0; padding: 0 20px;
+  transition: max-height .35s ease, padding .25s ease;
+}
+#cardEmentaTexto .dc-body.expanded { max-height: 2000px; padding: 20px; }
+#cardEmentaTexto .obs-edit-btn { margin-left: 4px; }
 .plano-file-bar { overflow: hidden; }
 .plano-iframe {
   width: 100%; height: min(82vh, 880px);

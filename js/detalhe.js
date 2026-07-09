@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initEditModal(disc);
   initDeleteBtn(disc);
   initObservacoes(disc);
+  initEmentaTexto(disc);
   initPlanoEnsino(disc);
   initHistorico(disc);
   initRetornos(disc);
@@ -133,6 +134,9 @@ function renderDetail(d) {
 
   // Plano de Ensino
   renderPlanoEnsino(d);
+
+  // Ementa
+  renderEmentaTexto(d);
 
   // Observações
   renderObservacoes(d);
@@ -574,6 +578,72 @@ function insertLinkInTextarea(textarea) {
   textarea.setSelectionRange(start + markdown.length, start + markdown.length);
 }
 
+function renderEmentaTexto(d) {
+  const textEl   = document.getElementById('detailEmentaTexto');
+  const editMode = document.getElementById('ementaTextoEditMode');
+  const editBtn  = document.getElementById('ementaTextoEditBtn');
+  if (!textEl) return;
+  if (editMode) editMode.style.display = 'none';
+  if (editBtn)  editBtn.style.display  = '';
+  const parsed = parseObs(d.ementa);
+  if (parsed) {
+    textEl.innerHTML = parsed;
+    textEl.classList.remove('obs-empty');
+  } else {
+    textEl.textContent = 'Sem ementa cadastrada.';
+    textEl.classList.add('obs-empty');
+  }
+  textEl.style.display = '';
+}
+
+function initEmentaTexto(d) {
+  const editBtn   = document.getElementById('ementaTextoEditBtn');
+  const editMode  = document.getElementById('ementaTextoEditMode');
+  const textarea  = document.getElementById('ementaTextoTextarea');
+  const saveBtn   = document.getElementById('ementaTextoSaveBtn');
+  const cancelBtn = document.getElementById('ementaTextoCancelBtn');
+  const textEl    = document.getElementById('detailEmentaTexto');
+  if (!editBtn || !editMode || !textarea) return;
+
+  const toggleBtn = document.getElementById('ementaTextoToggleBtn');
+  const body      = document.querySelector('#cardEmentaTexto .dc-body');
+  const header    = document.querySelector('#cardEmentaTexto .dc-header');
+  if (toggleBtn && body && header) {
+    header.addEventListener('click', e => {
+      if (e.target.closest('#ementaTextoEditBtn')) return;
+      const expanded = body.classList.toggle('expanded');
+      toggleBtn.setAttribute('aria-expanded', expanded);
+    });
+  }
+
+  editBtn.addEventListener('click', () => {
+    textarea.value = d.ementa || '';
+    textEl.style.display  = 'none';
+    editMode.style.display = '';
+    editBtn.style.display  = 'none';
+    if (body) { body.classList.add('expanded'); toggleBtn?.setAttribute('aria-expanded', 'true'); }
+    textarea.focus();
+  });
+
+  const cancelEdit = () => {
+    editMode.style.display = 'none';
+    textEl.style.display   = '';
+    editBtn.style.display  = '';
+  };
+
+  saveBtn.addEventListener('click', async () => {
+    const ementa = textarea.value.trim();
+    const { error } = await db.from('disciplinas').update({ ementa }).eq('id', d.id);
+    if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+    d.ementa = ementa;
+    cancelEdit();
+    renderEmentaTexto(d);
+    showToast('Ementa salva com sucesso!', 'success');
+  });
+
+  cancelBtn.addEventListener('click', cancelEdit);
+}
+
 function renderObservacoes(d) {
   const textEl  = document.getElementById('detailEmenta');
   const editMode = document.getElementById('ementaEditMode');
@@ -920,6 +990,7 @@ function fillEditForm(d) {
   document.getElementById('editApostilaHtml').value = d.apostila_html || '';
   document.getElementById('editYoutube').value      = d.youtube      || '';
   document.getElementById('editSoundcloud').value   = d.soundcloud   || '';
+  document.getElementById('editEmenta').value       = d.ementa       || '';
   document.getElementById('editObservacoes').value  = d.obs          || '';
 
   // Preenche o campo "Mesmo material de"
@@ -973,6 +1044,7 @@ async function saveEditedDiscipline(d, closeModal) {
     apostila_html:   val('editApostilaHtml'),
     youtube:         val('editYoutube'),
     soundcloud:      val('editSoundcloud'),
+    ementa:            val('editEmenta'),
     obs:               val('editObservacoes'),
     disciplina_pai_id: (document.getElementById('editDisciplinaPaiId') || {}).value || null,
   };

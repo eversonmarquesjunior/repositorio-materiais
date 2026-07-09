@@ -48,6 +48,8 @@ let currentMode       = 'import';
 let updateRows        = [];
 let dbDisciplinas     = null;
 let detectedLinkFields = [];
+let ementaRows        = [];
+let ementaOpenIndex   = null;
 
 const UPDATE_FIELDS = ['dropbox', 'youtube', 'soundcloud', 'apostila_html', 'plano_ensino_url'];
 
@@ -76,7 +78,24 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnLimparTeste').addEventListener('click',  clearTestData);
   document.getElementById('tabImportar').addEventListener('click',     () => setMode('import'));
   document.getElementById('tabAtualizar').addEventListener('click',    () => setMode('update'));
+  document.getElementById('tabEmentas').addEventListener('click',      () => setMode('ementas'));
   document.getElementById('btnRunUpdate').addEventListener('click',    confirmRunUpdate);
+  document.getElementById('btnSaveEmentas').addEventListener('click',  confirmSaveEmentas);
+
+  const ementasZone   = document.getElementById('ementasUploadZone');
+  const ementasFileIn = document.getElementById('ementasFile');
+
+  ementasZone.addEventListener('click', () => ementasFileIn.click());
+  ementasZone.addEventListener('dragover',  e => { e.preventDefault(); ementasZone.classList.add('drag-over'); });
+  ementasZone.addEventListener('dragleave', () => ementasZone.classList.remove('drag-over'));
+  ementasZone.addEventListener('drop', e => {
+    e.preventDefault();
+    ementasZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) processDocxFiles(e.dataTransfer.files);
+  });
+  ementasFileIn.addEventListener('change', () => {
+    if (ementasFileIn.files.length) processDocxFiles(ementasFileIn.files);
+  });
 });
 
 /* ── BANNER DE TESTE ────────────────────────────────────────── */
@@ -106,17 +125,26 @@ function setMode(mode) {
   currentMode = mode;
   document.getElementById('tabImportar').classList.toggle('active', mode === 'import');
   document.getElementById('tabAtualizar').classList.toggle('active', mode === 'update');
+  document.getElementById('tabEmentas').classList.toggle('active', mode === 'ementas');
 
   const modeloGroup = document.getElementById('modeloSelect').closest('.form-group');
   modeloGroup.style.display = mode === 'import' ? '' : 'none';
 
-  parsedRows = [];
-  updateRows = [];
+  document.getElementById('csvUploadBox').style.display     = mode === 'ementas' ? 'none' : '';
+  document.getElementById('ementasUploadBox').style.display = mode === 'ementas' ? '' : 'none';
+
+  parsedRows  = [];
+  updateRows  = [];
+  ementaRows  = [];
+  ementaOpenIndex = null;
   document.getElementById('previewBox').style.display        = 'none';
   document.getElementById('actionsBox').style.display        = 'none';
   document.getElementById('actionsUpdateBox').style.display  = 'none';
+  document.getElementById('actionsEmentasBox').style.display = 'none';
   document.getElementById('fileChosen').style.display        = 'none';
   document.getElementById('csvFile').value = '';
+  document.getElementById('ementasFileChosen').style.display = 'none';
+  document.getElementById('ementasFile').value = '';
 
   const wrap = document.querySelector('.preview-table-wrap');
   wrap.style.maxHeight = '';
@@ -579,6 +607,251 @@ async function runUpdate() {
     progressBar.style.background = '#ef4444';
     importLog.textContent = updated + ' atualizadas · ' + errors + ' com erro (veja o console).';
     showToast('Atualização com erros: ' + updated + ' ok, ' + errors + ' falha(s).', 'error');
+  }
+
+  btn.disabled = false;
+}
+
+/* ── MODO IMPORTAR EMENTAS (.docx) ───────────────────────────── */
+function decodeXmlEntities(s) {
+  return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+}
+
+async function docxToText(file) {
+  const buffer = await file.arrayBuffer();
+  const zip = await JSZip.loadAsync(buffer);
+  const doc = zip.file('word/document.xml');
+  if (!doc) throw new Error('document.xml não encontrado (arquivo não é um .docx válido)');
+  let xml = await doc.async('text');
+  xml = xml.replace(/<\/w:p>/g, '\n');
+  xml = xml.replace(/<[^>]+>/g, '');
+  xml = decodeXmlEntities(xml);
+  xml = xml.replace(/\r/g, '');
+  xml = xml.replace(/[ \t]+\n/g, '\n');
+  xml = xml.replace(/\n{2,}/g, '\n');
+  return xml;
+}
+
+function extractCampos(text) {
+  let nome = '';
+  const nomeMatch = text.match(/DISCIPLINA\s*:\s*([^\n]*)/i);
+  if (nomeMatch) {
+    nome = nomeMatch[1].trim();
+    if (!nome) {
+      const afterIdx = text.indexOf(nomeMatch[0]) + nomeMatch[0].length;
+      const rest = text.slice(afterIdx).split('\n').map(l => l.trim()).filter(Boolean);
+      nome = rest[0] || '';
+    }
+  }
+
+  let ementa = '';
+  const ementaStart = text.match(/1\)\s*EMENTA DA DISCIPLINA[^\n:]*:?/i);
+  if (ementaStart) {
+    const startIdx = text.indexOf(ementaStart[0]) + ementaStart[0].length;
+    const restText = text.slice(startIdx);
+    const endMatch = restText.match(/\n\s*2\)/);
+    const raw = endMatch ? restText.slice(0, endMatch.index) : restText;
+    ementa = raw.split('\n').map(l => l.trim()).filter(Boolean).join('\n\n');
+  }
+
+  return { nome, ementa };
+}
+
+async function processDocxFiles(fileList) {
+  const chosen = document.getElementById('ementasFileChosen');
+  const files  = Array.from(fileList);
+  chosen.textContent = files.length + ' arquivo' + (files.length !== 1 ? 's' : '') + ' selecionado' + (files.length !== 1 ? 's' : '');
+  chosen.style.display = '';
+
+  const mappingInfo = document.getElementById('mappingInfo');
+  document.getElementById('previewBox').style.display = '';
+  mappingInfo.className = 'mapping-info';
+  mappingInfo.innerHTML = '<span>Processando ' + files.length + ' arquivo(s)…</span>';
+  document.getElementById('previewWrap').style.display = 'none';
+  document.getElementById('statsRow').innerHTML = '';
+  document.getElementById('actionsEmentasBox').style.display = 'none';
+
+  let dbRows;
+  try {
+    dbRows = await ensureDbLoaded();
+  } catch (e) {
+    mappingInfo.className = 'mapping-info warn';
+    mappingInfo.innerHTML = '<span>Erro ao carregar disciplinas do banco: ' + esc(e.message) + '</span>';
+    return;
+  }
+
+  const dbMap = new Map();
+  dbRows.forEach(r => dbMap.set(normStr(r.nome), r));
+
+  ementaRows = [];
+  for (const file of files) {
+    try {
+      const text = await docxToText(file);
+      const { nome, ementa } = extractCampos(text);
+      const dbMatch = nome ? dbMap.get(normStr(nome)) : null;
+      ementaRows.push({
+        fileName: file.name,
+        nome:     nome   || '',
+        ementa:   ementa || '',
+        dbId:     dbMatch?.id,
+        dbNome:   dbMatch?.nome,
+        matched:  !!dbMatch,
+      });
+    } catch (e) {
+      ementaRows.push({
+        fileName: file.name,
+        nome: '',
+        ementa: '',
+        dbId: undefined,
+        dbNome: undefined,
+        matched: false,
+        error: e.message,
+      });
+    }
+  }
+
+  ementaOpenIndex = null;
+  mappingInfo.innerHTML = '<span>' + files.length + ' arquivo(s) processado(s). Revise os nomes e o texto da ementa antes de salvar.</span>';
+  refreshEmentaStatsRow();
+  renderEmentaPreview();
+
+  if (ementaRows.some(r => r.matched)) {
+    document.getElementById('actionsEmentasBox').style.display = '';
+    refreshEmentaActionStats();
+  }
+}
+
+function renderEmentaPreview() {
+  const previewWrap = document.getElementById('previewWrap');
+  if (!ementaRows.length) { previewWrap.style.display = 'none'; return; }
+  previewWrap.style.display = '';
+
+  const wrap = document.querySelector('.preview-table-wrap');
+  wrap.style.maxHeight = '520px';
+  wrap.style.overflowY = 'auto';
+
+  document.getElementById('previewHead').innerHTML = '<tr>' +
+    '<th>Arquivo</th><th>Status</th><th>Nome (disciplina)</th><th>Ementa extraída</th><th></th></tr>';
+
+  document.getElementById('previewBody').innerHTML = ementaRows.map((r, i) => {
+    const status = r.matched
+      ? '<span class="match-chip found">✓ Encontrada</span>'
+      : '<span class="match-chip not-found">✗ Não encontrada</span>';
+
+    const nomeCell = '<td><input type="text" class="ementa-nome-input" value="' + esc(r.nome) +
+      '" onchange="onEmentaNomeChange(' + i + ', this.value)" /></td>';
+
+    const ementaPreview = r.ementa
+      ? esc(r.ementa.slice(0, 220)) + (r.ementa.length > 220 ? '…' : '')
+      : '<em style="color:#94a3b8">(ementa não identificada)</em>';
+
+    const ementaCell = '<td class="ementa-preview-cell">' +
+      '<div class="ementa-preview-text">' + ementaPreview + '</div>' +
+      '<button type="button" class="btn-toggle-ementa" onclick="toggleEmentaEdit(' + i + ')">' +
+      (ementaOpenIndex === i ? 'Fechar' : 'Ver / editar') + '</button></td>';
+
+    const rowHtml = '<tr' + (r.matched ? '' : ' style="opacity:.7"') + '>' +
+      '<td title="' + esc(r.fileName) + '" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.fileName) + '</td>' +
+      '<td>' + status + '</td>' +
+      nomeCell + ementaCell +
+      '<td><button class="btn-remove-row" onclick="removeEmentaRow(' + i + ')" title="Remover linha">✕</button></td></tr>';
+
+    if (ementaOpenIndex !== i) return rowHtml;
+
+    return rowHtml + '<tr class="ementa-edit-row"><td colspan="5">' +
+      '<textarea oninput="onEmentaTextInput(' + i + ', this.value)">' + esc(r.ementa) + '</textarea>' +
+      '</td></tr>';
+  }).join('');
+
+  document.getElementById('previewMore').style.display = 'none';
+}
+
+function onEmentaNomeChange(index, value) {
+  ementaRows[index].nome = value;
+  const match = dbDisciplinas ? dbDisciplinas.find(r => normStr(r.nome) === normStr(value)) : null;
+  ementaRows[index].matched = !!match;
+  ementaRows[index].dbId    = match?.id;
+  ementaRows[index].dbNome  = match?.nome;
+  refreshEmentaStatsRow();
+  renderEmentaPreview();
+  const foundCount = ementaRows.filter(r => r.matched).length;
+  document.getElementById('actionsEmentasBox').style.display = foundCount ? '' : 'none';
+  if (foundCount) refreshEmentaActionStats();
+}
+
+function onEmentaTextInput(index, value) {
+  ementaRows[index].ementa = value;
+}
+
+function toggleEmentaEdit(index) {
+  ementaOpenIndex = ementaOpenIndex === index ? null : index;
+  renderEmentaPreview();
+}
+
+function removeEmentaRow(index) {
+  ementaRows.splice(index, 1);
+  if (ementaOpenIndex === index) ementaOpenIndex = null;
+  else if (ementaOpenIndex !== null && ementaOpenIndex > index) ementaOpenIndex--;
+  refreshEmentaStatsRow();
+  renderEmentaPreview();
+  const foundCount = ementaRows.filter(r => r.matched).length;
+  document.getElementById('actionsEmentasBox').style.display = foundCount ? '' : 'none';
+  if (foundCount) refreshEmentaActionStats();
+}
+
+function refreshEmentaStatsRow() {
+  const foundCount    = ementaRows.filter(r => r.matched).length;
+  const notFoundCount = ementaRows.filter(r => !r.matched).length;
+  document.getElementById('statsRow').innerHTML =
+    '<span class="stat-chip valid">' + foundCount + ' encontrada' + (foundCount !== 1 ? 's' : '') + ' no banco</span>' +
+    (notFoundCount ? '<span class="stat-chip skip">' + notFoundCount + ' não encontrada' + (notFoundCount !== 1 ? 's' : '') + '</span>' : '');
+}
+
+function refreshEmentaActionStats() {
+  const found = ementaRows.filter(r => r.matched).length;
+  document.getElementById('ementasStats').innerHTML =
+    '<span class="stat-chip valid">' + found + ' disciplina' + (found !== 1 ? 's' : '') + ' receber' + (found !== 1 ? 'ão' : 'á') + ' a ementa</span>';
+}
+
+async function confirmSaveEmentas() {
+  const found = ementaRows.filter(r => r.matched);
+  if (!found.length) return;
+  const ok = confirm('Salvar a ementa de ' + found.length + ' disciplina' + (found.length !== 1 ? 's' : '') + ' no banco?\n\nEssa ação modifica registros existentes no Supabase.');
+  if (ok) await runSaveEmentas();
+}
+
+async function runSaveEmentas() {
+  const progressWrap = document.getElementById('progressEmentasWrap');
+  const progressBar  = document.getElementById('progressEmentasBar');
+  const importLog    = document.getElementById('importEmentasLog');
+  const btn          = document.getElementById('btnSaveEmentas');
+
+  progressWrap.style.display = '';
+  btn.disabled = true;
+
+  const matched = ementaRows.filter(r => r.matched);
+  let updated = 0, errors = 0;
+
+  for (let i = 0; i < matched.length; i++) {
+    const r = matched[i];
+    const { error } = await db.from('disciplinas').update({ ementa: r.ementa }).eq('id', r.dbId);
+    if (error) { errors++; console.error('Erro ao salvar ementa:', r.fileName, error.message); }
+    else updated++;
+
+    const pct = Math.round(((i + 1) / matched.length) * 100);
+    progressBar.style.width = pct + '%';
+    importLog.textContent = 'Salvando… ' + (i + 1) + ' de ' + matched.length;
+  }
+
+  if (errors === 0) {
+    progressBar.style.background = '#22c55e';
+    importLog.textContent = '✓ ' + updated + ' ementa(s) salva(s) com sucesso!';
+    showToast(updated + ' ementa(s) salva(s) com sucesso!', 'success');
+  } else {
+    progressBar.style.background = '#ef4444';
+    importLog.textContent = updated + ' salva(s) · ' + errors + ' com erro (veja o console).';
+    showToast('Salvamento com erros: ' + updated + ' ok, ' + errors + ' falha(s).', 'error');
   }
 
   btn.disabled = false;

@@ -3,6 +3,11 @@
 --  Execute este arquivo no SQL Editor do Supabase
 -- ============================================================
 
+-- ── MIGRAÇÃO (bases já existentes) ───────────────────────────
+-- Se a tabela `disciplinas` já existe e ainda não tem a coluna
+-- `ementa`, rode isto manualmente no SQL Editor do Supabase:
+-- ALTER TABLE disciplinas ADD COLUMN IF NOT EXISTS ementa text;
+
 -- Tabela principal
 CREATE TABLE IF NOT EXISTS disciplinas (
   id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -33,6 +38,7 @@ CREATE TABLE IF NOT EXISTS disciplinas (
 
   -- Texto livre
   obs              text,
+  ementa           text,
 
   -- Timestamps
   created_at       timestamptz NOT NULL DEFAULT now(),
