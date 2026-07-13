@@ -50,7 +50,7 @@
         <a href="../index.html" class="sidebar-link">Pesquisar</a>
         <a href="adicionar-disciplina.html" class="sidebar-link admin-only">Adicionar Disciplina</a>
         <a href="importar.html" class="sidebar-link admin-only">Importar Dados</a>
-        <a href="dashboard.html" class="sidebar-link admin-only active">Dashboard</a>
+        <a href="dashboard.html" class="sidebar-link manager-only active">Dashboard</a>
       </nav>
     </aside>
     <div class="sidebar-backdrop"></div>
@@ -101,7 +101,7 @@
             <div class="nav-links">
               <a href="../index.html" class="nav-link">Pesquisar</a>
               <a href="importar.html" class="nav-link admin-only">Importar Dados</a>
-              <a href="dashboard.html" class="nav-link admin-only active">Dashboard</a>
+              <a href="dashboard.html" class="nav-link manager-only active">Dashboard</a>
             </div>
             <div class="header-actions">
               <a href="adicionar-disciplina.html" class="nav-link nav-cta admin-only">Adicionar Disciplina</a>
@@ -219,7 +219,7 @@
   <script src="../js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase-client.js"></script>
-  <script>window.__AUTH_CONFIG__ = { adminOnly: true, loginPath: '../login.html', homePath: '../index.html' };</script>
+  <script>window.__AUTH_CONFIG__ = { managerOnly: true, loginPath: '../login.html', homePath: '../index.html' };</script>
   <script src="../js/auth.js"></script>
   <!-- <script src="../js/data.js"></script> -->
   <!-- <script src="../js/dashboard.js"></script> -->

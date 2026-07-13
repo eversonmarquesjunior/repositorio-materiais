@@ -46,19 +46,19 @@
       </div>
 
       <h1 class="login-title">Acessar o repositório</h1>
-      <p class="login-subtitle">Entre com sua conta de administrador ou continue como visitante.</p>
+      <p class="login-subtitle">Entre com sua conta ou continue como visitante.</p>
 
       <form id="loginForm" class="login-form">
         <div class="form-group">
-          <label for="loginEmail">E-mail</label>
-          <input type="email" id="loginEmail" required autocomplete="username" placeholder="seuemail@fatecie.edu.br" />
+          <label for="loginEmail">Login</label>
+          <input type="text" id="loginEmail" required autocomplete="username" placeholder="Digite seu usuário" />
         </div>
         <div class="form-group">
           <label for="loginPassword">Senha</label>
           <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="••••••••" />
         </div>
         <div id="loginError" class="login-error" style="display:none"></div>
-        <button type="submit" id="loginSubmitBtn" class="btn btn-primary login-submit-btn">Entrar como Admin</button>
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary login-submit-btn">Entrar</button>
       </form>
 
       <div class="login-divider"><span>ou</span></div>
@@ -78,7 +78,7 @@
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
+      const username = document.getElementById('loginEmail').value.trim().toLowerCase();
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
       const submitBtn = document.getElementById('loginSubmitBtn');
@@ -86,13 +86,28 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Entrando…';
 
-      const { error } = await db.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        errorEl.textContent = 'E-mail ou senha inválidos.';
+      const invalidLogin = () => {
+        errorEl.textContent = 'Login ou senha inválidos.';
         errorEl.style.display = '';
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Entrar como Admin';
+        submitBtn.textContent = 'Entrar';
+      };
+
+      const { data: usuario, error: lookupError } = await db
+        .from('usuarios')
+        .select('email')
+        .eq('username', username)
+        .single();
+
+      if (lookupError || !usuario) {
+        invalidLogin();
+        return;
+      }
+
+      const { error } = await db.auth.signInWithPassword({ email: usuario.email, password });
+
+      if (error) {
+        invalidLogin();
         return;
       }
 

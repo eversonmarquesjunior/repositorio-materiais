@@ -291,8 +291,9 @@ svg { flex-shrink: 0; }
 
 .header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
-/* ── CONTROLE DE ACESSO (admin / visitante) ─────────────────── */
+/* ── CONTROLE DE ACESSO (admin / gestor / visitante) ─────────── */
 html:not(.is-admin) .admin-only { display: none !important; }
+html:not(.is-admin):not(.is-gestor) .manager-only { display: none !important; }
 
 .auth-status { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .auth-visitor-badge {

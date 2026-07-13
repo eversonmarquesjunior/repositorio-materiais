@@ -22,10 +22,13 @@ const COL_MAP = {
   soundcloud:      ['link soundcloud', 'soundcloud'],
   plano_ensino_url: ['plano de ensino', 'link plano de ensino', 'plano ensino'],
   obs:             ['observacao', 'obs', 'observação'],
+  ano:             ['ano', 'ano de origem', 'ano origem', 'ano da disciplina'],
 };
 
 const COL_LABELS = {
   nome:            'Nome da Disciplina',
+  modelo:          'Modelo',
+  status:          'Status (badge)',
   link_moodle_wae: 'Moodle WAE',
   link_dp_wae:     'DP WAE',
   link_moodle_erp: 'Moodle ERP',
@@ -48,6 +51,7 @@ let currentMode       = 'import';
 let updateRows        = [];
 let dbDisciplinas     = null;
 let detectedLinkFields = [];
+let previewFields      = [];
 let ementaRows        = [];
 let ementaOpenIndex   = null;
 
@@ -71,6 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   fileIn.addEventListener('change', () => {
     if (fileIn.files[0]) processFile(fileIn.files[0]);
+  });
+
+  const statusUpdateSelect = document.getElementById('statusUpdateSelect');
+  const statusUpdateAno    = document.getElementById('statusUpdateAno');
+  statusUpdateSelect.addEventListener('change', () => {
+    const show = statusUpdateSelect.value === 'antiga';
+    statusUpdateAno.style.display = show ? '' : 'none';
+    if (!show) statusUpdateAno.value = '';
   });
 
   document.getElementById('btnSaveTeste').addEventListener('click',    saveForTest);
@@ -129,6 +141,14 @@ function setMode(mode) {
 
   const modeloGroup = document.getElementById('modeloSelect').closest('.form-group');
   modeloGroup.style.display = mode === 'import' ? '' : 'none';
+  document.getElementById('modeloUpdateGroup').style.display = mode === 'update' ? '' : 'none';
+  if (mode !== 'update') document.getElementById('modeloUpdateSelect').value = '';
+  document.getElementById('statusUpdateGroup').style.display = mode === 'update' ? '' : 'none';
+  if (mode !== 'update') {
+    document.getElementById('statusUpdateSelect').value = '';
+    document.getElementById('statusUpdateAno').value = '';
+    document.getElementById('statusUpdateAno').style.display = 'none';
+  }
 
   document.getElementById('csvUploadBox').style.display     = mode === 'ementas' ? 'none' : '';
   document.getElementById('ementasUploadBox').style.display = mode === 'ementas' ? '' : 'none';
@@ -232,6 +252,35 @@ function getModelo() {
 
 function isUrl(v) {
   return v && (v.startsWith('http://') || v.startsWith('https://'));
+}
+
+function getModeloUpdateTarget() {
+  const sel = document.getElementById('modeloUpdateSelect');
+  return sel ? sel.value : '';
+}
+
+const STATUS_UPDATE_LABELS = {
+  comum:       'Disciplina Comum',
+  atualizacao: 'Atualização do Zero',
+  paliativa:   'Disciplina Paliativa',
+  antiga:      'Disciplina Origem Grad.',
+};
+
+// Seleção feita no formulário: qual "módulo" de status aplicar e um ano padrão
+// (usado só quando a linha do CSV não tiver a própria coluna "ano").
+function getStatusUpdateSelection() {
+  const sel = document.getElementById('statusUpdateSelect');
+  const modulo = sel ? sel.value : '';
+  if (!modulo) return null;
+  const globalAno = modulo === 'antiga' ? document.getElementById('statusUpdateAno').value.trim() : '';
+  return { modulo, globalAno };
+}
+
+function buildStatusValue(modulo, ano) {
+  if (modulo === 'antiga') {
+    return ano ? `Disciplina Origem Grad. - ${ano}` : STATUS_UPDATE_LABELS.antiga;
+  }
+  return modulo;
 }
 
 function mapRows(headers, dataRows) {
@@ -455,7 +504,7 @@ async function processFileForUpdate(text) {
 
   const detected = {};
   for (const [field, candidates] of Object.entries(COL_MAP)) {
-    if (field !== 'nome' && !UPDATE_FIELDS.includes(field)) continue;
+    if (field !== 'nome' && field !== 'ano' && !UPDATE_FIELDS.includes(field)) continue;
     const idx = findCol(headers, candidates);
     if (idx >= 0) detected[field] = idx;
   }
@@ -467,9 +516,17 @@ async function processFileForUpdate(text) {
   }
 
   detectedLinkFields = UPDATE_FIELDS.filter(f => f in detected);
-  if (!detectedLinkFields.length) {
+  const modeloTarget = getModeloUpdateTarget();
+  const statusSel     = getStatusUpdateSelection();
+  previewFields = [
+    ...detectedLinkFields,
+    ...(modeloTarget ? ['modelo'] : []),
+    ...(statusSel ? ['status'] : []),
+  ];
+
+  if (!detectedLinkFields.length && !modeloTarget && !statusSel) {
     mappingInfo.className = 'mapping-info warn';
-    mappingInfo.innerHTML = '<span>Nenhuma coluna de link detectada (dropbox, youtube, soundcloud, apostila html).</span>';
+    mappingInfo.innerHTML = '<span>Nenhuma coluna de link detectada (dropbox, youtube, soundcloud, apostila html) e nenhum modelo/status selecionado para alterar.</span>';
     return;
   }
 
@@ -486,6 +543,11 @@ async function processFileForUpdate(text) {
       const val = (row[detected[f]] || '').trim();
       if (isUrl(val)) links[f] = val;
     });
+    if (modeloTarget) links.modelo = modeloTarget;
+    if (statusSel) {
+      const rowAno = ((detected.ano !== undefined ? row[detected.ano] : '') || '').trim() || statusSel.globalAno;
+      links.status = buildStatusValue(statusSel.modulo, rowAno);
+    }
 
     const dbMatch = dbMap.get(normStr(nome));
     updateRows.push({ csvNome: nome, dbId: dbMatch?.id, dbNome: dbMatch?.nome, matched: !!dbMatch, links });
@@ -494,8 +556,15 @@ async function processFileForUpdate(text) {
   const foundCount    = updateRows.filter(r => r.matched).length;
   const notFoundCount = updateRows.filter(r => !r.matched).length;
 
-  const linkLabels = detectedLinkFields.map(f => COL_LABELS[f]).join(', ');
-  mappingInfo.innerHTML = '<span><strong>Links detectados:</strong> ' + esc(linkLabels) + '</span>';
+  const infoParts = [];
+  if (detectedLinkFields.length) infoParts.push('<span><strong>Links detectados:</strong> ' + esc(detectedLinkFields.map(f => COL_LABELS[f]).join(', ')) + '</span>');
+  if (modeloTarget) infoParts.push('<span><strong>Modelo será alterado para:</strong> ' + esc(modeloTarget) + '</span>');
+  if (statusSel) {
+    infoParts.push('<span><strong>Status será alterado para:</strong> ' + esc(STATUS_UPDATE_LABELS[statusSel.modulo] || statusSel.modulo) +
+      (statusSel.modulo === 'antiga' ? ' (ano por linha, editável na tabela abaixo)' : '') + '</span>');
+    if ('ano' in detected) infoParts.push('<span><strong>Coluna de ano detectada:</strong> coluna "' + esc(headers[detected.ano]) + '"</span>');
+  }
+  mappingInfo.innerHTML = infoParts.join('');
 
   refreshUpdateStatsRow();
   renderUpdatePreview();
@@ -517,7 +586,7 @@ function renderUpdatePreview() {
 
   document.getElementById('previewHead').innerHTML = '<tr>' +
     '<th>Status</th><th>Nome no CSV</th><th>Nome no banco</th>' +
-    detectedLinkFields.map(f => '<th>' + (COL_LABELS[f] || f) + '</th>').join('') +
+    previewFields.map(f => '<th>' + (COL_LABELS[f] || f) + '</th>').join('') +
     '<th></th></tr>';
 
   document.getElementById('previewBody').innerHTML = updateRows.map((r, i) => {
@@ -529,11 +598,16 @@ function renderUpdatePreview() {
       ? '<td title="' + esc(r.dbNome) + '" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.dbNome) + '</td>'
       : '<td style="color:#94a3b8">—</td>';
 
-    const linkCells = detectedLinkFields.map(f => {
-      const v = r.links[f];
-      return v
-        ? '<td><a href="' + esc(v) + '" target="_blank" rel="noopener" style="color:#ff8f00;text-decoration:underline">link</a></td>'
-        : '<td style="color:#94a3b8">—</td>';
+    const linkCells = previewFields.map(f => {
+      const v = r.links[f] || '';
+      if (f === 'status') {
+        return '<td><input type="text" class="ementa-nome-input" value="' + esc(v) +
+          '" onchange="onUpdateStatusChange(' + i + ', this.value)" /></td>';
+      }
+      if (!v) return '<td style="color:#94a3b8">—</td>';
+      return f === 'modelo'
+        ? '<td>' + esc(v) + '</td>'
+        : '<td><a href="' + esc(v) + '" target="_blank" rel="noopener" style="color:#ff8f00;text-decoration:underline">link</a></td>';
     }).join('');
 
     return '<tr' + (r.matched ? '' : ' style="opacity:.55"') + '>' +
@@ -544,6 +618,10 @@ function renderUpdatePreview() {
   }).join('');
 
   document.getElementById('previewMore').style.display = 'none';
+}
+
+function onUpdateStatusChange(index, value) {
+  updateRows[index].links.status = value.trim();
 }
 
 function removeUpdateRow(index) {

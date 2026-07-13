@@ -1,8 +1,11 @@
 /**
- * auth.js — Controle de acesso (admin via Supabase Auth / visitante)
+ * auth.js — Controle de acesso (admin/gestor via Supabase Auth / visitante)
  *
  * Cada página define window.__AUTH_CONFIG__ antes de carregar este script:
- *   { adminOnly: bool, loginPath: '...login.html', homePath: '...index.html' }
+ *   { adminOnly: bool, managerOnly: bool, loginPath: '...login.html', homePath: '...index.html' }
+ *
+ * adminOnly:   somente role 'admin' pode acessar a página.
+ * managerOnly: role 'admin' ou 'gestor' podem acessar a página.
  */
 (function () {
   const VISITOR_KEY = 'repo_visitor';
@@ -10,6 +13,7 @@
   const loginPath = cfg.loginPath || 'login.html';
   const homePath  = cfg.homePath  || 'index.html';
   const adminOnly = !!cfg.adminOnly;
+  const managerOnly = !!cfg.managerOnly;
 
   function showBody() {
     document.body.style.visibility = 'visible';
@@ -22,10 +26,10 @@
     return local.slice(0, 2).toUpperCase();
   }
 
-  function renderAuthStatus(isAdmin, session) {
+  function renderAuthStatus(session) {
     const el = document.getElementById('authStatus');
     if (!el) return;
-    if (isAdmin) {
+    if (session) {
       const email = session.user.email;
       el.innerHTML =
         '<div class="user-menu">' +
@@ -139,6 +143,21 @@
     });
   }
 
+  async function getRole(session) {
+    if (!session) return null;
+    try {
+      const { data } = await db
+        .from('usuarios')
+        .select('role')
+        .eq('email', session.user.email)
+        .single();
+      return data ? data.role : null;
+    } catch (err) {
+      console.error('Falha ao buscar papel do usuário:', err);
+      return null;
+    }
+  }
+
   async function run() {
     let session = null;
     try {
@@ -148,10 +167,13 @@
       console.error('Falha ao verificar sessão:', err);
     }
 
-    const isAdmin = !!session;
+    const role = await getRole(session);
+    const isAdmin = role === 'admin';
+    const isGestor = role === 'gestor';
+    const isManager = isAdmin || isGestor;
     const isVisitor = localStorage.getItem(VISITOR_KEY) === '1';
 
-    if (!isAdmin && !isVisitor) {
+    if (!session && !isVisitor) {
       window.location.replace(loginPath);
       return;
     }
@@ -159,10 +181,18 @@
       window.location.replace(homePath);
       return;
     }
+    if (managerOnly && !isManager) {
+      window.location.replace(homePath);
+      return;
+    }
 
     window.__isAdmin = isAdmin;
-    document.documentElement.classList.add(isAdmin ? 'is-admin' : 'is-visitor');
-    renderAuthStatus(isAdmin, session);
+    window.__isManager = isManager;
+    window.__role = role;
+    if (isAdmin) document.documentElement.classList.add('is-admin');
+    else if (isGestor) document.documentElement.classList.add('is-gestor');
+    else document.documentElement.classList.add('is-visitor');
+    renderAuthStatus(session);
     showBody();
   }
 

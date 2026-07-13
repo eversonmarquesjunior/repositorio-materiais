@@ -404,6 +404,7 @@ function renderEmptyStats() {
     { label: 'Graduação',        value: countByModelo(list, 'Graduação') },
     { label: 'Pós-graduação',    value: countByModelo(list, 'Pós-graduação') },
     { label: 'Graduação & Pós',  value: countByModelo(list, 'Graduação & Pós') },
+    { label: 'Curso Inova',      value: countByModelo(list, 'Curso Inova') },
   ].filter(s => s.value > 0);
 
   const cards = stats.map(s => `

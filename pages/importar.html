@@ -236,7 +236,7 @@
         <a href="../index.html" class="sidebar-link">Pesquisar</a>
         <a href="adicionar-disciplina.html" class="sidebar-link admin-only">Adicionar Disciplina</a>
         <a href="importar.html" class="sidebar-link admin-only active">Importar Dados</a>
-        <a href="dashboard.html" class="sidebar-link admin-only">Dashboard</a>
+        <a href="dashboard.html" class="sidebar-link manager-only">Dashboard</a>
       </nav>
     </aside>
     <div class="sidebar-backdrop"></div>
@@ -286,7 +286,7 @@
             <div class="nav-links">
               <a href="../index.html" class="nav-link">Pesquisar</a>
               <a href="importar.html" class="nav-link admin-only active">Importar Dados</a>
-              <a href="dashboard.html" class="nav-link admin-only">Dashboard</a>
+              <a href="dashboard.html" class="nav-link manager-only">Dashboard</a>
             </div>
             <div class="header-actions">
               <a href="adicionar-disciplina.html" class="nav-link nav-cta admin-only">Adicionar Disciplina</a>
@@ -306,7 +306,7 @@
 
           <div class="mode-tabs">
             <button class="mode-tab active" id="tabImportar">Importar Disciplinas</button>
-            <button class="mode-tab" id="tabAtualizar">Atualizar Links</button>
+            <button class="mode-tab" id="tabAtualizar">Atualizar Links / Modelo</button>
             <button class="mode-tab" id="tabEmentas">Importar Ementas</button>
           </div>
 
@@ -332,7 +332,43 @@
                 <option value="Pós-graduação">Pós-graduação</option>
                 <option value="Graduação">Graduação</option>
                 <option value="Curso Inova">Curso Inova</option>
+                <option value="Graduação & Pós">Graduação & Pós</option>
               </select>
+            </div>
+
+            <div class="form-group" id="modeloUpdateGroup" style="margin-bottom:1rem;display:none">
+              <label for="modeloUpdateSelect" style="font-size:.875rem;font-weight:600;color:var(--text,#1e293b);display:block;margin-bottom:.35rem">
+                Alterar modelo para (opcional)
+              </label>
+              <select id="modeloUpdateSelect" style="width:100%;max-width:320px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;font-size:.875rem;background:var(--surface);color:var(--text)">
+                <option value="">— Não alterar —</option>
+                <option value="Graduação">Graduação</option>
+                <option value="Pós-graduação">Pós-graduação</option>
+                <option value="Curso Inova">Curso Inova</option>
+                <option value="Graduação & Pós">Graduação & Pós</option>
+              </select>
+              <p style="font-size:.78rem;color:#64748b;margin:.4rem 0 0">
+                O CSV desta aba só precisa da coluna com o nome da disciplina. O modelo escolhido aqui será aplicado a todas as linhas encontradas no banco.
+              </p>
+            </div>
+
+            <div class="form-group" id="statusUpdateGroup" style="margin-bottom:1rem;display:none">
+              <label for="statusUpdateSelect" style="font-size:.875rem;font-weight:600;color:var(--text,#1e293b);display:block;margin-bottom:.35rem">
+                Alterar status (badge) para (opcional)
+              </label>
+              <select id="statusUpdateSelect" style="width:100%;max-width:320px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;font-size:.875rem;background:var(--surface);color:var(--text)">
+                <option value="">— Não alterar —</option>
+                <option value="comum">Disciplina Comum</option>
+                <option value="atualizacao">Atualização do Zero</option>
+                <option value="paliativa">Disciplina Paliativa</option>
+                <option value="antiga">Disciplina Origem Grad.</option>
+              </select>
+              <input type="text" id="statusUpdateAno" placeholder="Ano padrão (opcional, ex: 2019)" style="display:none;margin-top:.5rem;width:100%;max-width:220px;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;font-size:.875rem;background:var(--surface);color:var(--text)" />
+              <p style="font-size:.78rem;color:#64748b;margin:.4rem 0 0">
+                Para "Disciplina Origem Grad.", inclua uma coluna <strong>ANO</strong> no CSV para definir o ano de cada disciplina individualmente
+                (o campo "Ano padrão" acima só é usado nas linhas sem essa coluna). Você também pode corrigir o valor final de cada linha
+                diretamente na tabela de pré-visualização, antes de confirmar.
+              </p>
             </div>
 
             <p style="font-size:.83rem;color:#64748b;margin:0 0 .85rem">
