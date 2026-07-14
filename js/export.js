@@ -37,6 +37,7 @@ function exportMesmoMaterial(d) {
     const pai = all.find(x => x.id === d.disciplina_pai_id);
     return pai ? pai.nome : '';
   }
+  if (d.disciplina_pai_texto) return d.disciplina_pai_texto;
   const filhas = all.filter(x => x.disciplina_pai_id === d.id);
   return filhas.length ? filhas.map(f => f.nome).join(', ') : '';
 }

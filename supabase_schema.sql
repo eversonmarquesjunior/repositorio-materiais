@@ -98,6 +98,7 @@ CREATE OR REPLACE TRIGGER trg_retornos_nome
 -- ── Vínculo de material compartilhado ───────────────────────
 -- Execute este ALTER TABLE no Supabase SQL Editor após a criação inicial:
 -- ALTER TABLE disciplinas ADD COLUMN IF NOT EXISTS disciplina_pai_id uuid REFERENCES disciplinas(id) ON DELETE SET NULL;
+-- ALTER TABLE disciplinas ADD COLUMN IF NOT EXISTS disciplina_pai_texto text;
 
 -- ── Row Level Security ────────────────────────────────────────
 ALTER TABLE disciplinas ENABLE ROW LEVEL SECURITY;

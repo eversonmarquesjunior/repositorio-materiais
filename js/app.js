@@ -199,7 +199,7 @@ function filterAndSort() {
     const matchModelo = !state.filterModelo.length || state.filterModelo.some(f => d.modelo && d.modelo.split(',').map(s => s.trim()).includes(f));
     const matchTipo   = !state.filterTipo.length   || state.filterTipo.includes(d.tipo_disciplina);
     const matchStatus = !state.filterStatus.length  || state.filterStatus.some(f => matchesStatus(d.status, f));
-    const matchQuery  = !q || normalizeStr(d.nome).includes(q);
+    const matchQuery  = !q || normalizeStr(d.nome).includes(q) || normalizeStr(d.disciplina_pai_texto).includes(q);
     return matchModelo && matchTipo && matchStatus && matchQuery;
   });
 
@@ -298,6 +298,10 @@ function mesmoMaterialBadge(d) {
     const pai = all.find(x => x.id === d.disciplina_pai_id);
     if (!pai) return '';
     return `<div class="badge-linked-row">${linkSVG}<span>Mesmo material de: <a href="pages/disciplina.html?id=${esc(pai.id)}" class="badge-linked-name" onclick="event.stopPropagation()">${esc(pai.nome)}</a></span></div>`;
+  }
+
+  if (d.disciplina_pai_texto) {
+    return `<div class="badge-linked-row">${linkSVG}<span>Mesmo material de: ${esc(d.disciplina_pai_texto)}</span></div>`;
   }
 
   const filhas = all.filter(x => x.disciplina_pai_id === d.id);

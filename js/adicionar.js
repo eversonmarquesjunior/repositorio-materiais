@@ -184,6 +184,11 @@ async function addNewDiscipline() {
     ementa:           document.getElementById('ementa').value.trim(),
     obs:              document.getElementById('observacoes').value.trim(),
     disciplina_pai_id: document.getElementById('disciplinaPaiId').value || null,
+    disciplina_pai_texto: (() => {
+      const paiId = document.getElementById('disciplinaPaiId').value;
+      const texto = document.getElementById('disciplinaPaiSearch').value.trim();
+      return !paiId && texto ? texto : null;
+    })(),
     updated_at: new Date().toISOString()
   };
 

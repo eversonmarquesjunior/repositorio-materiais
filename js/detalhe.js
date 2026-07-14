@@ -85,6 +85,9 @@ function renderDetail(d) {
     if (d.paiNome && d.paiId) {
       mesmoMaterialEl.innerHTML = `${linkSVG}<span>Mesmo material de: <a href="disciplina.html?id=${esc(d.paiId)}" class="badge-linked-name">${esc(d.paiNome)}</a></span>`;
       mesmoMaterialEl.style.display = '';
+    } else if (d.disciplina_pai_texto) {
+      mesmoMaterialEl.innerHTML = `${linkSVG}<span>Mesmo material de: ${esc(d.disciplina_pai_texto)}</span>`;
+      mesmoMaterialEl.style.display = '';
     } else if (d.filhas && d.filhas.length) {
       const nomes = d.filhas.map(f => `<a href="disciplina.html?id=${esc(f.id)}" class="badge-linked-name">${esc(f.nome)}</a>`).join(', ');
       mesmoMaterialEl.innerHTML = `${linkSVG}<span>Mesmo material de: ${nomes}</span>`;
@@ -1006,6 +1009,9 @@ function fillEditForm(d) {
       selectedEl.style.display = '';
       searchEl.style.display  = 'none';
     }
+  } else if (d.disciplina_pai_texto) {
+    const searchEl = document.getElementById('editDisciplinaPaiSearch');
+    if (searchEl) searchEl.value = d.disciplina_pai_texto;
   }
 }
 
@@ -1047,6 +1053,11 @@ async function saveEditedDiscipline(d, closeModal) {
     ementa:            val('editEmenta'),
     obs:               val('editObservacoes'),
     disciplina_pai_id: (document.getElementById('editDisciplinaPaiId') || {}).value || null,
+    disciplina_pai_texto: (() => {
+      const paiId = (document.getElementById('editDisciplinaPaiId') || {}).value || null;
+      const texto = (document.getElementById('editDisciplinaPaiSearch') || {}).value?.trim() || '';
+      return !paiId && texto ? texto : null;
+    })(),
   };
 
   const { error } = await db.from('disciplinas').update(updates).eq('id', d.id);
