@@ -42,6 +42,10 @@ function exportMesmoMaterial(d) {
   return filhas.length ? filhas.map(f => f.nome).join(', ') : '';
 }
 
+function exportEmentaTexto(d) {
+  return d.ementa || '';
+}
+
 /* Colunas exportadas: { header, get(d), link } — link: true = valor é uma URL */
 const EXPORT_COLUMNS = [
   { header: 'Nome',            get: d => d.nome || '' },
@@ -49,6 +53,7 @@ const EXPORT_COLUMNS = [
   { header: 'Tipo de Disciplina', get: exportTipoLabel },
   { header: 'Status',          get: exportStatusLabel },
   { header: 'Mesmo Material De', get: exportMesmoMaterial },
+  { header: 'Ementa',           get: exportEmentaTexto },
   { header: 'Plano de Ensino', get: d => d.plano_ensino_url || '', link: true },
   { header: 'Moodle WAE',      get: d => d.link_moodle_wae  || '', link: true },
   { header: 'DP WAE',          get: d => d.link_dp_wae      || '', link: true },
@@ -139,7 +144,7 @@ function exportToExcel() {
     });
   });
 
-  ws['!cols'] = columns.map(c => ({ wch: c.link ? 28 : 20 }));
+  ws['!cols'] = columns.map(c => ({ wch: c.link ? 28 : (c.header === 'Ementa' ? 50 : 20) }));
   ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: Math.max(columns.length - 1, 0) } }];
 
   const wb = XLSX.utils.book_new();

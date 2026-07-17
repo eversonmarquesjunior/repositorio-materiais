@@ -297,11 +297,13 @@ function mesmoMaterialBadge(d) {
   if (d.disciplina_pai_id) {
     const pai = all.find(x => x.id === d.disciplina_pai_id);
     if (!pai) return '';
-    return `<div class="badge-linked-row">${linkSVG}<span>Mesmo material de: <a href="pages/disciplina.html?id=${esc(pai.id)}" class="badge-linked-name" onclick="event.stopPropagation()">${esc(pai.nome)}</a></span></div>`;
+    const tooltip = esc(`Mesmo material de: ${pai.nome}`);
+    return `<div class="badge-linked-row" data-tooltip="${tooltip}">${linkSVG}<span>Mesmo material de: <a href="pages/disciplina.html?id=${esc(pai.id)}" class="badge-linked-name" onclick="event.stopPropagation()">${esc(pai.nome)}</a></span></div>`;
   }
 
   if (d.disciplina_pai_texto) {
-    return `<div class="badge-linked-row">${linkSVG}<span>Mesmo material de: ${esc(d.disciplina_pai_texto)}</span></div>`;
+    const tooltip = esc(`Mesmo material de: ${d.disciplina_pai_texto}`);
+    return `<div class="badge-linked-row" data-tooltip="${tooltip}">${linkSVG}<span>Mesmo material de: ${esc(d.disciplina_pai_texto)}</span></div>`;
   }
 
   const filhas = all.filter(x => x.disciplina_pai_id === d.id);
@@ -309,7 +311,8 @@ function mesmoMaterialBadge(d) {
   const nomes = filhas.map(f =>
     `<a href="pages/disciplina.html?id=${esc(f.id)}" class="badge-linked-name" onclick="event.stopPropagation()">${esc(f.nome)}</a>`
   ).join(', ');
-  return `<div class="badge-linked-row">${linkSVG}<span>Mesmo material de: ${nomes}</span></div>`;
+  const tooltip = esc(`Mesmo material de: ${filhas.map(f => f.nome).join(', ')}`);
+  return `<div class="badge-linked-row" data-tooltip="${tooltip}">${linkSVG}<span>Mesmo material de: ${nomes}</span></div>`;
 }
 
 function cardHTML(d) {
