@@ -33,3 +33,7 @@ on conflict (username) do nothing;
 insert into usuarios (username, email, role) values
   ('victor.biazon', 'victor.biazon@fatecie.edu.br', 'gestor')
 on conflict (username) do update set role = excluded.role;
+
+insert into usuarios (username, email, role) values
+  ('jaqueline.valin', 'jaqueline.valin@fatecie.edu.br', 'gestor')
+on conflict (username) do update set role = excluded.role;
